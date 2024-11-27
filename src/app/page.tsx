@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Share } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "#/components/ui/button";
 
@@ -38,35 +39,53 @@ export default function Home() {
   }
 
   async function subscribeToPush() {
-    const registration = await navigator.serviceWorker.ready;
+    try {
+      const registration = await navigator.serviceWorker.ready;
 
-    const sub = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-      ),
-    });
+      const sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+        ),
+      });
 
-    await fetch("/api/subscribe", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(sub),
-    });
-
-    setSubscription(sub);
-  }
-
-  async function handleSendNotification() {
-    if (subscription) {
-      fetch("/api/notification", {
+      const response = await fetch("/api/subscribe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(subscription),
+        body: JSON.stringify(sub),
       });
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      setSubscription(sub);
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo activar las notificaciones");
+    }
+  }
+
+  async function handleSendNotification() {
+    if (subscription) {
+      try {
+        const response = await fetch("/api/notification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(subscription),
+        });
+
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("No se pudo enviar la notificación");
+      }
     }
   }
 
