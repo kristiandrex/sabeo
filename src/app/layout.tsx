@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BeSabio",
+  title: "Palabra del día",
   description: "Descubre la palabra en el menor tiempo posible",
 };
 

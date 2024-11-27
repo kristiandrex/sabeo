@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BeSabio",
-    short_name: "BeSabio",
+    name: "Palabra del día",
+    short_name: "Palabra",
     description: "Descubre la palabra en el menor tiempo posible",
     start_url: "/",
     display: "standalone",
