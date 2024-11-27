@@ -33,6 +33,10 @@ export default function Home() {
       updateViaCache: "none",
     });
 
+    if (registration.active) {
+      registration.active.postMessage({ target });
+    }
+
     const sub = await registration.pushManager.getSubscription();
 
     setSubscription(sub);
