@@ -1,6 +1,6 @@
 import webpush from "web-push";
 
-import { createClient } from "#/lib/supabase";
+import { createClient } from "#/lib/supabase/server";
 
 webpush.setVapidDetails(
   "mailto:cristiandrestorres@gmail.com",

@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Share } from "lucide-react";
 import { toast } from "sonner";
+import type { Session } from "@supabase/supabase-js";
 
 import { Button } from "#/components/ui/button";
+import { Google } from "#/components/icons/google";
+import { createClient } from "#/lib/supabase/client";
+import { OnboardingSteps } from "#/components/onboarding-steps";
+import { IOSInstructions } from "#/components/ios-instructions";
+
+const NUMBER_OF_STEPS = 3;
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -26,6 +32,7 @@ export default function Home() {
   );
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
 
   async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -88,6 +95,17 @@ export default function Home() {
     }
   }
 
+  async function signinWithGoogle() {
+    const supabase = createClient();
+
+    supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL,
+      },
+    });
+  }
+
   useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
       registerServiceWorker();
@@ -100,33 +118,49 @@ export default function Home() {
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
   }, []);
 
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        setSession(data.session);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    supabase.auth.onAuthStateChange((_, _session) => {
+      setSession(_session);
+    });
+  }, []);
+
   if (isIOS && !isStandalone) {
     return (
-      <div className="h-screen flex flex-col justify-center items-center gap-2 text-center text-balance">
-        <p>
-          Para recibir notificaciones haz click en el botón de compartir{" "}
-          <Share className="inline-block" />
-        </p>
-
-        <p>
-          Luego selecciona &quot;Agregar a la pantalla de inicio&quot; y sigue
-          las instrucciones.
-        </p>
-      </div>
+      <OnboardingSteps numberOfSteps={NUMBER_OF_STEPS} currentStep={0}>
+        <IOSInstructions />
+      </OnboardingSteps>
     );
   }
 
   if (!subscription) {
     return (
-      <div className="h-screen grid place-items-center">
+      <OnboardingSteps numberOfSteps={NUMBER_OF_STEPS} currentStep={1}>
         <Button onClick={subscribeToPush}>Activar notificaciones</Button>
-      </div>
+      </OnboardingSteps>
     );
   }
 
-  return (
-    <div className="h-screen grid place-items-center">
-      <Button onClick={handleSendNotification}>Enviar notificación</Button>
-    </div>
-  );
+  if (!session) {
+    return (
+      <OnboardingSteps numberOfSteps={NUMBER_OF_STEPS} currentStep={2}>
+        <Button onClick={signinWithGoogle}>
+          <Google color="#fff" fill="#fff" />
+          Entrar con Google
+        </Button>
+      </OnboardingSteps>
+    );
+  }
+
+  return <Button onClick={handleSendNotification}>Enviar notificación</Button>;
 }
