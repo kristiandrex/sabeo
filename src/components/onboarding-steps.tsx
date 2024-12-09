@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 
 import { cn } from "#/lib/utils";
-import { Button } from "#/components/ui/button";
 import { Google } from "#/components/icons/google";
 import { createClient } from "#/lib/supabase/client";
 import { IOSInstructions } from "#/components/ios-instructions";
@@ -113,7 +112,7 @@ export function OnboardingSteps() {
   if (!subscription) {
     return (
       <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={1}>
-        <Button onClick={subscribeToPush}>Activar notificaciones</Button>
+        <button onClick={subscribeToPush}>Activar notificaciones</button>
       </OnboardingStepsLayout>
     );
   }
@@ -121,10 +120,10 @@ export function OnboardingSteps() {
   if (!session) {
     return (
       <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={2}>
-        <Button onClick={signinWithGoogle}>
+        <button onClick={signinWithGoogle}>
           <Google color="#fff" fill="#fff" />
           Entrar con Google
-        </Button>
+        </button>
       </OnboardingStepsLayout>
     );
   }

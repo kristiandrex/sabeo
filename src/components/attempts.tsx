@@ -1,7 +1,16 @@
 import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from "#/constants";
 import { cn } from "#/lib/utils";
-import { getColorByAttempts } from "#/services/challenge";
-import { Challenge } from "#/types/Challenge";
+import { getColorsByAttempt } from "#/services/challenge";
+
+export function getClassNamesByColor(color: string) {
+  const classNames: Record<string, string> = {
+    green: "bg-green-500 border-green-500 text-white",
+    yellow: "bg-yellow-500 border-yellow-500 text-white",
+    gray: "bg-gray-600 border-gray-600 text-white",
+  };
+
+  return classNames[color];
+}
 
 export function Attempts({
   attempts,
@@ -10,7 +19,7 @@ export function Attempts({
 }: {
   attempts: string[];
   currentAttempt: string;
-  challenge: Challenge;
+  challenge: string;
 }) {
   const rows: React.ReactNode[] = [];
 
@@ -22,22 +31,21 @@ export function Attempts({
     let colors: string[] = [];
 
     if (attempt && !isCurrentAttempt) {
-      colors = getColorByAttempts({
+      colors = getColorsByAttempt({
         attempt,
-        challenge: challenge.word,
+        challenge,
       });
     }
 
     for (let j = 0; j < NUMBER_OF_COLUMNS; j++) {
-      const color = colors[j];
+      const color = colors[j] ?? "";
 
       columns.push(
         <div
           key={j}
           className={cn(
             "box-content flex aspect-square h-7 items-center justify-center border-2 p-2 text-xl uppercase sm:p-4",
-
-            color
+            getClassNamesByColor(color)
           )}
         >
           {attempt ? attempt[j] : ""}

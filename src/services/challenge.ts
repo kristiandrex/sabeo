@@ -1,4 +1,4 @@
-export function getColorByAttempts({
+export function getColorsByAttempt({
   attempt,
   challenge,
 }: {
@@ -11,11 +11,11 @@ export function getColorByAttempts({
     const letter = attempt[i] ?? "";
 
     if (letter === challenge[i]) {
-      colors.push("bg-green-500");
+      colors.push("green");
     } else if (challenge.includes(letter)) {
-      colors.push("bg-yellow-500");
+      colors.push("yellow");
     } else {
-      colors.push("bg-gray-500");
+      colors.push("gray");
     }
   }
 

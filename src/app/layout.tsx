@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 
-import { Toaster } from "#/components/ui/sonner";
-
+import "@radix-ui/themes/styles.css";
 import "./globals.css";
+import { Theme } from "@radix-ui/themes";
 
 export const metadata: Metadata = {
   title: "Palabra del día",
@@ -17,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        {children}
+        <Theme>{children}</Theme>
         <Toaster />
       </body>
     </html>

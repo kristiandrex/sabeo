@@ -39,9 +39,13 @@ export function Game(props: { challenge: Challenge }) {
       <Attempts
         attempts={attempts}
         currentAttempt={currentAttempt}
-        challenge={props.challenge}
+        challenge={props.challenge.word}
       />
-      <Keyboard attempts={attempts} onKeyDown={onKeyDown} />
+      <Keyboard
+        challenge={props.challenge.word}
+        attempts={attempts}
+        onKeyDown={onKeyDown}
+      />
     </div>
   );
 }
