@@ -1,3 +1,5 @@
+import { Color } from "#/types";
+
 export function getColorsByAttempt({
   attempt,
   challenge,
@@ -5,7 +7,7 @@ export function getColorsByAttempt({
   attempt: string;
   challenge: string;
 }) {
-  const colors: string[] = [];
+  const colors: Color[] = [];
 
   for (let i = 0; i < attempt.length; i++) {
     const letter = attempt[i] ?? "";

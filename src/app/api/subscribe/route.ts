@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     await webpush.sendNotification(
       sub,
       JSON.stringify({
-        title: "Palabra del día",
+        title: "Sapiente",
         body: "Recibirás notificaciones cuando haya un nuevo reto",
         icon: "/icon-512x512.png",
       })

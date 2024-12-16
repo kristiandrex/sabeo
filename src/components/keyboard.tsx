@@ -2,13 +2,13 @@ import { Button } from "@radix-ui/themes";
 import { useEffect } from "react";
 
 import { cn } from "#/lib/utils";
-import { getColorsByAttempt } from "#/services/challenge";
+import { getColorsByAttempt } from "#/utils/challenge";
 
 function getClassNamesByColor(color: string) {
   return {
     green: "bg-green-500 hover:bg-green-600",
     yellow: "bg-yellow-500 hover:bg-yellow-600",
-    gray: "bg-gray-600 hover:bg-gray-700",
+    gray: "bg-gray-500 hover:bg-gray-600",
   }[color];
 }
 
@@ -96,7 +96,10 @@ function KeyboardRow({
   const keys = row.map((key) => (
     <Button
       key={key}
-      className={cn("flex-auto p-2 text-center sm:p-4", colors[key])}
+      className={cn(
+        "flex-auto p-2 text-center sm:p-4 bg-gray-400 hover:bg-gray-500",
+        colors[key]
+      )}
       color="gray"
       onClick={onClick(key)}
     >

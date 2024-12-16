@@ -4,12 +4,12 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
+import { Button } from "@radix-ui/themes";
 
 import { cn } from "#/lib/utils";
-import { Google } from "#/components/icons/google";
 import { createClient } from "#/lib/supabase/client";
 import { IOSInstructions } from "#/components/ios-instructions";
-import { urlBase64ToUint8Array } from "#/services/notifications";
+import { urlBase64ToUint8Array } from "#/utils/notifications";
 
 const NUMBER_OF_STEPS = 3;
 
@@ -112,7 +112,17 @@ export function OnboardingSteps() {
   if (!subscription) {
     return (
       <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={1}>
-        <button onClick={subscribeToPush}>Activar notificaciones</button>
+        <div className="flex flex-col gap-4 items-center">
+          <p>
+            Activa las notificaciones para avisarte cuando haya un nuevo reto
+          </p>
+          <Button
+            className="bg-green-500 hover:bg-green-600"
+            onClick={subscribeToPush}
+          >
+            Activar notificaciones
+          </Button>
+        </div>
       </OnboardingStepsLayout>
     );
   }
@@ -120,10 +130,15 @@ export function OnboardingSteps() {
   if (!session) {
     return (
       <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={2}>
-        <button onClick={signinWithGoogle}>
-          <Google color="#fff" fill="#fff" />
-          Entrar con Google
-        </button>
+        <div className="flex flex-col gap-4 items-center">
+          <p>Inicia sesión con tu cuenta de Google para guardar tu progreso</p>
+          <Button
+            className="bg-green-500 hover:bg-green-600"
+            onClick={signinWithGoogle}
+          >
+            Entrar con Google
+          </Button>
+        </div>
       </OnboardingStepsLayout>
     );
   }

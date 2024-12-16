@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   await webpush.sendNotification(
     sub,
     JSON.stringify({
-      title: "Palabra del día",
+      title: "Sapiente",
       body: "¡Hay un nuevo reto!",
       icon: "/icon-512x512.png",
     })

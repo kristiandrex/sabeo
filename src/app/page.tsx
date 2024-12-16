@@ -2,7 +2,7 @@ import { Fragment } from "react";
 
 import { OnboardingSteps } from "#/components/onboarding-steps";
 import { Game } from "#/components/game";
-import { getLatestChallenge } from "#/actions/challenge";
+import { getLatestChallenge } from "#/app/actions/challenge";
 
 export default async function Home() {
   const latestChallenge = await getLatestChallenge();

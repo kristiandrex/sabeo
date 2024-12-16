@@ -6,7 +6,7 @@ import "./globals.css";
 import { Theme } from "@radix-ui/themes";
 
 export const metadata: Metadata = {
-  title: "Palabra del día",
+  title: "Sapiente",
   description: "Descubre la palabra en el menor tiempo posible",
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="es">
       <body>
         <Theme>{children}</Theme>
-        <Toaster />
+        <Toaster position="top-center" />
       </body>
     </html>
   );
