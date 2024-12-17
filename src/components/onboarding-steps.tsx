@@ -130,7 +130,7 @@ export function OnboardingSteps() {
     return (
       <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={1}>
         <div className="flex flex-col gap-4 items-center">
-          <p>
+          <p className="text-center text-pretty">
             Activa las notificaciones para avisarte cuando haya un nuevo reto
           </p>
           <Button
@@ -148,7 +148,9 @@ export function OnboardingSteps() {
     return (
       <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={2}>
         <div className="flex flex-col gap-4 items-center">
-          <p>Inicia sesión con tu cuenta de Google para guardar tu progreso</p>
+          <p className="text-center text-pretty">
+            Inicia sesión con tu cuenta de Google para guardar tu progreso
+          </p>
           <Button
             className="bg-green-500 hover:bg-green-600"
             onClick={signinWithGoogle}
