@@ -20,6 +20,7 @@ export function OnboardingSteps() {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -73,33 +74,49 @@ export function OnboardingSteps() {
   }
 
   useEffect(() => {
-    if ("serviceWorker" in navigator && "PushManager" in window) {
-      registerServiceWorker();
-    }
-
     setIsIOS(
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
     );
 
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
-  }, []);
 
-  useEffect(() => {
-    const supabase = createClient();
+    async function initialize() {
+      if ("serviceWorker" in navigator && "PushManager" in window) {
+        await registerServiceWorker();
+      }
 
-    supabase.auth
-      .getSession()
-      .then(({ data }) => {
+      const supabase = createClient();
+
+      try {
+        const { data, error } = await supabase.auth.getSession();
+
+        if (error) {
+          throw error;
+        }
+
         setSession(data.session);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error(error);
-      });
+      } finally {
+        setLoading(false);
+      }
 
-    supabase.auth.onAuthStateChange((_, _session) => {
-      setSession(_session);
-    });
+      supabase.auth.onAuthStateChange((_, _session) => {
+        setSession(_session);
+        setLoading(false);
+      });
+    }
+
+    initialize();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="fixed h-dvh w-screen bg-white grid place-items-center">
+        <p className="text-2xl text-center">Cargando...</p>
+      </div>
+    );
+  }
 
   if (isIOS && !isStandalone) {
     return (
