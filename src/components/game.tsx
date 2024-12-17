@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Button, Dialog, Flex } from "@radix-ui/themes";
 import { toast } from "sonner";
 
@@ -31,25 +31,34 @@ export function Game({ challenge }: { challenge: Challenge }) {
   const [attempts, setAttempts] = useLocalStorage<string[]>("attempts", []);
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
   const [dialogIsOpened, setDialogIsOpened] = useState(false);
-
-  const alreadyClosed = useRef(false);
+  const [isPending, startTransition] = useTransition();
 
   const colors = getAllAttemptsColors(attempts, challenge.word);
 
   const isChallengeCompleted =
-    attempts.length === NUMBER_OF_ROWS || attempts.includes(challenge.word);
+    (attempts.length === NUMBER_OF_ROWS || attempts.includes(challenge.word)) &&
+    !isPending;
 
   async function addAttempt(attempt: string) {
-    if (attempt === challenge.word) {
-      const response = await completeChallenge();
+    startTransition(async () => {
+      const prevAttempts = attempts;
 
-      if (response.error) {
-        toast.error(response.error);
-        return;
+      setAttempts((prevAttempts) => prevAttempts.concat(attempt));
+
+      if (attempt === challenge.word) {
+        const response = await completeChallenge();
+
+        if (response.success) {
+          toast.success("¡Muy bien, completaste el reto!");
+          setDialogIsOpened(true);
+        }
+
+        if (response.error) {
+          toast.error(response.error);
+          setAttempts(prevAttempts);
+        }
       }
-    }
-
-    setAttempts((prevAttempts) => prevAttempts.concat(attempt));
+    });
   }
 
   function onKeyDown(key: string) {
@@ -72,9 +81,13 @@ export function Game({ challenge }: { challenge: Challenge }) {
   }
 
   async function share() {
-    if (!navigator.canShare()) {
+    const canShare =
+      typeof navigator.canShare === "function" && navigator.canShare();
+
+    if (!canShare) {
       const text = getTextToShare();
-      navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(text);
+      toast.success("Se copió tu resultado al portapapeles");
       return;
     }
 
@@ -108,12 +121,10 @@ export function Game({ challenge }: { challenge: Challenge }) {
     }
   }, [challenge.id, challengeId, setChallengeId, setAttempts]);
 
-  useEffect(() => {
-    if (!alreadyClosed.current && isChallengeCompleted) {
-      setDialogIsOpened(isChallengeCompleted);
-      alreadyClosed.current = true;
-    }
-  }, [attempts, challenge.word, isChallengeCompleted]);
+  useEffect(
+    () => setDialogIsOpened(isChallengeCompleted),
+    [isChallengeCompleted]
+  );
 
   return (
     <div className="flex h-screen flex-col items-center justify-between gap-4 p-2 sm:p-4">
@@ -121,7 +132,7 @@ export function Game({ challenge }: { challenge: Challenge }) {
         <Dialog.Content maxWidth="450px">
           <Dialog.Title align={"center"}>Reto del día</Dialog.Title>
 
-          <Dialog.Description align={"center"}>
+          <Dialog.Description align={"center"} mb={"4"}>
             La palabra es: {challenge.word}
           </Dialog.Description>
 
