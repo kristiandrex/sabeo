@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Sapiente",
-    short_name: "Sapiente",
+    name: "Sabeo",
+    short_name: "Sabeo",
     description: "Descubre la palabra en el menor tiempo posible",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#000000",
+    theme_color: "#22c55e",
     icons: [
       {
         src: "/icon-192x192.png",

@@ -92,14 +92,14 @@ export function Game({ challenge }: { challenge: Challenge }) {
     }
 
     await navigator.share({
-      title: "Reto del dia en Sapiente",
+      title: "Reto del dia en Sabeo",
       text: getTextToShare(),
-      url: "https://sapiente.vercel.app/",
+      url: "https://sabeo.vercel.app/",
     });
   }
 
   function getTextToShare() {
-    let text = "Reto del día en Sapiente\n";
+    let text = "Reto del día en Sabeo\n";
 
     colors.forEach((row) => {
       row.forEach((color) => {
@@ -109,7 +109,7 @@ export function Game({ challenge }: { challenge: Challenge }) {
       text += "\n";
     });
 
-    text += "Inténtalo en https://sapiente.vercel.app/";
+    text += "Inténtalo en https://sabeo.vercel.app/";
 
     return text;
   }

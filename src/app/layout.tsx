@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
+import { Theme } from "@radix-ui/themes";
 
 import "@radix-ui/themes/styles.css";
 import "./globals.css";
-import { Theme } from "@radix-ui/themes";
 
 export const metadata: Metadata = {
-  title: "Sapiente",
+  title: "Sabeo",
   description: "Descubre la palabra en el menor tiempo posible",
 };
 
