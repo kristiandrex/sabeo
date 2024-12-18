@@ -81,13 +81,12 @@ export function OnboardingSteps() {
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
 
     async function initialize() {
-      if ("serviceWorker" in navigator && "PushManager" in window) {
-        await registerServiceWorker();
-      }
-
-      const supabase = createClient();
-
       try {
+        if ("serviceWorker" in navigator && "PushManager" in window) {
+          await registerServiceWorker();
+        }
+
+        const supabase = createClient();
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -95,16 +94,16 @@ export function OnboardingSteps() {
         }
 
         setSession(data.session);
+
+        supabase.auth.onAuthStateChange((_, _session) => {
+          setSession(_session);
+          setLoading(false);
+        });
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
       }
-
-      supabase.auth.onAuthStateChange((_, _session) => {
-        setSession(_session);
-        setLoading(false);
-      });
     }
 
     initialize();
@@ -112,7 +111,7 @@ export function OnboardingSteps() {
 
   if (loading) {
     return (
-      <div className="fixed h-dvh w-screen bg-white grid place-items-center">
+      <div className="fixed h-svh w-screen bg-white grid place-items-center">
         <p className="text-2xl text-center">Cargando...</p>
       </div>
     );
@@ -126,9 +125,28 @@ export function OnboardingSteps() {
     );
   }
 
-  if (!subscription) {
+  if (!session) {
     return (
       <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={1}>
+        <div className="flex flex-col gap-4 items-center">
+          <p className="text-center text-pretty">
+            Inicia sesión con tu cuenta de Google para guardar tu progreso
+          </p>
+
+          <Button
+            className="bg-green-500 hover:bg-green-600"
+            onClick={signinWithGoogle}
+          >
+            Entrar con Google
+          </Button>
+        </div>
+      </OnboardingStepsLayout>
+    );
+  }
+
+  if (!subscription) {
+    return (
+      <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={2}>
         <div className="flex flex-col gap-4 items-center">
           <p className="text-center text-pretty">
             Activa las notificaciones para avisarte cuando haya un nuevo reto
@@ -138,24 +156,6 @@ export function OnboardingSteps() {
             onClick={subscribeToPush}
           >
             Activar notificaciones
-          </Button>
-        </div>
-      </OnboardingStepsLayout>
-    );
-  }
-
-  if (!session) {
-    return (
-      <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={2}>
-        <div className="flex flex-col gap-4 items-center">
-          <p className="text-center text-pretty">
-            Inicia sesión con tu cuenta de Google para guardar tu progreso
-          </p>
-          <Button
-            className="bg-green-500 hover:bg-green-600"
-            onClick={signinWithGoogle}
-          >
-            Entrar con Google
           </Button>
         </div>
       </OnboardingStepsLayout>
@@ -186,17 +186,17 @@ function OnboardingStepsLayout(props: {
         key={i}
         className={cn(
           "w-3 h-3 rounded-full bg-gray-300",
-          i === props.currentStep && "bg-primary"
+          i === props.currentStep && "w-4 h-4 bg-gray-400"
         )}
       ></div>
     );
   }
 
   return (
-    <div className="fixed h-screen w-screen bg-white grid place-items-center p-8">
+    <div className="fixed h-svh w-screen bg-white grid place-items-center p-8">
       <div className="grid grid-rows-[1fr_auto] h-full">
         <div className="h-full grid place-items-center">{props.children}</div>
-        <div className="flex gap-2 justify-center">{dots}</div>
+        <div className="flex gap-2 justify-center items-center">{dots}</div>
       </div>
     </div>
   );

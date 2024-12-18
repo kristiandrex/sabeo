@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Button, Dialog, Flex } from "@radix-ui/themes";
+import { Button, Dialog, Flex, Heading } from "@radix-ui/themes";
 import { toast } from "sonner";
 
 import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from "#/constants";
@@ -81,21 +81,22 @@ export function Game({ challenge }: { challenge: Challenge }) {
   }
 
   async function share() {
-    const canShare =
-      typeof navigator.canShare === "function" && navigator.canShare();
+    try {
+      if (typeof navigator.share !== "function") {
+        const text = getTextToShare();
+        await navigator.clipboard.writeText(text);
+        toast.success("Se copió tu resultado al portapapeles");
+        return;
+      }
 
-    if (!canShare) {
-      const text = getTextToShare();
-      await navigator.clipboard.writeText(text);
-      toast.success("Se copió tu resultado al portapapeles");
-      return;
+      await navigator.share({
+        title: "Sabeo",
+        text: getTextToShare(),
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo compartir el reto");
     }
-
-    await navigator.share({
-      title: "Reto del dia en Sabeo",
-      text: getTextToShare(),
-      url: "https://sabeo.vercel.app/",
-    });
   }
 
   function getTextToShare() {
@@ -127,10 +128,12 @@ export function Game({ challenge }: { challenge: Challenge }) {
   );
 
   return (
-    <div className="flex h-screen flex-col items-center justify-between gap-4 p-2 sm:p-4">
+    <div className="flex h-svh flex-col items-center justify-between gap-4 p-2 sm:p-4">
       <Dialog.Root open={dialogIsOpened} onOpenChange={setDialogIsOpened}>
         <Dialog.Content maxWidth="450px">
-          <Dialog.Title align={"center"}>Reto del día</Dialog.Title>
+          <Dialog.Title align={"center"} mb={"2"}>
+            Reto del día
+          </Dialog.Title>
 
           <Dialog.Description align={"center"} mb={"4"}>
             La palabra es: {challenge.word}
@@ -150,11 +153,14 @@ export function Game({ challenge }: { challenge: Challenge }) {
         </Dialog.Content>
       </Dialog.Root>
 
+      <Heading className="text-4xl">Sabeo</Heading>
+
       <Attempts
         attempts={attempts}
         currentAttempt={currentAttempt}
         colors={colors}
       />
+
       <Keyboard
         challenge={challenge.word}
         attempts={attempts}
