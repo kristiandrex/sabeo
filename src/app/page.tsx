@@ -1,6 +1,3 @@
-import { Fragment } from "react";
-
-import { OnboardingSteps } from "#/components/onboarding-steps";
 import { Game } from "#/components/game";
 import { getLatestChallenge } from "#/app/actions/challenge";
 
@@ -15,10 +12,5 @@ export default async function Home() {
     );
   }
 
-  return (
-    <Fragment>
-      <OnboardingSteps />
-      <Game challenge={latestChallenge} />
-    </Fragment>
-  );
+  return <Game challenge={latestChallenge} />;
 }

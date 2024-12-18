@@ -11,9 +11,11 @@ import { createClient } from "#/lib/supabase/client";
 import { IOSInstructions } from "#/components/ios-instructions";
 import { urlBase64ToUint8Array } from "#/utils/notifications";
 
-const NUMBER_OF_STEPS = 3;
+type Props = {
+  children: React.ReactNode;
+};
 
-export function OnboardingSteps() {
+export function OnboardingSteps({ children }: Props) {
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   );
@@ -21,6 +23,8 @@ export function OnboardingSteps() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const numberOfSteps = isIOS ? 3 : 2;
 
   async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -119,7 +123,7 @@ export function OnboardingSteps() {
 
   if (isIOS && !isStandalone) {
     return (
-      <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={0}>
+      <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={0}>
         <IOSInstructions />
       </OnboardingStepsLayout>
     );
@@ -127,7 +131,7 @@ export function OnboardingSteps() {
 
   if (!session) {
     return (
-      <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={1}>
+      <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={1}>
         <div className="flex flex-col gap-4 items-center">
           <p className="text-center text-pretty">
             Inicia sesión con tu cuenta de Google para guardar tu progreso
@@ -146,7 +150,7 @@ export function OnboardingSteps() {
 
   if (!subscription) {
     return (
-      <OnboardingStepsLayout numberOfSteps={NUMBER_OF_STEPS} currentStep={2}>
+      <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={2}>
         <div className="flex flex-col gap-4 items-center">
           <p className="text-center text-pretty">
             Activa las notificaciones para avisarte cuando haya un nuevo reto
@@ -162,7 +166,7 @@ export function OnboardingSteps() {
     );
   }
 
-  return null;
+  return children;
 }
 
 function OnboardingStepsLayout(props: {
@@ -186,7 +190,7 @@ function OnboardingStepsLayout(props: {
         key={i}
         className={cn(
           "w-3 h-3 rounded-full bg-gray-300",
-          i === props.currentStep && "w-4 h-4 bg-gray-400"
+          i === props.currentStep && "bg-gray-400"
         )}
       ></div>
     );

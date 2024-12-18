@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Button, Dialog, Flex, Heading } from "@radix-ui/themes";
+import { Button, Dialog, Flex } from "@radix-ui/themes";
 import { toast } from "sonner";
 
 import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from "#/constants";
 import { Challenge, Color } from "#/types";
 import { useLocalStorage } from "#/hooks/useLocalStorage";
 import { completeChallenge } from "#/app/actions/challenge";
+import { getColorsByAttempt } from "#/utils/challenge";
 
 import { Attempts } from "./attempts";
 import { Keyboard } from "./keyboard";
-import { getColorsByAttempt } from "#/utils/challenge";
+import { Header } from "./header";
 
 function getAllAttemptsColors(attempts: string[], challenge: string) {
   return attempts.map((attempt) =>
@@ -131,21 +132,21 @@ export function Game({ challenge }: { challenge: Challenge }) {
     <div className="flex h-svh flex-col items-center justify-between gap-4 p-2 sm:p-4">
       <Dialog.Root open={dialogIsOpened} onOpenChange={setDialogIsOpened}>
         <Dialog.Content maxWidth="450px">
-          <Dialog.Title align={"center"} mb={"2"}>
+          <Dialog.Title align={"center"} className="text-2xl mb-1">
             Reto del día
           </Dialog.Title>
 
-          <Dialog.Description align={"center"} mb={"4"}>
+          <Dialog.Description align={"center"}>
             La palabra es: {challenge.word}
           </Dialog.Description>
 
-          <Flex direction="column">
+          <Flex direction="column" className="my-4">
             {colors.map((row, index) => (
               <ColorSquaresRow key={index} colors={row} />
             ))}
           </Flex>
 
-          <Flex justify={"center"} mt={"4"}>
+          <Flex justify={"center"}>
             <Button className="bg-green-500 hover:bg-green-600" onClick={share}>
               Compartir
             </Button>
@@ -153,7 +154,7 @@ export function Game({ challenge }: { challenge: Challenge }) {
         </Dialog.Content>
       </Dialog.Root>
 
-      <Heading className="text-4xl">Sabeo</Heading>
+      <Header />
 
       <Attempts
         attempts={attempts}
