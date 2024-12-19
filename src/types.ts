@@ -6,3 +6,17 @@ export type Challenge = {
 };
 
 export type Color = "green" | "yellow" | "gray";
+
+export type ChallengeCompleted = {
+  player: string;
+  total_challenges: number;
+  total_seconds: number;
+};
+
+export type RankingPosition = {
+  id: string;
+  name: string;
+  picture: string;
+  challenges: number;
+  seconds: number;
+};

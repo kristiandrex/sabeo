@@ -12,7 +12,6 @@ import { getColorsByAttempt } from "#/utils/challenge";
 
 import { Attempts } from "./attempts";
 import { Keyboard } from "./keyboard";
-import { Header } from "./header";
 
 function getAllAttemptsColors(attempts: string[], challenge: string) {
   return attempts.map((attempt) =>
@@ -129,7 +128,7 @@ export function Game({ challenge }: { challenge: Challenge }) {
   );
 
   return (
-    <div className="flex h-svh flex-col items-center justify-between gap-4 p-2 sm:p-4">
+    <div className="flex h-full flex-col items-center justify-between gap-4">
       <Dialog.Root open={dialogIsOpened} onOpenChange={setDialogIsOpened}>
         <Dialog.Content maxWidth="450px">
           <Dialog.Title align={"center"} className="text-2xl mb-1">
@@ -153,8 +152,6 @@ export function Game({ challenge }: { challenge: Challenge }) {
           </Flex>
         </Dialog.Content>
       </Dialog.Root>
-
-      <Header />
 
       <Attempts
         attempts={attempts}
