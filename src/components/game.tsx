@@ -80,7 +80,7 @@ export function Game({ challenge }: { challenge: Challenge }) {
     }
 
     if (key === "ENTER" && !wordIsCompleted) {
-      toast.error("La palabra debe tener 5 letras");
+      toast.error("El intento debe tener 5 letras");
       return;
     }
 
