@@ -10,8 +10,9 @@ export async function getLatestChallenge(): Promise<Challenge | null> {
     const { data } = await supabase
       .from("challenges")
       .select("*")
-      .order("created_at", { ascending: true })
       .not("started_at", "is", null)
+      .order("started_at", { ascending: false })
+      .order("created_at", { ascending: true })
       .limit(1)
       .single();
 
