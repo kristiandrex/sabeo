@@ -102,6 +102,11 @@ export function OnboardingSteps({ children }: Props) {
         supabase.auth.onAuthStateChange((_, _session) => {
           setSession(_session);
           setLoading(false);
+
+          if (!_session) {
+            localStorage.removeItem("challenge");
+            localStorage.removeItem("attempts");
+          }
         });
       } catch (error) {
         console.error(error);

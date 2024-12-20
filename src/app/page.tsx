@@ -2,6 +2,7 @@ import { Game } from "#/components/game";
 import { getLatestChallenge } from "#/app/actions/challenge";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function Home() {
   const latestChallenge = await getLatestChallenge();
