@@ -131,12 +131,12 @@ export function Game({ challenge }: { challenge: Challenge }) {
     <div className="flex h-full flex-col items-center justify-between gap-4">
       <Dialog.Root open={dialogIsOpened} onOpenChange={setDialogIsOpened}>
         <Dialog.Content maxWidth="450px">
-          <Dialog.Title align={"center"} className="text-2xl mb-1">
-            Reto del día
+          <Dialog.Title align={"center"} className="text-2xl mb-2">
+            Reto del día: {challenge.word}
           </Dialog.Title>
 
-          <Dialog.Description align={"center"}>
-            La palabra es: {challenge.word}
+          <Dialog.Description align={"center"} className="text-balance">
+            {challenge.description}
           </Dialog.Description>
 
           <Flex direction="column" className="my-4">
