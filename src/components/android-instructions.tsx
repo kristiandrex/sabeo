@@ -1,11 +1,11 @@
-import { Share } from "lucide-react";
+import { EllipsisVerticalIcon } from "lucide-react";
 
-export function IOSInstructions() {
+export function AndroidInstructions() {
   return (
     <div className="flex flex-col justify-center items-center gap-2 text-center text-balance">
       <p>
-        Para recibir notificaciones haz click en el botón de compartir{" "}
-        <Share className="inline-block" />
+        Para recibir notificaciones haz click en el botón de Más opciones{" "}
+        <EllipsisVerticalIcon className="inline-block" />
       </p>
 
       <p>

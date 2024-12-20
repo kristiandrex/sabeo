@@ -8,8 +8,10 @@ import { Button } from "@radix-ui/themes";
 
 import { cn } from "#/lib/utils";
 import { createClient } from "#/lib/supabase/client";
-import { IOSInstructions } from "#/components/ios-instructions";
 import { urlBase64ToUint8Array } from "#/utils/notifications";
+
+import { IOSInstructions } from "./ios-instructions";
+import { AndroidInstructions } from "./android-instructions";
 
 type Props = {
   children: React.ReactNode;
@@ -20,6 +22,7 @@ export function OnboardingSteps({ children }: Props) {
     null
   );
   const [isIOS, setIsIOS] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,6 +85,8 @@ export function OnboardingSteps({ children }: Props) {
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
     );
 
+    setIsAndroid(/Android/.test(navigator.userAgent));
+
     setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
 
     async function initialize() {
@@ -130,6 +135,14 @@ export function OnboardingSteps({ children }: Props) {
     return (
       <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={0}>
         <IOSInstructions />
+      </OnboardingStepsLayout>
+    );
+  }
+
+  if (isAndroid && !isStandalone) {
+    return (
+      <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={0}>
+        <AndroidInstructions />
       </OnboardingStepsLayout>
     );
   }
