@@ -23,7 +23,7 @@ export default function RootLayout({
       <body>
         <Theme
           accentColor="green"
-          className="h-svh p-4 flex flex-col overflow-hidden gap-4"
+          className="h-svh p-2 sm:p-4 flex flex-col overflow-hidden gap-8 max-w-xl mx-auto"
         >
           <OnboardingSteps>
             <Header />

@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Button, Dialog, Flex } from "@radix-ui/themes";
 import { toast } from "sonner";
 
 import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from "#/constants";
-import { Challenge, Color } from "#/types";
+import { Challenge } from "#/types";
 import { useLocalStorage } from "#/hooks/useLocalStorage";
 import { completeChallenge } from "#/app/actions/challenge";
 import { getColorsByAttempt } from "#/utils/challenge";
 
 import { Attempts } from "./attempts";
 import { Keyboard } from "./keyboard";
+import { DialogChallengeCompleted } from "./dialog-completed";
 
 function getAllAttemptsColors(attempts: string[], challenge: string) {
   return attempts.map((attempt) =>
@@ -80,41 +80,6 @@ export function Game({ challenge }: { challenge: Challenge }) {
     }
   }
 
-  async function share() {
-    try {
-      if (typeof navigator.share !== "function") {
-        const text = getTextToShare();
-        await navigator.clipboard.writeText(text);
-        toast.success("Se copió tu resultado al portapapeles");
-        return;
-      }
-
-      await navigator.share({
-        title: "Sabeo",
-        text: getTextToShare(),
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("No se pudo compartir el reto");
-    }
-  }
-
-  function getTextToShare() {
-    let text = "Reto del día en Sabeo\n";
-
-    colors.forEach((row) => {
-      row.forEach((color) => {
-        text += color === "green" ? "🟩" : color === "yellow" ? "🟨" : "⬜";
-      });
-
-      text += "\n";
-    });
-
-    text += "Inténtalo en https://sabeo.vercel.app/";
-
-    return text;
-  }
-
   useEffect(() => {
     if (challenge.id !== Number(challengeId)) {
       setChallengeId(challenge.id);
@@ -128,30 +93,13 @@ export function Game({ challenge }: { challenge: Challenge }) {
   );
 
   return (
-    <div className="flex h-full flex-col items-center justify-between gap-4">
-      <Dialog.Root open={dialogIsOpened} onOpenChange={setDialogIsOpened}>
-        <Dialog.Content maxWidth="450px">
-          <Dialog.Title align={"center"} className="text-2xl mb-2">
-            Reto del día: {challenge.word}
-          </Dialog.Title>
-
-          <Dialog.Description align={"center"} className="text-balance">
-            {challenge.description}
-          </Dialog.Description>
-
-          <Flex direction="column" className="my-4">
-            {colors.map((row, index) => (
-              <ColorSquaresRow key={index} colors={row} />
-            ))}
-          </Flex>
-
-          <Flex justify={"center"}>
-            <Button className="bg-green-500 hover:bg-green-600" onClick={share}>
-              Compartir
-            </Button>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+    <main className="flex h-full flex-col items-center justify-between gap-4">
+      <DialogChallengeCompleted
+        challenge={challenge}
+        colors={colors}
+        open={dialogIsOpened}
+        onOpenChange={setDialogIsOpened}
+      />
 
       <Attempts
         attempts={attempts}
@@ -164,24 +112,6 @@ export function Game({ challenge }: { challenge: Challenge }) {
         attempts={attempts}
         onKeyDown={onKeyDown}
       />
-    </div>
-  );
-}
-
-function ColorSquaresRow({ colors }: { colors: Color[] }) {
-  return (
-    <Flex justify={"center"}>
-      {colors.map((color) => {
-        if (color === "green") {
-          return "🟩";
-        }
-
-        if (color === "yellow") {
-          return "🟨";
-        }
-
-        return "⬜";
-      })}
-    </Flex>
+    </main>
   );
 }

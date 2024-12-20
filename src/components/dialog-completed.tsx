@@ -1,0 +1,97 @@
+import { Button, Dialog, Flex } from "@radix-ui/themes";
+import { toast } from "sonner";
+
+import { Challenge, Color } from "#/types";
+
+type Props = {
+  challenge: Challenge;
+  colors: Color[][];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export function DialogChallengeCompleted({
+  challenge,
+  colors,
+  open,
+  onOpenChange,
+}: Props) {
+  async function share() {
+    try {
+      if (typeof navigator.share !== "function") {
+        const text = getTextToShare();
+        await navigator.clipboard.writeText(text);
+        toast.success("Se copió tu resultado al portapapeles");
+        return;
+      }
+
+      await navigator.share({
+        title: "Sabeo",
+        text: getTextToShare(),
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo compartir el reto");
+    }
+  }
+
+  function getTextToShare() {
+    let text = "Reto del día en Sabeo\n";
+
+    colors.forEach((row) => {
+      row.forEach((color) => {
+        text += color === "green" ? "🟩" : color === "yellow" ? "🟨" : "⬜";
+      });
+
+      text += "\n";
+    });
+
+    text += "Inténtalo en https://sabeo.vercel.app/";
+
+    return text;
+  }
+
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Content maxWidth="450px">
+        <Dialog.Title align={"center"} className="text-2xl mb-2">
+          Reto del día: {challenge.word}
+        </Dialog.Title>
+
+        <Dialog.Description align={"center"} className="text-balance">
+          {challenge.description}
+        </Dialog.Description>
+
+        <Flex direction="column" className="my-4">
+          {colors.map((row, index) => (
+            <ColorSquaresRow key={index} colors={row} />
+          ))}
+        </Flex>
+
+        <Flex justify={"center"}>
+          <Button className="bg-green-500 hover:bg-green-600" onClick={share}>
+            Compartir
+          </Button>
+        </Flex>
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+}
+
+function ColorSquaresRow({ colors }: { colors: Color[] }) {
+  return (
+    <Flex justify={"center"}>
+      {colors.map((color) => {
+        if (color === "green") {
+          return "🟩";
+        }
+
+        if (color === "yellow") {
+          return "🟨";
+        }
+
+        return "⬜";
+      })}
+    </Flex>
+  );
+}

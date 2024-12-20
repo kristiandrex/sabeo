@@ -75,9 +75,7 @@ export function Keyboard({
     };
   }, [onKeyDown]);
 
-  return (
-    <div className="flex w-full flex-col gap-1 sm:w-auto sm:gap-2">{rows}</div>
-  );
+  return <div className="flex w-full flex-col gap-1">{rows}</div>;
 }
 
 function KeyboardRow({
@@ -97,7 +95,7 @@ function KeyboardRow({
     <Button
       key={key}
       className={cn(
-        "flex-auto p-2 text-center sm:p-4 bg-gray-400 hover:bg-gray-500",
+        "flex-auto p-2 text-center sm:p-4 bg-gray-400 hover:bg-gray-500 text-base",
         colors[key]
       )}
       color="gray"
@@ -107,5 +105,5 @@ function KeyboardRow({
     </Button>
   ));
 
-  return <div className="flex gap-1 sm:gap-2">{keys}</div>;
+  return <div className="flex gap-1">{keys}</div>;
 }
