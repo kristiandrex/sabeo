@@ -120,7 +120,7 @@ export function OnboardingSteps({ children }: Props) {
 
   if (loading) {
     return (
-      <div className="fixed h-svh w-screen bg-white grid place-items-center">
+      <div className="fixed top-0 left-0 h-svh w-screen bg-white grid place-items-center">
         <p className="text-2xl text-center">Cargando...</p>
       </div>
     );
@@ -202,7 +202,7 @@ function OnboardingStepsLayout(props: {
   }
 
   return (
-    <div className="fixed h-svh w-screen bg-white grid place-items-center p-8">
+    <div className="fixed top-0 left-0 h-svh w-screen bg-white grid place-items-center p-8">
       <div className="grid grid-rows-[1fr_auto] h-full">
         <div className="h-full grid place-items-center">{props.children}</div>
         <div className="flex gap-2 justify-center items-center">{dots}</div>
