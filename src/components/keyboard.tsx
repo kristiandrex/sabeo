@@ -95,7 +95,7 @@ function KeyboardRow({
     <Button
       key={key}
       className={cn(
-        "flex-auto p-2 text-center sm:p-4 bg-gray-400 hover:bg-gray-500 text-base",
+        "flex-auto p-2 sm:p-4 py-6 text-center bg-gray-400 hover:bg-gray-500 text-base",
         colors[key]
       )}
       color="gray"

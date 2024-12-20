@@ -4,7 +4,7 @@ export function AndroidInstructions() {
   return (
     <div className="flex flex-col justify-center items-center gap-2 text-center text-balance">
       <p>
-        Para recibir notificaciones haz click en el botón de Más opciones{" "}
+        Para instalar la app haz click en el botón de Más opciones{" "}
         <EllipsisVerticalIcon className="inline-block" />
       </p>
 
