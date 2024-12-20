@@ -5,34 +5,49 @@ import { HelpCircleIcon, LogOutIcon, TrophyIcon } from "lucide-react";
 import Link from "next/link";
 
 import { createClient } from "#/lib/supabase/client";
+import { useLocalStorage } from "#/hooks/useLocalStorage";
+
+import { DialogInstructions } from "./dialog-instructions";
 
 export function Header() {
+  const [instructionsOpen, setInstructionsOpen] = useLocalStorage<boolean>(
+    "instructions",
+    true
+  );
+
   function signOut() {
     const supabase = createClient();
     supabase.auth.signOut();
   }
 
   return (
-    <header className="flex justify-between items-center gap-16 w-full">
-      <div>
-        <Link href="/">
-          <h1 className="text-4xl font-bold">Sabeo</h1>
-        </Link>
-      </div>
+    <>
+      <DialogInstructions
+        open={instructionsOpen}
+        onOpenChange={setInstructionsOpen}
+      />
 
-      <div className="flex gap-4">
-        <Button variant="ghost">
-          <HelpCircleIcon />
-        </Button>
-        <Button variant="ghost" asChild>
-          <Link href="/ranking">
-            <TrophyIcon />
+      <header className="flex justify-between items-center gap-16 w-full">
+        <div>
+          <Link href="/">
+            <h1 className="text-4xl font-bold">Sabeo</h1>
           </Link>
-        </Button>
-        <Button variant="ghost" onClick={signOut}>
-          <LogOutIcon />
-        </Button>
-      </div>
-    </header>
+        </div>
+
+        <div className="flex gap-4">
+          <Button variant="ghost" onClick={() => setInstructionsOpen(true)}>
+            <HelpCircleIcon />
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link href="/ranking">
+              <TrophyIcon />
+            </Link>
+          </Button>
+          <Button variant="ghost" onClick={signOut}>
+            <LogOutIcon />
+          </Button>
+        </div>
+      </header>
+    </>
   );
 }

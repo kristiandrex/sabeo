@@ -67,14 +67,24 @@ export function Game({ challenge }: { challenge: Challenge }) {
     }
 
     const isLetter = /^[A-Z]$/.test(key);
-    const areAttemptsCompleted = attempts.length === NUMBER_OF_ROWS;
+
     const wordIsCompleted = currentAttempt.length === NUMBER_OF_COLUMNS;
 
     if (isLetter && !wordIsCompleted) {
       setCurrentAttempt((value) => value.concat(key));
-    } else if (key === "BACKSPACE") {
+      return;
+    }
+    if (key === "BACKSPACE") {
       setCurrentAttempt((value) => value.slice(0, -1));
-    } else if (key === "ENTER" && wordIsCompleted && !areAttemptsCompleted) {
+      return;
+    }
+
+    if (key === "ENTER" && !wordIsCompleted) {
+      toast.error("La palabra debe tener 5 letras");
+      return;
+    }
+
+    if (key === "ENTER" && wordIsCompleted) {
       addAttempt(currentAttempt);
       setCurrentAttempt("");
     }

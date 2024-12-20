@@ -1,4 +1,4 @@
-import { Button, Dialog, Flex } from "@radix-ui/themes";
+import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
 import { toast } from "sonner";
 
 import { Challenge, Color } from "#/types";
@@ -53,14 +53,16 @@ export function DialogChallengeCompleted({
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Content maxWidth="450px">
+      <Dialog.Content maxWidth="450px" aria-describedby={undefined}>
         <Dialog.Title align={"center"} className="text-2xl mb-2">
-          Reto del día: {challenge.word}
+          La palabra es: {challenge.word}
         </Dialog.Title>
 
-        <Dialog.Description align={"center"} className="text-balance">
-          {challenge.description}
-        </Dialog.Description>
+        {challenge.description && (
+          <Text as="p" className="text-center text-balance">
+            {challenge.description}
+          </Text>
+        )}
 
         <Flex direction="column" className="my-4">
           {colors.map((row, index) => (
