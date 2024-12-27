@@ -1,17 +1,11 @@
 "use client";
 
-import {
-  useActionState,
-  useEffect,
-  useOptimistic,
-  useState,
-  useTransition,
-} from "react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from "#/constants";
 import { Challenge } from "#/types";
-import { completeChallenge } from "#/app/actions/challenge";
+import { addAttempt, completeChallenge } from "#/app/actions/challenge";
 import { getColorsByAttempt } from "#/utils/challenge";
 
 import { Attempts } from "./attempts";
@@ -33,49 +27,57 @@ type Props = {
 };
 
 export function Game({ challenge, initialAttempts }: Props) {
-  const [state, action, isPending] = useActionState(
-    (prevAttempts: string[], newAttempt: string) => {
-      console.log(newAttempt);
-
-      return prevAttempts.concat(newAttempt);
-    },
-    initialAttempts
-  );
-
   const [attempts, setAttempts] = useState(initialAttempts);
-
-  const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
-    state,
-    (prevAttemps, newAttempt: string) => prevAttemps.concat(newAttempt)
-  );
-
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
   const [dialogIsOpened, setDialogIsOpened] = useState(false);
 
-  const colors = getAllAttemptsColors(attempts, challenge.word);
+  const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
+    attempts,
+    (currentAttempts, newAttempt: string) => currentAttempts.concat(newAttempt)
+  );
+
+  const [optimisticCurrent, setOptimisticCurrent] = useOptimistic(
+    currentAttempt,
+    (currentAttempt, newAttempt: string) => newAttempt
+  );
+
+  const [isPending, startTransition] = useTransition();
+
+  const colors = getAllAttemptsColors(optimisticAttempts, challenge.word);
 
   const isChallengeCompleted =
-    (attempts.length === NUMBER_OF_ROWS || attempts.includes(challenge.word)) &&
+    (optimisticAttempts.length === NUMBER_OF_ROWS ||
+      optimisticAttempts.includes(challenge.word)) &&
     !isPending;
 
-  async function addAttempt(attempt: string) {
-    addOptimisticAttempt(attempt);
+  async function addAttemptAction(attempt: string) {
+    toast.info("Guardando tu respuesta...");
 
-    if (attempt === challenge.word) {
-      const response = await completeChallenge();
+    startTransition(async () => {
+      addOptimisticAttempt(attempt);
+      setOptimisticCurrent("");
 
-      if (response.error) {
-        toast.error(response.error);
-        return;
+      if (attempt === challenge.word) {
+        const response = await completeChallenge();
+
+        if (!response.success) {
+          toast.error(response.error);
+        } else {
+          toast.success("¡Muy bien, completaste el reto!");
+          setDialogIsOpened(true);
+        }
       }
 
-      if (response.success) {
-        toast.success("¡Muy bien, completaste el reto!");
-        setDialogIsOpened(true);
-      }
-    }
+      const { success } = await addAttempt(attempt, challenge.id);
 
-    setAttempts((value) => value.concat(attempt));
+      if (!success) {
+        toast.error("No se pudo guardar tu respuesta");
+      } else {
+        startTransition(() => {
+          setAttempts((value) => value.concat(attempt));
+        });
+      }
+    });
   }
 
   function onKeyDown(key: string) {
@@ -85,7 +87,7 @@ export function Game({ challenge, initialAttempts }: Props) {
 
     const isLetter = /^[A-Z]$/.test(key);
 
-    const wordIsCompleted = currentAttempt.length === NUMBER_OF_COLUMNS;
+    const wordIsCompleted = optimisticCurrent.length === NUMBER_OF_COLUMNS;
 
     if (isLetter && !wordIsCompleted) {
       setCurrentAttempt((value) => value.concat(key));
@@ -102,8 +104,10 @@ export function Game({ challenge, initialAttempts }: Props) {
     }
 
     if (key === "ENTER" && wordIsCompleted) {
-      addAttempt(currentAttempt);
-      setCurrentAttempt("");
+      startTransition(() => {
+        addAttemptAction(optimisticCurrent);
+        setCurrentAttempt("");
+      });
     }
   }
 
@@ -122,14 +126,14 @@ export function Game({ challenge, initialAttempts }: Props) {
       />
 
       <Attempts
-        attempts={attempts}
-        currentAttempt={currentAttempt}
+        attempts={optimisticAttempts}
+        currentAttempt={optimisticCurrent}
         colors={colors}
       />
 
       <Keyboard
         challenge={challenge.word}
-        attempts={attempts}
+        attempts={optimisticAttempts}
         onKeyDown={onKeyDown}
       />
     </main>
