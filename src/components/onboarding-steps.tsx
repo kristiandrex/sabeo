@@ -28,7 +28,8 @@ export function OnboardingSteps({ children }: Props) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const numberOfSteps = isIOS ? 3 : 2;
+  const isMobile = isIOS || isAndroid;
+  const numberOfSteps = isMobile ? 3 : 2;
 
   async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -134,11 +135,6 @@ export function OnboardingSteps({ children }: Props) {
         supabase.auth.onAuthStateChange((_, _session) => {
           setSession(_session);
           setLoading(false);
-
-          if (!_session) {
-            localStorage.removeItem("challenge");
-            localStorage.removeItem("attempts");
-          }
         });
       } catch (error) {
         console.error(error);
@@ -172,7 +168,10 @@ export function OnboardingSteps({ children }: Props) {
 
   if (!session) {
     return (
-      <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={1}>
+      <OnboardingStepsLayout
+        numberOfSteps={numberOfSteps}
+        currentStep={isMobile ? 1 : 0}
+      >
         <div className="flex flex-col gap-4 items-center">
           <p className="text-center text-pretty">
             Inicia sesión con tu cuenta de Google para guardar tu progreso
@@ -191,7 +190,10 @@ export function OnboardingSteps({ children }: Props) {
 
   if (!subscription) {
     return (
-      <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={2}>
+      <OnboardingStepsLayout
+        numberOfSteps={numberOfSteps}
+        currentStep={isMobile ? 2 : 1}
+      >
         <div className="flex flex-col gap-4 items-center">
           <p className="text-center text-pretty">
             Activa las notificaciones para avisarte cuando haya un nuevo reto
