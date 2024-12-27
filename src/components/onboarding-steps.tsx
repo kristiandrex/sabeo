@@ -1,17 +1,18 @@
 "use client";
 
-import React from "react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import type { Session } from "@supabase/supabase-js";
 import { Button } from "@radix-ui/themes";
+import type { Session } from "@supabase/supabase-js";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-import { cn } from "#/lib/utils";
 import { createClient } from "#/lib/supabase/client";
+import { cn } from "#/lib/utils";
 import { urlBase64ToUint8Array } from "#/utils/notifications";
 
-import { IOSInstructions } from "./ios-instructions";
 import { AndroidInstructions } from "./android-instructions";
+import { IOSInstructions } from "./ios-instructions";
+import { Loading } from "./loading";
 
 type Props = {
   children: React.ReactNode;
@@ -72,7 +73,7 @@ export function OnboardingSteps({ children }: Props) {
   async function signinWithGoogle() {
     const supabase = createClient();
 
-    supabase.auth.signInWithOAuth({
+    await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL,
@@ -124,11 +125,7 @@ export function OnboardingSteps({ children }: Props) {
   }, []);
 
   if (loading) {
-    return (
-      <div className="fixed top-0 left-0 h-svh w-screen bg-white grid place-items-center">
-        <p className="text-2xl text-center">Cargando...</p>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (isIOS && !isStandalone) {

@@ -1,19 +1,19 @@
-import { Game } from "#/components/game";
-import { getLatestChallenge } from "#/app/actions/challenge";
+import { redirect } from "next/navigation";
+
+import { createClient } from "#/lib/supabase/server";
+import { Loading } from "#/components/loading";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Home() {
-  const latestChallenge = await getLatestChallenge();
+  const supabase = await createClient();
 
-  if (!latestChallenge) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <h1 className="text-2xl font-semibold">No hay reto disponible</h1>
-      </div>
-    );
+  const { data } = await supabase.auth.getUser();
+
+  if (data?.user) {
+    redirect("/play");
   }
 
-  return <Game challenge={latestChallenge} />;
+  return <Loading />;
 }

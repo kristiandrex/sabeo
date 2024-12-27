@@ -6,7 +6,6 @@ import "@radix-ui/themes/styles.css";
 import "./globals.css";
 
 import { OnboardingSteps } from "#/components/onboarding-steps";
-import { Header } from "#/components/header";
 
 export const metadata: Metadata = {
   title: "Sabeo",
@@ -25,10 +24,7 @@ export default function RootLayout({
           accentColor="green"
           className="h-svh p-2 sm:p-4 flex flex-col overflow-hidden gap-8 max-w-xl mx-auto"
         >
-          <OnboardingSteps>
-            <Header />
-            {children}
-          </OnboardingSteps>
+          <OnboardingSteps>{children}</OnboardingSteps>
         </Theme>
         <Toaster position="top-center" />
       </body>

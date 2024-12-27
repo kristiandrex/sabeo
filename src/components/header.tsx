@@ -3,6 +3,7 @@
 import { Button } from "@radix-ui/themes";
 import { HelpCircleIcon, LogOutIcon, TrophyIcon } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { createClient } from "#/lib/supabase/client";
 import { useLocalStorage } from "#/hooks/useLocalStorage";
@@ -15,9 +16,10 @@ export function Header() {
     true
   );
 
-  function signOut() {
+  async function signOut() {
     const supabase = createClient();
-    supabase.auth.signOut();
+    await supabase.auth.signOut();
+    redirect("/");
   }
 
   return (
@@ -29,7 +31,7 @@ export function Header() {
 
       <header className="flex justify-between items-center gap-16 w-full">
         <div>
-          <Link href="/">
+          <Link href="/play">
             <h1 className="text-4xl font-bold">Sabeo</h1>
           </Link>
         </div>

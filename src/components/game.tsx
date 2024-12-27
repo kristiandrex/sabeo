@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import {
+  useActionState,
+  useEffect,
+  useOptimistic,
+  useState,
+  useTransition,
+} from "react";
 import { toast } from "sonner";
 
 import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from "#/constants";
 import { Challenge } from "#/types";
-import { useLocalStorage } from "#/hooks/useLocalStorage";
 import { completeChallenge } from "#/app/actions/challenge";
 import { getColorsByAttempt } from "#/utils/challenge";
 
@@ -22,16 +27,30 @@ function getAllAttemptsColors(attempts: string[], challenge: string) {
   );
 }
 
-export function Game({ challenge }: { challenge: Challenge }) {
-  const [challengeId, setChallengeId] = useLocalStorage(
-    "challenge",
-    challenge.id
+type Props = {
+  challenge: Challenge;
+  initialAttempts: string[];
+};
+
+export function Game({ challenge, initialAttempts }: Props) {
+  const [state, action, isPending] = useActionState(
+    (prevAttempts: string[], newAttempt: string) => {
+      console.log(newAttempt);
+
+      return prevAttempts.concat(newAttempt);
+    },
+    initialAttempts
   );
 
-  const [attempts, setAttempts] = useLocalStorage<string[]>("attempts", []);
+  const [attempts, setAttempts] = useState(initialAttempts);
+
+  const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
+    state,
+    (prevAttemps, newAttempt: string) => prevAttemps.concat(newAttempt)
+  );
+
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
   const [dialogIsOpened, setDialogIsOpened] = useState(false);
-  const [isPending, startTransition] = useTransition();
 
   const colors = getAllAttemptsColors(attempts, challenge.word);
 
@@ -40,25 +59,23 @@ export function Game({ challenge }: { challenge: Challenge }) {
     !isPending;
 
   async function addAttempt(attempt: string) {
-    startTransition(async () => {
-      const prevAttempts = attempts;
+    addOptimisticAttempt(attempt);
 
-      setAttempts((prevAttempts) => prevAttempts.concat(attempt));
+    if (attempt === challenge.word) {
+      const response = await completeChallenge();
 
-      if (attempt === challenge.word) {
-        const response = await completeChallenge();
-
-        if (response.success) {
-          toast.success("¡Muy bien, completaste el reto!");
-          setDialogIsOpened(true);
-        }
-
-        if (response.error) {
-          toast.error(response.error);
-          setAttempts(prevAttempts);
-        }
+      if (response.error) {
+        toast.error(response.error);
+        return;
       }
-    });
+
+      if (response.success) {
+        toast.success("¡Muy bien, completaste el reto!");
+        setDialogIsOpened(true);
+      }
+    }
+
+    setAttempts((value) => value.concat(attempt));
   }
 
   function onKeyDown(key: string) {
@@ -89,13 +106,6 @@ export function Game({ challenge }: { challenge: Challenge }) {
       setCurrentAttempt("");
     }
   }
-
-  useEffect(() => {
-    if (challenge.id !== Number(challengeId)) {
-      setChallengeId(challenge.id);
-      setAttempts([]);
-    }
-  }, [challenge.id, challengeId, setChallengeId, setAttempts]);
 
   useEffect(
     () => setDialogIsOpened(isChallengeCompleted),
