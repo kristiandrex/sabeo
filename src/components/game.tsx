@@ -62,21 +62,26 @@ export function Game({ challenge, initialAttempts }: Props) {
 
         if (!response.success) {
           toast.error(response.error);
-        } else {
-          toast.success("¡Muy bien, completaste el reto!");
-          setDialogIsOpened(true);
+          return;
         }
+
+        toast.success("¡Muy bien, completaste el reto!");
+        setDialogIsOpened(true);
       }
 
       const { success } = await addAttempt(attempt, challenge.id);
 
       if (!success) {
         toast.error("No se pudo guardar tu respuesta");
-      } else {
-        startTransition(() => {
-          setAttempts((value) => value.concat(attempt));
-        });
+        return;
       }
+
+      toast.success("Respuesta guardada correctamente");
+
+      startTransition(() => {
+        setAttempts((value) => value.concat(attempt));
+        setCurrentAttempt("");
+      });
     });
   }
 
@@ -104,10 +109,7 @@ export function Game({ challenge, initialAttempts }: Props) {
     }
 
     if (key === "ENTER" && wordIsCompleted) {
-      startTransition(() => {
-        addAttemptAction(optimisticCurrent);
-        setCurrentAttempt("");
-      });
+      addAttemptAction(optimisticCurrent);
     }
   }
 
