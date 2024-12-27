@@ -2,13 +2,13 @@
 
 import { Button } from "@radix-ui/themes";
 import type { Session } from "@supabase/supabase-js";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { createClient } from "#/lib/supabase/client";
 import { cn } from "#/lib/utils";
 import { urlBase64ToUint8Array } from "#/utils/notifications";
+import { getSubscriptionByUser } from "#/app/actions/notifications";
 
 import { AndroidInstructions } from "./android-instructions";
 import { IOSInstructions } from "./ios-instructions";
@@ -37,7 +37,18 @@ export function OnboardingSteps({ children }: Props) {
     });
 
     const sub = await registration.pushManager.getSubscription();
-    setSubscription(sub);
+
+    if (!sub) {
+      return;
+    }
+
+    const { subscription: storedSubscription } = await getSubscriptionByUser(
+      sub.endpoint
+    );
+
+    if (storedSubscription) {
+      setSubscription(sub);
+    }
   }
 
   async function subscribeToPush() {
@@ -51,12 +62,27 @@ export function OnboardingSteps({ children }: Props) {
         ),
       });
 
+      const supabase = createClient();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const json = sub.toJSON();
+
       const response = await fetch("/api/subscribe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(sub),
+        body: JSON.stringify({
+          ...json,
+          player: user.id,
+        }),
       });
 
       if (!response.ok) {
