@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import webpush from "web-push";
 
 import { createClient } from "#/lib/supabase/server";
@@ -8,7 +9,7 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 );
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
     const sub = await req.json();
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
       sub,
       JSON.stringify({
         title: "Sabeo",
-        body: "Recibirás notificaciones cuando haya un nuevo reto",
+        body: "Recibirás una notificación cuando haya un nuevo reto",
         icon: "/icon-512x512.png",
       })
     );
