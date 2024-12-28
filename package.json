@@ -12,6 +12,7 @@
     "@radix-ui/themes": "^3.1.6",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
+    "@vercel/functions": "^1.5.2",
     "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",

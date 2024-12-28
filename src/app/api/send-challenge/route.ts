@@ -1,6 +1,7 @@
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import webpush, { PushSubscription } from "web-push";
+import { waitUntil } from "@vercel/functions";
 import { type NextRequest } from "next/server";
+import webpush, { PushSubscription } from "web-push";
 
 import { createServiceClient } from "#/lib/supabase/server";
 
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    for (const sub of data) {
+    const promises = data.map((sub) =>
       webpush
         .sendNotification(
           sub,
@@ -77,8 +78,10 @@ export async function POST(req: NextRequest) {
             icon: "/icon-512x512.png",
           })
         )
-        .catch((error) => console.error(error));
-    }
+        .catch((error) => console.error(error))
+    );
+
+    waitUntil(Promise.allSettled(promises));
 
     console.log("Notifications sent");
     return new Response("Notifications sent", { status: 200 });
