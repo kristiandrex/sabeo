@@ -13,13 +13,14 @@ webpush.setVapidDetails(
 export async function POST(req: NextRequest) {
   try {
     const requestHeaders = new Headers(req.headers);
-    const supabase = await createServiceClient();
 
     if (
       requestHeaders.get("api-key") !== process.env.NOTIFICATIONS_PRIVATE_KEY
     ) {
       return new Response("Unauthorized", { status: 401 });
     }
+
+    const supabase = await createServiceClient();
 
     const { data, error }: PostgrestSingleResponse<PushSubscription[]> =
       await supabase.from("subscriptions").select("*");
@@ -42,14 +43,14 @@ export async function POST(req: NextRequest) {
             icon: "/icon-512x512.png",
           })
         )
-        .catch((error) => {
-          console.error(error);
-        });
+        .catch((error) => console.error(error));
     }
 
+    console.log("Notifications sent");
     return new Response("Notifications sent", { status: 200 });
   } catch (error) {
     console.error(error);
+
     return new Response("An error occurred while sending notifications", {
       status: 500,
     });
