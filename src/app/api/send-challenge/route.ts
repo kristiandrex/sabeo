@@ -22,6 +22,35 @@ export async function POST(req: NextRequest) {
 
     const supabase = await createServiceClient();
 
+    const { data: challenge, error: challengeError } = await supabase
+      .from("challenges")
+      .select("*")
+      .is("started_at", null)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .single();
+
+    if (challengeError) {
+      console.error(challengeError);
+      return new Response("An error occurred while fetching the challenge", {
+        status: 500,
+      });
+    }
+
+    if (challenge) {
+      const { error: updateError } = await supabase
+        .from("challenges")
+        .update({ started_at: new Date().toISOString() })
+        .eq("id", challenge.id);
+
+      if (updateError) {
+        console.error(updateError);
+        return new Response("An error occurred while updating the challenge", {
+          status: 500,
+        });
+      }
+    }
+
     const { data, error }: PostgrestSingleResponse<PushSubscription[]> =
       await supabase.from("subscriptions").select("*");
 
