@@ -30,6 +30,11 @@ export async function POST(req: NextRequest) {
       .limit(1)
       .single();
 
+    // No challenge available
+    if (challengeError?.code === "PGRST116") {
+      return new Response("No challenge available", { status: 404 });
+    }
+
     if (challengeError) {
       console.error(challengeError);
       return new Response("An error occurred while fetching the challenge", {
