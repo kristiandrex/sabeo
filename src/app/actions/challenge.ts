@@ -42,6 +42,10 @@ export async function getAttemptsByPlayer(challenge: number) {
       .eq("challenge", challenge)
       .single();
 
+    if (query.error?.code === "PGRST116") {
+      return [];
+    }
+
     if (query.error) {
       throw query.error;
     }
