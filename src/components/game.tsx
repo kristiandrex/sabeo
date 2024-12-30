@@ -51,7 +51,7 @@ export function Game({ challenge, initialAttempts }: Props) {
     !isPending;
 
   async function addAttemptAction(attempt: string) {
-    toast.info("Guardando tu respuesta...");
+    toast.info("Guardando intento...");
 
     startTransition(async () => {
       addOptimisticAttempt(attempt);
@@ -72,11 +72,11 @@ export function Game({ challenge, initialAttempts }: Props) {
       const { success } = await addAttempt(attempt, challenge.id);
 
       if (!success) {
-        toast.error("No se pudo guardar tu respuesta");
+        toast.error("No se pudo guardar tu intento");
         return;
       }
 
-      toast.success("Respuesta guardada correctamente");
+      toast.success("Intento guardado");
 
       startTransition(() => {
         setAttempts((value) => value.concat(attempt));

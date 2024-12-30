@@ -21,7 +21,7 @@ export function DialogChallengeCompleted({
       if (typeof navigator.share !== "function") {
         const text = getTextToShare();
         await navigator.clipboard.writeText(text);
-        toast.success("Se copió tu resultado al portapapeles");
+        toast.success("Se copió tu resultado");
         return;
       }
 
