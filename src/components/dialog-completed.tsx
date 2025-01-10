@@ -21,6 +21,8 @@ export function DialogChallengeCompleted({
       if (typeof navigator.share !== "function") {
         const text = getTextToShare();
         await navigator.clipboard.writeText(text);
+
+        toast.dismiss();
         toast.success("Se copió tu resultado");
         return;
       }
@@ -31,6 +33,7 @@ export function DialogChallengeCompleted({
       });
     } catch (error) {
       console.error(error);
+      toast.dismiss();
       toast.error("No se pudo compartir el reto");
     }
   }
