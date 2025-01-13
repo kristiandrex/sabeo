@@ -104,9 +104,9 @@ export function OnboardingSteps({ children }: Props) {
       provider: "google",
       options: {
         redirectTo:
-          process.env.VERCEL_ENV !== "production"
+          process.env.NEXT_PUBLIC_VERCEL_ENV !== "production"
             ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/auth/callback`
-            : `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/api/auth/callback`,
+            : `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}/api/auth/callback`,
       },
     });
   }
