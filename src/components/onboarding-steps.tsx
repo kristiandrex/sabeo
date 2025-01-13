@@ -103,9 +103,10 @@ export function OnboardingSteps({ children }: Props) {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: process.env.NEXT_PUBLIC_VERCEL_URL
-          ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/auth/callback`
-          : process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL,
+        redirectTo:
+          process.env.VERCEL_ENV !== "production"
+            ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/auth/callback`
+            : `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/api/auth/callback`,
       },
     });
   }
