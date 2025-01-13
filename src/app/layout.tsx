@@ -10,6 +10,18 @@ import { OnboardingSteps } from "#/components/onboarding-steps";
 export const metadata: Metadata = {
   title: "Sabeo",
   description: "Descubre la palabra en el menor tiempo posible",
+  openGraph: {
+    title: "Sabeo",
+    description: "Descubre la palabra en el menor tiempo posible",
+    url: "https://sabeo.vercel.app/",
+    images: [
+      {
+        url: "https://sabeo.vercel.app/icon-512x512.png",
+        width: 512,
+        height: 512,
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
