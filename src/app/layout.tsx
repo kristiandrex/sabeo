@@ -26,7 +26,7 @@ export default function RootLayout({
         >
           <OnboardingSteps>{children}</OnboardingSteps>
         </Theme>
-        <Toaster position="top-center" />
+        <Toaster position="top-center" closeButton />
       </body>
     </html>
   );

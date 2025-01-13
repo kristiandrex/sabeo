@@ -1,4 +1,4 @@
-import { NUMBER_OF_COLUMNS, NUMBER_OF_ROWS } from "#/constants";
+import { NUMBER_OF_ROWS } from "#/constants";
 import { cn } from "#/lib/utils";
 import { Color } from "#/types";
 
@@ -16,10 +16,12 @@ export function Attempts({
   attempts,
   currentAttempt,
   colors,
+  challenge,
 }: {
   attempts: string[];
   currentAttempt: string;
   colors: Color[][];
+  challenge: string;
 }) {
   const rows: React.ReactNode[] = [];
 
@@ -30,7 +32,7 @@ export function Attempts({
     const columns: React.ReactNode[] = [];
     const attemptColors = colors[i] ?? [];
 
-    for (let j = 0; j < NUMBER_OF_COLUMNS; j++) {
+    for (let j = 0; j < challenge.length; j++) {
       const color = attemptColors[j] ?? "";
 
       columns.push(
@@ -47,7 +49,13 @@ export function Attempts({
     }
 
     rows.push(
-      <div key={i} className="grid grid-cols-5 gap-2">
+      <div
+        key={i}
+        className={cn(
+          "grid gap-2",
+          challenge.length === 5 ? "grid-cols-5" : "grid-cols-6"
+        )}
+      >
         {columns}
       </div>
     );

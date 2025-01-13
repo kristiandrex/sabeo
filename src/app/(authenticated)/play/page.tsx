@@ -21,7 +21,7 @@ export default async function PlayPage() {
   if (!latestChallenge) {
     return (
       <div className="flex h-screen items-center justify-center flex-col gap-2">
-        <h1 className="text-2xl font-semibold">No hay reto disponible</h1>
+        <h1 className="text-2xl">No hay reto disponible</h1>
         <Button onClick={reload}>Recargar</Button>
       </div>
     );

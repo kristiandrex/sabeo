@@ -10,8 +10,20 @@ export type Color = "green" | "yellow" | "gray";
 
 export type ChallengeCompleted = {
   player: string;
+  /**
+   * Challenges completed by the player
+   */
   total_challenges: number;
+
+  /**
+   * Total seconds spent by the player to complete the challenges
+   */
   total_seconds: number;
+};
+
+export type DailyChallengeCompleted = {
+  player: string;
+  seconds: number;
 };
 
 export type RankingPosition = {

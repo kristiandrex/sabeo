@@ -16,13 +16,16 @@ export function DialogInstructions({ open, onOpenChange }: Props) {
         </Dialog.Title>
 
         <p className="mb-2">
+          Ahora habrá palabras de <strong>5 o 6 letras</strong> en el reto.
+        </p>
+
+        <p className="mb-2">
           <strong>Recibirás una notificación</strong> sorpresa para iniciar el
           reto diario.
         </p>
 
         <p className="mb-2">
-          Tendrás <strong>6 intentos</strong> para descubrir la palabra de{" "}
-          <strong>5 letras</strong>.
+          Tendrás <strong>6 intentos</strong> para descubrir la palabra.
         </p>
 
         <p className="mb-2">

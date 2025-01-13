@@ -12,7 +12,7 @@ import { DialogInstructions } from "./dialog-instructions";
 
 export function Header() {
   const [instructionsOpen, setInstructionsOpen] = useLocalStorage<boolean>(
-    "instructions",
+    "instructions-v2",
     true
   );
 
