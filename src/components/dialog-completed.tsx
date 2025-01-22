@@ -6,24 +6,33 @@ import { Challenge, Color } from "#/types";
 type Props = {
   challenge: Challenge;
   colors: Color[][];
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  defaultOpen: boolean;
 };
 
 export function DialogChallengeCompleted({
   challenge,
   colors,
-  open,
-  onOpenChange,
+  defaultOpen,
 }: Props) {
+  async function copyToClipboard() {
+    try {
+      const text = getTextToShare();
+      await navigator.clipboard.writeText(text);
+
+      toast.dismiss();
+      toast.success("Se copió tu resultado");
+    } catch (error) {
+      console.error(error);
+
+      toast.dismiss();
+      toast.error("No se pudo compartir el reto");
+    }
+  }
+
   async function share() {
     try {
       if (typeof navigator.share !== "function") {
-        const text = getTextToShare();
-        await navigator.clipboard.writeText(text);
-
-        toast.dismiss();
-        toast.success("Se copió tu resultado");
+        copyToClipboard();
         return;
       }
 
@@ -33,8 +42,7 @@ export function DialogChallengeCompleted({
       });
     } catch (error) {
       console.error(error);
-      toast.dismiss();
-      toast.error("No se pudo compartir el reto");
+      copyToClipboard();
     }
   }
 
@@ -55,7 +63,7 @@ export function DialogChallengeCompleted({
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root defaultOpen={defaultOpen}>
       <Dialog.Content maxWidth="450px" aria-describedby={undefined}>
         <Dialog.Title align={"center"} className="text-2xl mb-2">
           La palabra es: {challenge.word}

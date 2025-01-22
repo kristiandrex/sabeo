@@ -6,6 +6,7 @@ import {
   getLatestChallenge,
 } from "#/app/actions/challenge";
 import { Game } from "#/components/game";
+import { NUMBER_OF_ROWS } from "#/constants";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -28,6 +29,16 @@ export default async function PlayPage() {
   }
 
   const initialAttempts = await getAttemptsByPlayer(latestChallenge.id);
+  const challengeIsCompleted = initialAttempts.includes(latestChallenge.word);
+  const challengeIsFinished =
+    initialAttempts.length === NUMBER_OF_ROWS || challengeIsCompleted;
 
-  return <Game challenge={latestChallenge} initialAttempts={initialAttempts} />;
+  return (
+    <Game
+      challenge={latestChallenge}
+      initialAttempts={initialAttempts}
+      challengeIsFinished={challengeIsFinished}
+      onFinishChallenge={reload}
+    />
+  );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useOptimistic, useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
+import Confetti from "react-confetti";
 
-import { NUMBER_OF_ROWS } from "#/constants";
 import { Challenge } from "#/types";
 import { addAttempt, completeChallenge } from "#/app/actions/challenge";
 import { getColorsByAttempt } from "#/utils/challenge";
@@ -11,25 +11,29 @@ import { getColorsByAttempt } from "#/utils/challenge";
 import { Attempts } from "./attempts";
 import { Keyboard } from "./keyboard";
 import { DialogChallengeCompleted } from "./dialog-completed";
+import { useWindowSize } from "react-use";
+import { NUMBER_OF_ROWS } from "#/constants";
 
 function getAllAttemptsColors(attempts: string[], challenge: string) {
-  return attempts.map((attempt) =>
-    getColorsByAttempt({
-      attempt,
-      challenge,
-    })
-  );
+  return attempts.map((attempt) => getColorsByAttempt({ attempt, challenge }));
 }
 
 type Props = {
   challenge: Challenge;
   initialAttempts: string[];
+  challengeIsFinished: boolean;
+  onFinishChallenge: () => Promise<void>;
 };
 
-export function Game({ challenge, initialAttempts }: Props) {
+export function Game({
+  challenge,
+  initialAttempts,
+  challengeIsFinished,
+  onFinishChallenge,
+}: Props) {
   const [attempts, setAttempts] = useState(initialAttempts);
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
-  const [dialogIsOpened, setDialogIsOpened] = useState(false);
+  const [challengeIsCompleted, setChallengeIsCompleted] = useState(false);
 
   const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
     attempts,
@@ -42,56 +46,55 @@ export function Game({ challenge, initialAttempts }: Props) {
   );
 
   const [isPending, startTransition] = useTransition();
+  const { height, width } = useWindowSize();
 
   const colors = getAllAttemptsColors(optimisticAttempts, challenge.word);
-
-  const isChallengeCompleted =
-    (optimisticAttempts.length === NUMBER_OF_ROWS ||
-      optimisticAttempts.includes(challenge.word)) &&
-    !isPending;
 
   async function addAttemptAction(attempt: string) {
     toast.dismiss();
     toast.info("Guardando intento...");
 
-    startTransition(async () => {
+    startTransition(() => {
       addOptimisticAttempt(attempt);
       setOptimisticCurrent("");
+    });
 
-      if (attempt === challenge.word) {
-        const response = await completeChallenge();
+    const { success } = await addAttempt(attempt, challenge.id);
 
-        if (!response.success) {
-          toast.dismiss();
-          toast.error(response.error);
-          return;
-        }
+    if (!success) {
+      toast.dismiss();
+      toast.error("No se pudo guardar tu intento");
+      return;
+    }
 
+    toast.dismiss();
+
+    if (attempt !== challenge.word) {
+      toast.success("Intento guardado");
+    } else {
+      const response = await completeChallenge();
+
+      if (!response.success) {
         toast.dismiss();
-        toast.success("¡Muy bien, completaste el reto!");
-        setDialogIsOpened(true);
-      }
-
-      const { success } = await addAttempt(attempt, challenge.id);
-
-      if (!success) {
-        toast.dismiss();
-        toast.error("No se pudo guardar tu intento");
+        toast.error(response.error);
         return;
       }
 
-      toast.dismiss();
-      toast.success("Intento guardado");
+      setChallengeIsCompleted(true);
+    }
 
-      startTransition(() => {
-        setAttempts((value) => value.concat(attempt));
-        setCurrentAttempt("");
-      });
+    startTransition(() => {
+      setAttempts((value) => value.concat(attempt));
+      setCurrentAttempt("");
     });
+
+    if (attempt === challenge.word || attempts.length === NUMBER_OF_ROWS - 1) {
+      await onFinishChallenge();
+    }
   }
 
   function onKeyDown(key: string) {
-    if (isChallengeCompleted) {
+    if (challengeIsFinished || isPending) {
       return;
     }
 
@@ -110,7 +113,7 @@ export function Game({ challenge, initialAttempts }: Props) {
 
     if (key === "ENTER" && !wordIsCompleted) {
       toast.dismiss();
-      toast.error("El intento debe tener 5 letras");
+      toast.error("El intento debe tener 5 o 6 letras");
       return;
     }
 
@@ -119,20 +122,20 @@ export function Game({ challenge, initialAttempts }: Props) {
     }
   }
 
-  useEffect(
-    () => setDialogIsOpened(isChallengeCompleted),
-    [isChallengeCompleted]
-  );
-
   return (
     <main className="flex h-full flex-col items-center justify-between gap-4">
+      <Confetti
+        width={width}
+        height={height}
+        run={challengeIsCompleted}
+        recycle={false}
+      />
       <DialogChallengeCompleted
+        key={challengeIsFinished.toString()}
         challenge={challenge}
         colors={colors}
-        open={dialogIsOpened}
-        onOpenChange={setDialogIsOpened}
+        defaultOpen={challengeIsFinished}
       />
-
       <Attempts
         attempts={optimisticAttempts}
         currentAttempt={optimisticCurrent}
