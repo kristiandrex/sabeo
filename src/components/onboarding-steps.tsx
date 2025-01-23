@@ -6,29 +6,33 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { createClient } from "#/lib/supabase/client";
-import { cn } from "#/lib/utils";
 import { urlBase64ToUint8Array } from "#/utils/notifications";
-import { getSubscriptionByUser } from "#/app/actions/notifications";
 
-import { AndroidInstructions } from "./android-instructions";
-import { IOSInstructions } from "./ios-instructions";
 import { Loading } from "./loading";
+import { InstallInstructions } from "./install-instructions";
+import { EllipsisVerticalIcon, ShareIcon } from "lucide-react";
+import { OnboardingStepsLayout } from "./onboarding-steps-layout";
 
 type Props = {
   children: React.ReactNode;
 };
 
-export function OnboardingSteps({ children }: Props) {
-  const [subscription, setSubscription] = useState<PushSubscription | null>(
-    null
-  );
-  const [isIOS, setIsIOS] = useState(false);
-  const [isAndroid, setIsAndroid] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+// If value is `null`, it means that the client is not ready yet
+type UseDevice = {
+  isIOS: boolean;
+  isAndroid: boolean;
+  isStandalone: boolean;
+} | null;
 
-  const isMobile = isIOS || isAndroid;
+export function OnboardingSteps({ children }: Props) {
+  const [subscription, setSubscription] = useState<
+    PushSubscription | "loading" | "skipped" | null
+  >("loading");
+
+  const [device, setDevice] = useState<UseDevice>(null);
+  const [session, setSession] = useState<Session | "loading" | null>("loading");
+
+  const isMobile = device?.isIOS || device?.isAndroid;
   const numberOfSteps = isMobile ? 3 : 2;
 
   async function registerServiceWorker() {
@@ -38,18 +42,7 @@ export function OnboardingSteps({ children }: Props) {
     });
 
     const sub = await registration.pushManager.getSubscription();
-
-    if (!sub) {
-      return;
-    }
-
-    const { subscription: storedSubscription } = await getSubscriptionByUser(
-      sub.endpoint
-    );
-
-    if (storedSubscription) {
-      setSubscription(sub);
-    }
+    setSubscription(sub);
   }
 
   async function subscribeToPush() {
@@ -112,13 +105,12 @@ export function OnboardingSteps({ children }: Props) {
   }
 
   useEffect(() => {
-    setIsIOS(
-      /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
-    );
-
-    setIsAndroid(/Android/.test(navigator.userAgent));
-
-    setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
+    setDevice({
+      isIOS:
+        /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window),
+      isAndroid: /Android/.test(navigator.userAgent),
+      isStandalone: window.matchMedia("(display-mode: standalone)").matches,
+    });
 
     async function initialize() {
       try {
@@ -137,34 +129,34 @@ export function OnboardingSteps({ children }: Props) {
 
         supabase.auth.onAuthStateChange((_, _session) => {
           setSession(_session);
-          setLoading(false);
         });
       } catch (error) {
         console.error(error);
-      } finally {
-        setLoading(false);
       }
     }
 
     initialize();
   }, []);
 
-  if (loading) {
+  const isLoading =
+    session === "loading" || subscription === "loading" || !device;
+
+  if (isLoading) {
     return <Loading />;
   }
 
-  if (isIOS && !isStandalone) {
+  if (isMobile && !device.isStandalone) {
     return (
       <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={0}>
-        <IOSInstructions />
-      </OnboardingStepsLayout>
-    );
-  }
-
-  if (isAndroid && !isStandalone) {
-    return (
-      <OnboardingStepsLayout numberOfSteps={numberOfSteps} currentStep={0}>
-        <AndroidInstructions />
+        <InstallInstructions
+          icon={
+            device.isIOS ? (
+              <ShareIcon className="inline-block" />
+            ) : (
+              <EllipsisVerticalIcon className="inline-block" />
+            )
+          }
+        />
       </OnboardingStepsLayout>
     );
   }
@@ -201,53 +193,26 @@ export function OnboardingSteps({ children }: Props) {
           <p className="text-center text-pretty">
             Activa las notificaciones para avisarte cuando haya un nuevo reto
           </p>
-          <Button
-            className="bg-green-500 hover:bg-green-600"
-            onClick={subscribeToPush}
-          >
-            Activar notificaciones
-          </Button>
+
+          <div className="flex flex-col gap-2">
+            <Button
+              className="bg-green-500 hover:bg-green-600"
+              onClick={subscribeToPush}
+            >
+              Activar notificaciones
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => setSubscription("skipped")}
+            >
+              Omitir
+            </Button>
+          </div>
         </div>
       </OnboardingStepsLayout>
     );
   }
 
   return children;
-}
-
-function OnboardingStepsLayout(props: {
-  children: React.ReactNode;
-
-  /**
-   * The total number of steps
-   */
-  numberOfSteps: number;
-
-  /**
-   * The current step starting from 0
-   */
-  currentStep: number;
-}) {
-  const dots: React.ReactNode[] = [];
-
-  for (let i = 0; i < props.numberOfSteps; i++) {
-    dots.push(
-      <div
-        key={i}
-        className={cn(
-          "w-3 h-3 rounded-full bg-gray-300",
-          i === props.currentStep && "bg-gray-400"
-        )}
-      ></div>
-    );
-  }
-
-  return (
-    <div className="fixed top-0 left-0 h-svh w-screen bg-white grid place-items-center p-8">
-      <div className="grid grid-rows-[1fr_auto] h-full">
-        <div className="h-full grid place-items-center">{props.children}</div>
-        <div className="flex gap-2 justify-center items-center">{dots}</div>
-      </div>
-    </div>
-  );
 }
