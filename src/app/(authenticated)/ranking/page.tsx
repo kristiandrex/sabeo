@@ -1,96 +1,10 @@
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
-import { Table, Tabs, Text } from "@radix-ui/themes";
+import { Avatar, Table, Tabs, Text } from "@radix-ui/themes";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
-import { createServiceClient } from "#/lib/supabase/server";
-import {
-  ChallengeCompleted,
-  DailyChallengeCompleted,
-  RankingPosition,
-} from "#/types";
+import { getDailyRanking, getRanking } from "#/app/actions/ranking";
 
 dayjs.extend(duration);
-
-async function getDailyRanking() {
-  try {
-    const supabase = await createServiceClient();
-
-    const { data, error } = await supabase.auth.admin.listUsers();
-
-    if (error) {
-      throw error;
-    }
-
-    const dailyChallenges: PostgrestSingleResponse<DailyChallengeCompleted[]> =
-      await supabase.rpc("get_daily_ranking");
-
-    if (dailyChallenges.error) {
-      throw dailyChallenges.error;
-    }
-
-    const ranking: RankingPosition[] = [];
-
-    for (const challenge of dailyChallenges.data) {
-      const player = data.users.find((user) => user.id === challenge.player);
-
-      if (player) {
-        ranking.push({
-          id: player.id,
-          name: player.user_metadata.name,
-          picture: player.user_metadata.picture,
-          challenges: 1,
-          seconds: challenge.seconds,
-        });
-      }
-    }
-
-    return ranking;
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
-
-async function getRanking() {
-  try {
-    const supabase = await createServiceClient();
-
-    const { data, error } = await supabase.auth.admin.listUsers();
-
-    if (error) {
-      throw error;
-    }
-
-    const challengesCompleted: PostgrestSingleResponse<ChallengeCompleted[]> =
-      await supabase.rpc("get_challenges_completed");
-
-    if (challengesCompleted.error) {
-      throw challengesCompleted.error;
-    }
-
-    const ranking: RankingPosition[] = [];
-
-    for (const challenge of challengesCompleted.data) {
-      const player = data.users.find((user) => user.id === challenge.player);
-
-      if (player) {
-        ranking.push({
-          id: player.id,
-          name: player.user_metadata.name,
-          picture: player.user_metadata.picture,
-          challenges: challenge.total_challenges,
-          seconds: challenge.total_seconds,
-        });
-      }
-    }
-
-    return ranking;
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
 
 function formatSeconds(seconds: number) {
   return dayjs.duration(seconds, "seconds").format("HH:mm:ss");
@@ -128,13 +42,12 @@ export default async function RankingPage() {
                 <Table.Row key={position.id}>
                   <Table.RowHeaderCell>{index + 1}</Table.RowHeaderCell>
                   <Table.Cell className="flex gap-2 items-center">
-                    {
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={position.picture}
-                        className="h-6 w-6 bg-gray-500 rounded-full"
-                      />
-                    }
+                    <Avatar
+                      src={position.picture}
+                      fallback={position.name[0] ?? ""}
+                      size={"2"}
+                      radius="full"
+                    />
                     <Text>{position.name}</Text>
                   </Table.Cell>
                   <Table.Cell>{position.challenges}</Table.Cell>
@@ -159,13 +72,12 @@ export default async function RankingPage() {
                 <Table.Row key={position.id}>
                   <Table.RowHeaderCell>{index + 1}</Table.RowHeaderCell>
                   <Table.Cell className="flex gap-2 items-center">
-                    {
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={position.picture}
-                        className="h-6 w-6 bg-gray-500 rounded-full"
-                      />
-                    }
+                    <Avatar
+                      src={position.picture}
+                      fallback={position.name[0] ?? ""}
+                      size={"2"}
+                      radius="full"
+                    />
                     <Text>{position.name}</Text>
                   </Table.Cell>
                   <Table.Cell>{formatSeconds(position.seconds)}</Table.Cell>
