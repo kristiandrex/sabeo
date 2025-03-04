@@ -8,14 +8,14 @@ A word-guessing game inspired by Wordle with random notifications like BeReal. P
 
 ## Features
 
-✅ Random notifications (PWA)
-✅ Global and daily rankings
-✅ Daily challenges
-✅ Social authentication
-✅ Mobile-first design
-✅ Real-time updates
-✅ Push notifications
-⬜ Daily streak tracking (coming soon)
+- ✅ Random notifications (PWA)
+- ✅ Global and daily rankings
+- ✅ Daily challenges
+- ✅ Social authentication
+- ✅ Mobile-first design
+- ✅ Real-time updates
+- ✅ Push notifications
+- ⬜ Daily streak tracking (coming soon)
 
 ## Architecture
 
