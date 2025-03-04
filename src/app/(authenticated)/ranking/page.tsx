@@ -18,7 +18,14 @@ export default async function RankingPage() {
   const dailyRanking = await getDailyRanking();
 
   return (
-    <main>
+    <main
+      className="grow overflow-y-auto
+        [&::-webkit-scrollbar]:w-2
+      [&::-webkit-scrollbar-track]:bg-green-200/[.50]
+      [&::-webkit-scrollbar-thumb]:bg-green-700/[.87]
+      dark:[&::-webkit-scrollbar-track]:bg-green-800/[.50]
+      dark:[&::-webkit-scrollbar-thumb]:bg-green-700/[.87]"
+    >
       <h2 className="text-2xl font-semibold">Ranking</h2>
 
       <Tabs.Root defaultValue="general">
