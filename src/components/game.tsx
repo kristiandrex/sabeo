@@ -1,24 +1,26 @@
 "use client";
 
+import nspell from "nspell";
 import { useOptimistic, useState, useTransition } from "react";
-import { toast } from "sonner";
 import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
+import { toast } from "sonner";
 
-import { Challenge } from "#/types";
 import { addAttempt, completeChallenge } from "#/app/actions/challenge";
+import { NUMBER_OF_ROWS } from "#/constants";
+import { Challenge } from "#/types";
 import { getColorsByAttempt } from "#/utils/challenge";
 
 import { Attempts } from "./attempts";
-import { Keyboard } from "./keyboard";
 import { DialogChallengeCompleted } from "./dialog-completed";
-import { useWindowSize } from "react-use";
-import { NUMBER_OF_ROWS } from "#/constants";
+import { Keyboard } from "./keyboard";
 
 function getAllAttemptsColors(attempts: string[], challenge: string) {
   return attempts.map((attempt) => getColorsByAttempt({ attempt, challenge }));
 }
 
 type Props = {
+  dictionary: { aff: string; dic: string };
   challenge: Challenge;
   initialAttempts: string[];
   challengeIsFinished: boolean;
@@ -26,6 +28,7 @@ type Props = {
 };
 
 export function Game({
+  dictionary,
   challenge,
   initialAttempts,
   challengeIsFinished,
@@ -34,6 +37,13 @@ export function Game({
   const [attempts, setAttempts] = useState(initialAttempts);
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
   const [challengeIsCompleted, setChallengeIsCompleted] = useState(false);
+
+  const [spell] = useState(() =>
+    nspell(
+      Buffer.from(dictionary.aff, "base64"),
+      Buffer.from(dictionary.dic, "base64")
+    )
+  );
 
   const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
     attempts,
@@ -106,20 +116,29 @@ export function Game({
       setCurrentAttempt((value) => value.concat(key));
       return;
     }
+
     if (key === "BACKSPACE") {
       setCurrentAttempt((value) => value.slice(0, -1));
       return;
     }
 
-    if (key === "ENTER" && !wordIsCompleted) {
+    if (key !== "ENTER") {
+      return;
+    }
+
+    if (!wordIsCompleted) {
       toast.dismiss();
       toast.error("El intento debe tener 5 o 6 letras");
       return;
     }
 
-    if (key === "ENTER" && wordIsCompleted) {
-      addAttemptAction(optimisticCurrent);
+    if (!spell.correct(optimisticCurrent.toLowerCase())) {
+      toast.dismiss();
+      toast.error("Esta palabra no está en mi diccionario");
+      return;
     }
+
+    addAttemptAction(optimisticCurrent);
   }
 
   return (

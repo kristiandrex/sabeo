@@ -5,6 +5,7 @@ import {
   getAttemptsByPlayer,
   getLatestChallenge,
 } from "#/app/actions/challenge";
+import { getDictionary } from "#/app/actions/dictionary";
 import { Game } from "#/components/game";
 import { NUMBER_OF_ROWS } from "#/constants";
 
@@ -13,6 +14,7 @@ export const revalidate = 0;
 
 export default async function PlayPage() {
   const latestChallenge = await getLatestChallenge();
+  const dictionary = await getDictionary();
 
   async function reload() {
     "use server";
@@ -35,6 +37,7 @@ export default async function PlayPage() {
 
   return (
     <Game
+      dictionary={dictionary}
       challenge={latestChallenge}
       initialAttempts={initialAttempts}
       challengeIsFinished={challengeIsFinished}
