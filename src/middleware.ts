@@ -18,6 +18,6 @@ export const config = {
      * - /api/auth/callback (auth callback)
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw\\.js|api/auth/callback|api/start-challenge|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw\\.js|api/auth/callback|api/start-challenge|api/notify|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
