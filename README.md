@@ -73,3 +73,10 @@ sabeo/
 - Push notification encryption (VAPID)
 - Row Level Security
 - Custom authentication callbacks
+
+### Generating VAPID Keys
+
+Sabeo relies on VAPID for push notification encryption. Use the [web-push CLI](https://github.com/web-push-libs/web-push) to rotate the key pair:
+
+1. Run `pnpm dlx web-push generate-vapid-keys --json` from the project root to create a new public/private key pair.
+2. Copy the printed `publicKey` and `privateKey` values into `.env` as `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`.
