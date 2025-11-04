@@ -44,11 +44,15 @@ A word-guessing game inspired by Wordle with random notifications like BeReal. P
 
 ### Prerequisites
 
-```bash
-Node.js
-pnpm
-Supabase CLI
-```
+- `Node.js` (LTS version recommended; see the [Node.js download page](https://nodejs.org/en/download))
+- `pnpm`
+- `Supabase CLI` (installed via `pnpm` as a dev dependency; run CLI commands with `pnpx supabase` per the [Supabase local development guide](https://supabase.com/docs/guides/local-development))
+- `Docker Engine` or `Docker Desktop` (required for the Supabase local stack; see [Docker Engine install docs](https://docs.docker.com/engine/install/) and [Docker Desktop install docs, including Linux support](https://docs.docker.com/desktop/))
+- `mkcert` ([FiloSottile/mkcert](https://github.com/FiloSottile/mkcert))
+
+### Local HTTPS
+
+- Run `mkcert -install` once to trust the local certificate authority before using `next dev --experimental-https`.
 
 ### Project Structure
 
