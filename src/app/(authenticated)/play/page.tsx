@@ -1,13 +1,13 @@
 import { Button } from "@radix-ui/themes";
 import { revalidatePath } from "next/cache";
 
-import {
-  getAttemptsByPlayer,
-  getLatestChallenge,
-} from "#/app/actions/challenge";
 import { getDictionary } from "#/app/actions/dictionary";
 import { Game } from "#/components/game";
 import { NUMBER_OF_ROWS } from "#/constants";
+import {
+  getAttemptsByPlayer,
+  getLatestChallenge,
+} from "#/queries/challenge";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
