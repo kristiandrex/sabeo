@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --experimental-https",
-    "build": "next build --turbopack",
-    "start": "next start --turbopack",
+    "build": "next build",
+    "start": "next start",
     "lint": "eslint .",
     "extract-dictionary": "node scripts/extract-dictionary.js"
   },
@@ -47,7 +47,7 @@
     "typescript": "^5",
     "typescript-eslint": "^8.18.1"
   },
-  "packageManager": "pnpm@9.14.1+sha512.7f1de9cffea40ff4594c48a94776112a0db325e81fb18a9400362ff7b7247f4fbd76c3011611c9f8ac58743c3dc526017894e07948de9b72052f874ee2edfdcd",
+  "packageManager": "pnpm@10.20.0",
   "pnpm": {
     "overrides": {
       "@types/react": "19.2.2",
