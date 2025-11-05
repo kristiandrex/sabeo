@@ -4,6 +4,7 @@ import { Button } from "@radix-ui/themes";
 import type { Session } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { createClient } from "#/lib/supabase/client";
 import { urlBase64ToUint8Array } from "#/utils/notifications";
@@ -27,6 +28,7 @@ type UseDevice = {
 const NOTIFICATIONS_SKIP_KEY = "notifications-skip";
 
 export function OnboardingSteps({ children }: Props) {
+  const router = useRouter();
   const [subscription, setSubscription] = useState<
     PushSubscription | "loading" | "skipped" | null
   >("loading");
@@ -40,6 +42,7 @@ export function OnboardingSteps({ children }: Props) {
   function handleSkipNotifications() {
     localStorage.setItem(NOTIFICATIONS_SKIP_KEY, "true");
     setSubscription("skipped");
+    router.replace("/play");
   }
 
   async function registerServiceWorker() {
@@ -92,6 +95,7 @@ export function OnboardingSteps({ children }: Props) {
 
       localStorage.removeItem(NOTIFICATIONS_SKIP_KEY);
       setSubscription(sub);
+      router.replace("/play");
     } catch (error) {
       console.error(error);
       toast.error("No se pudo activar las notificaciones");
