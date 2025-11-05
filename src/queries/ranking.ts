@@ -1,12 +1,10 @@
-"use server";
-
 import { createServiceClient } from "#/lib/supabase/server";
-import {
+import type {
   DailyChallengeCompleted,
   RankingPosition,
   ChallengeCompleted,
 } from "#/types";
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export async function getDailyRanking() {
   try {
