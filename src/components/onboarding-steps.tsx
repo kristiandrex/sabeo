@@ -24,6 +24,8 @@ type UseDevice = {
   isStandalone: boolean;
 } | null;
 
+const NOTIFICATIONS_SKIP_KEY = "notifications-skip";
+
 export function OnboardingSteps({ children }: Props) {
   const [subscription, setSubscription] = useState<
     PushSubscription | "loading" | "skipped" | null
@@ -34,6 +36,11 @@ export function OnboardingSteps({ children }: Props) {
 
   const isMobile = device?.isIOS || device?.isAndroid;
   const numberOfSteps = isMobile ? 3 : 2;
+
+  function handleSkipNotifications() {
+    localStorage.setItem(NOTIFICATIONS_SKIP_KEY, "true");
+    setSubscription("skipped");
+  }
 
   async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -52,7 +59,7 @@ export function OnboardingSteps({ children }: Props) {
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
         ),
       });
 
@@ -83,6 +90,7 @@ export function OnboardingSteps({ children }: Props) {
         throw new Error(response.statusText);
       }
 
+      localStorage.removeItem(NOTIFICATIONS_SKIP_KEY);
       setSubscription(sub);
     } catch (error) {
       console.error(error);
@@ -105,6 +113,13 @@ export function OnboardingSteps({ children }: Props) {
   }
 
   useEffect(() => {
+    const hasSkippedNotifications =
+      localStorage.getItem(NOTIFICATIONS_SKIP_KEY) === "true";
+
+    if (hasSkippedNotifications) {
+      setSubscription("skipped");
+    }
+
     setDevice({
       isIOS:
         /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window),
@@ -114,7 +129,11 @@ export function OnboardingSteps({ children }: Props) {
 
     async function initialize() {
       try {
-        if ("serviceWorker" in navigator && "PushManager" in window) {
+        if (
+          !hasSkippedNotifications &&
+          "serviceWorker" in navigator &&
+          "PushManager" in window
+        ) {
           await registerServiceWorker();
         }
 
@@ -202,10 +221,7 @@ export function OnboardingSteps({ children }: Props) {
               Activar notificaciones
             </Button>
 
-            <Button
-              variant="outline"
-              onClick={() => setSubscription("skipped")}
-            >
+            <Button variant="outline" onClick={handleSkipNotifications}>
               Omitir
             </Button>
           </div>
