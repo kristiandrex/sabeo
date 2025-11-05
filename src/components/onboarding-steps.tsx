@@ -39,9 +39,49 @@ type UseDevice = {
 } | null;
 
 const NOTIFICATIONS_SKIP_KEY = "notifications-skip";
+const STANDALONE_MEDIA_QUERY = "(display-mode: standalone)";
+
+type DeviceState = NonNullable<UseDevice>;
+
+function isStandaloneMode(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const mediaQuery = window.matchMedia(STANDALONE_MEDIA_QUERY);
+
+  if (mediaQuery.matches) {
+    return true;
+  }
+
+  const navigatorStandalone = (
+    window.navigator as Navigator & { standalone?: boolean }
+  ).standalone;
+
+  return navigatorStandalone === true;
+}
+
+function detectDevice(): DeviceState {
+  if (typeof window === "undefined") {
+    return {
+      isIOS: false,
+      isAndroid: false,
+      isStandalone: false,
+    };
+  }
+
+  const userAgent = window.navigator.userAgent;
+
+  return {
+    isIOS: /iPad|iPhone|iPod/.test(userAgent) && !("MSStream" in window),
+    isAndroid: /Android/.test(userAgent),
+    isStandalone: isStandaloneMode(),
+  };
+}
 
 export function OnboardingSteps({ children }: Props) {
   const router = useRouter();
+
   const [subscription, setSubscription] = useState<
     PushSubscription | "loading" | "skipped" | null
   >("loading");
@@ -51,7 +91,7 @@ export function OnboardingSteps({ children }: Props) {
 
   const isMobile = device?.isIOS || device?.isAndroid;
 
-  function handleSkipNotifications() {
+  function onSkipNotifications() {
     setShowInstallInstructions(false);
     localStorage.setItem(NOTIFICATIONS_SKIP_KEY, "true");
     setSubscription("skipped");
@@ -68,12 +108,22 @@ export function OnboardingSteps({ children }: Props) {
     setSubscription(sub);
   }
 
-  async function subscribeToPush() {
+  async function subscribeToNotifications() {
     try {
-      if (device && isMobile && !device.isStandalone) {
+      const standalone = isStandaloneMode();
+
+      if (standalone) {
+        setDevice((prev) =>
+          prev ? { ...prev, isStandalone: true } : detectDevice(),
+        );
+      }
+
+      if (device && isMobile && !standalone) {
         setShowInstallInstructions(true);
         return;
       }
+
+      setShowInstallInstructions(false);
 
       const registration = await navigator.serviceWorker.ready;
 
@@ -142,12 +192,26 @@ export function OnboardingSteps({ children }: Props) {
       setSubscription("skipped");
     }
 
-    setDevice({
-      isIOS:
-        /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window),
-      isAndroid: /Android/.test(navigator.userAgent),
-      isStandalone: window.matchMedia("(display-mode: standalone)").matches,
-    });
+    const initialDevice = detectDevice();
+    setDevice(initialDevice);
+
+    const standaloneQuery = window.matchMedia(STANDALONE_MEDIA_QUERY);
+
+    function onDisplayModeChange(event: MediaQueryListEvent) {
+      const nextStandalone = event.matches || isStandaloneMode();
+
+      setDevice((prev) =>
+        prev
+          ? { ...prev, isStandalone: nextStandalone }
+          : { ...detectDevice(), isStandalone: nextStandalone },
+      );
+
+      if (nextStandalone) {
+        setShowInstallInstructions(false);
+      }
+    }
+
+    standaloneQuery.addEventListener("change", onDisplayModeChange);
 
     async function initialize() {
       try {
@@ -177,6 +241,10 @@ export function OnboardingSteps({ children }: Props) {
     }
 
     initialize();
+
+    return () => {
+      standaloneQuery.removeEventListener("change", onDisplayModeChange);
+    };
   }, []);
 
   const isLoading =
@@ -188,12 +256,12 @@ export function OnboardingSteps({ children }: Props) {
     return <Loading />;
   }
 
-  if (showInstallInstructions && device) {
+  if (showInstallInstructions && device && !device.isStandalone) {
     return (
       <OnboardingLayout>
         <InstallInstructions
           platform={device.isIOS ? "ios" : "android"}
-          onSkip={handleSkipNotifications}
+          onSkip={onSkipNotifications}
         />
       </OnboardingLayout>
     );
@@ -278,7 +346,7 @@ export function OnboardingSteps({ children }: Props) {
           <div className="flex w-full max-w-sm flex-col gap-2">
             <Button
               className="h-12 bg-green-500 text-base font-semibold hover:bg-green-600"
-              onClick={subscribeToPush}
+              onClick={subscribeToNotifications}
             >
               Activar notificaciones
             </Button>
@@ -286,7 +354,7 @@ export function OnboardingSteps({ children }: Props) {
             <Button
               variant="outline"
               className="h-12 text-base font-semibold"
-              onClick={handleSkipNotifications}
+              onClick={onSkipNotifications}
             >
               Continuar sin notificaciones
             </Button>

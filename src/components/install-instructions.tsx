@@ -26,7 +26,7 @@ const stepsByPlatform: Record<
     },
     {
       key: "ios-open-app",
-      text: "Abre Sabeo desde tu pantalla de inicio y vuelve para activar las notificaciones.",
+      text: "Abre Sabeo desde tu pantalla de inicio y vuelve a presionar 'Activar notificaciones'.",
     },
   ],
   android: [
@@ -41,7 +41,7 @@ const stepsByPlatform: Record<
     },
     {
       key: "android-open-app",
-      text: "Abre Sabeo desde tu pantalla de inicio y vuelve para activar las notificaciones.",
+      text: "Abre Sabeo desde tu pantalla de inicio y vuelve a presionar 'Activar notificaciones'.",
     },
   ],
 };
