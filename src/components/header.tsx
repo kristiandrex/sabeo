@@ -1,7 +1,12 @@
 "use client";
 
 import { Button } from "@radix-ui/themes";
-import { HelpCircleIcon, LogOutIcon, TrophyIcon } from "lucide-react";
+import {
+  HelpCircleIcon,
+  LogOutIcon,
+  SettingsIcon,
+  TrophyIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -13,7 +18,7 @@ import { DialogInstructions } from "./dialog-instructions";
 export function Header() {
   const [instructionsOpen, setInstructionsOpen] = useLocalStorage<boolean>(
     "instructions-v2",
-    true
+    true,
   );
 
   async function signOut() {
@@ -36,7 +41,12 @@ export function Header() {
           </Link>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" asChild>
+            <Link href="/settings" aria-label="Configuración">
+              <SettingsIcon />
+            </Link>
+          </Button>
           <Button variant="ghost" onClick={() => setInstructionsOpen(true)}>
             <HelpCircleIcon />
           </Button>
@@ -45,6 +55,7 @@ export function Header() {
               <TrophyIcon />
             </Link>
           </Button>
+          <div className="h-6 w-px bg-gray-300" />
           <Button variant="ghost" onClick={signOut}>
             <LogOutIcon />
           </Button>

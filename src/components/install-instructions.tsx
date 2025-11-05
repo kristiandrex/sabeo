@@ -4,6 +4,7 @@ import { EllipsisVerticalIcon, ShareIcon, SmartphoneIcon } from "lucide-react";
 type InstallInstructionsProps = {
   platform: "ios" | "android";
   onSkip: () => void;
+  skipLabel?: string;
 };
 
 const stepsByPlatform: Record<
@@ -49,6 +50,7 @@ const stepsByPlatform: Record<
 export function InstallInstructions({
   platform,
   onSkip,
+  skipLabel = "Continuar sin notificaciones",
 }: InstallInstructionsProps) {
   const steps = stepsByPlatform[platform];
 
@@ -102,7 +104,7 @@ export function InstallInstructions({
         className="h-12 w-full max-w-sm text-base font-semibold"
         onClick={onSkip}
       >
-        Continuar sin notificaciones
+        {skipLabel}
       </Button>
     </div>
   );

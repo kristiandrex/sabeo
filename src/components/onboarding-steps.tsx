@@ -7,7 +7,15 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "#/lib/supabase/client";
-import { urlBase64ToUint8Array } from "#/utils/notifications";
+import {
+  detectDevice,
+  getExistingSubscription,
+  isMobileDevice,
+  isStandaloneMode,
+  subscribePlayerToNotifications,
+  watchStandaloneMode,
+  type DeviceInfo,
+} from "#/utils/pwa";
 
 import { Loading } from "./loading";
 import { InstallInstructions } from "./install-instructions";
@@ -32,52 +40,9 @@ function OnboardingLayout({ children }: LayoutProps) {
 }
 
 // If value is `null`, it means that the client is not ready yet
-type UseDevice = {
-  isIOS: boolean;
-  isAndroid: boolean;
-  isStandalone: boolean;
-} | null;
+type UseDevice = DeviceInfo | null;
 
 const NOTIFICATIONS_SKIP_KEY = "notifications-skip";
-const STANDALONE_MEDIA_QUERY = "(display-mode: standalone)";
-
-type DeviceState = NonNullable<UseDevice>;
-
-function isStandaloneMode(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  const mediaQuery = window.matchMedia(STANDALONE_MEDIA_QUERY);
-
-  if (mediaQuery.matches) {
-    return true;
-  }
-
-  const navigatorStandalone = (
-    window.navigator as Navigator & { standalone?: boolean }
-  ).standalone;
-
-  return navigatorStandalone === true;
-}
-
-function detectDevice(): DeviceState {
-  if (typeof window === "undefined") {
-    return {
-      isIOS: false,
-      isAndroid: false,
-      isStandalone: false,
-    };
-  }
-
-  const userAgent = window.navigator.userAgent;
-
-  return {
-    isIOS: /iPad|iPhone|iPod/.test(userAgent) && !("MSStream" in window),
-    isAndroid: /Android/.test(userAgent),
-    isStandalone: isStandaloneMode(),
-  };
-}
 
 export function OnboardingSteps({ children }: Props) {
   const router = useRouter();
@@ -89,7 +54,7 @@ export function OnboardingSteps({ children }: Props) {
   const [session, setSession] = useState<Session | "loading" | null>("loading");
   const [showInstallInstructions, setShowInstallInstructions] = useState(false);
 
-  const isMobile = device?.isIOS || device?.isAndroid;
+  const isMobile = device ? isMobileDevice(device) : false;
 
   function onSkipNotifications() {
     setShowInstallInstructions(false);
@@ -99,12 +64,7 @@ export function OnboardingSteps({ children }: Props) {
   }
 
   async function registerServiceWorker() {
-    const registration = await navigator.serviceWorker.register("/sw.js", {
-      scope: "/",
-      updateViaCache: "none",
-    });
-
-    const sub = await registration.pushManager.getSubscription();
+    const sub = await getExistingSubscription();
     setSubscription(sub);
   }
 
@@ -125,15 +85,6 @@ export function OnboardingSteps({ children }: Props) {
 
       setShowInstallInstructions(false);
 
-      const registration = await navigator.serviceWorker.ready;
-
-      const sub = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-        ),
-      });
-
       const supabase = createClient();
 
       const {
@@ -144,22 +95,7 @@ export function OnboardingSteps({ children }: Props) {
         throw new Error("User not found");
       }
 
-      const json = sub.toJSON();
-
-      const response = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...json,
-          player: user.id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
+      const sub = await subscribePlayerToNotifications(user.id);
 
       localStorage.removeItem(NOTIFICATIONS_SKIP_KEY);
       setSubscription(sub);
@@ -195,11 +131,7 @@ export function OnboardingSteps({ children }: Props) {
     const initialDevice = detectDevice();
     setDevice(initialDevice);
 
-    const standaloneQuery = window.matchMedia(STANDALONE_MEDIA_QUERY);
-
-    function onDisplayModeChange(event: MediaQueryListEvent) {
-      const nextStandalone = event.matches || isStandaloneMode();
-
+    const unsubscribeStandalone = watchStandaloneMode((nextStandalone) => {
       setDevice((prev) =>
         prev
           ? { ...prev, isStandalone: nextStandalone }
@@ -209,9 +141,7 @@ export function OnboardingSteps({ children }: Props) {
       if (nextStandalone) {
         setShowInstallInstructions(false);
       }
-    }
-
-    standaloneQuery.addEventListener("change", onDisplayModeChange);
+    });
 
     async function initialize() {
       try {
@@ -243,7 +173,7 @@ export function OnboardingSteps({ children }: Props) {
     initialize();
 
     return () => {
-      standaloneQuery.removeEventListener("change", onDisplayModeChange);
+      unsubscribeStandalone();
     };
   }, []);
 

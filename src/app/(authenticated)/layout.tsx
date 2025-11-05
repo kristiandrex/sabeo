@@ -1,3 +1,7 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 import { Header } from "#/components/header";
 
 export default function AuthenticatedLayout({
@@ -5,9 +9,12 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isSettingsPage = pathname === "/settings";
+
   return (
     <>
-      <Header />
+      {!isSettingsPage && <Header />}
       {children}
     </>
   );
