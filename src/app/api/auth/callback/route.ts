@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
+import { GUEST_COOKIE } from "#/constants";
 import { createClient } from "#/lib/supabase/server";
-
-const GUEST_COOKIE = "guest-play";
 
 function sanitizePath(path?: string) {
   return path && path.startsWith("/") ? path : "/";

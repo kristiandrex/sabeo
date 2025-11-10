@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
-const GUEST_COOKIE = "guest-play";
+import { GUEST_COOKIE } from "#/constants";
 
 export async function setGuestMode() {
   const cookieStore = await cookies();

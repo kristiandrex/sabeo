@@ -1,15 +1,13 @@
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 import { getDictionary } from "#/app/actions/dictionary";
 import { Game } from "#/components/game";
 import { NotificationGate } from "#/components/notification-gate";
 import { Button } from "#/components/ui/button";
-import { NUMBER_OF_ROWS } from "#/constants";
+import { GUEST_COOKIE, NUMBER_OF_ROWS } from "#/constants";
 import { createClient } from "#/lib/supabase/server";
-import {
-  getAttemptsByPlayer,
-  getLatestChallenge,
-} from "#/queries/challenge";
+import { getAttemptsByPlayer, getLatestChallenge } from "#/queries/challenge";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,6 +17,11 @@ export default async function PlayPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const cookieStore = await cookies();
+
+  const hasGuestPreference = cookieStore.get(GUEST_COOKIE)?.value === "1";
+  const isGuest = !user && hasGuestPreference;
+
   const latestChallenge = await getLatestChallenge();
   const dictionary = await getDictionary();
 
@@ -49,6 +52,7 @@ export default async function PlayPage() {
         initialAttempts={initialAttempts}
         challengeIsFinished={challengeIsFinished}
         onFinishChallenge={reload}
+        isGuest={isGuest}
       />
     </NotificationGate>
   );

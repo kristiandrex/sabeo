@@ -34,7 +34,7 @@ export default function RootLayout({
           <div className="h-svh max-w-xl mx-auto p-2 sm:p-4 flex flex-col overflow-hidden gap-8">
             {children}
           </div>
-          <Toaster position="top-center" closeButton />
+          <Toaster position="top-center" closeButton visibleToasts={1} />
         </ThemeProvider>
       </body>
     </html>

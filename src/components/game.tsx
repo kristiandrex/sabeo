@@ -1,9 +1,7 @@
 "use client";
 
 import nspell from "nspell";
-import { useOptimistic, useState, useTransition } from "react";
-import Confetti from "react-confetti";
-import { useWindowSize } from "react-use";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { addAttempt, completeChallenge } from "#/app/actions/challenge";
@@ -19,12 +17,44 @@ function getAllAttemptsColors(attempts: string[], challenge: string) {
   return attempts.map((attempt) => getColorsByAttempt({ attempt, challenge }));
 }
 
+function readGuestAttempts(key: string, fallback: string[]) {
+  const rawValue = localStorage.getItem(key);
+
+  if (!rawValue) {
+    return fallback;
+  }
+
+  try {
+    const parsedValue = JSON.parse(rawValue);
+
+    if (!Array.isArray(parsedValue)) {
+      return fallback;
+    }
+
+    return parsedValue.filter(
+      (value): value is string => typeof value === "string",
+    );
+  } catch {
+    return fallback;
+  }
+}
+
+function writeGuestAttempts(key: string, attempts: string[]) {
+  try {
+    localStorage.setItem(key, JSON.stringify(attempts));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 type Props = {
   dictionary: { aff: string; dic: string };
   challenge: Challenge;
   initialAttempts: string[];
   challengeIsFinished: boolean;
   onFinishChallenge: () => Promise<void>;
+  isGuest: boolean;
 };
 
 export function Game({
@@ -33,11 +63,10 @@ export function Game({
   initialAttempts,
   challengeIsFinished,
   onFinishChallenge,
+  isGuest,
 }: Props) {
   const [attempts, setAttempts] = useState(initialAttempts);
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
-  const [challengeIsCompleted, setChallengeIsCompleted] = useState(false);
-
   const [spell] = useState(() =>
     nspell(
       Buffer.from(dictionary.aff, "base64"),
@@ -56,9 +85,16 @@ export function Game({
   );
 
   const [isPending, startTransition] = useTransition();
-  const { height, width } = useWindowSize();
 
   const colors = getAllAttemptsColors(optimisticAttempts, challenge.word);
+
+  const storageKey = `guest-attempts-${challenge.id}`;
+
+  const guestHasFinished =
+    isGuest &&
+    (attempts.includes(challenge.word) || attempts.length === NUMBER_OF_ROWS);
+
+  const challengeLocked = challengeIsFinished || guestHasFinished;
 
   async function addAttemptAction(attempt: string) {
     toast.dismiss();
@@ -68,6 +104,36 @@ export function Game({
       addOptimisticAttempt(attempt);
       setOptimisticCurrent("");
     });
+
+    if (isGuest) {
+      const updatedAttempts = attempts.concat(attempt);
+
+      if (!writeGuestAttempts(storageKey, updatedAttempts)) {
+        toast.dismiss();
+        toast.error("No se pudo guardar tu intento");
+        return;
+      }
+
+      toast.dismiss();
+
+      if (attempt !== challenge.word) {
+        toast.success("Intento guardado");
+      }
+
+      startTransition(() => {
+        setAttempts(updatedAttempts);
+        setCurrentAttempt("");
+      });
+
+      if (
+        attempt === challenge.word ||
+        attempts.length === NUMBER_OF_ROWS - 1
+      ) {
+        await onFinishChallenge();
+      }
+
+      return;
+    }
 
     const { success } = await addAttempt(attempt, challenge.id);
 
@@ -89,8 +155,6 @@ export function Game({
         toast.error(response.error);
         return;
       }
-
-      setChallengeIsCompleted(true);
     }
 
     startTransition(() => {
@@ -104,7 +168,7 @@ export function Game({
   }
 
   function onKeyDown(key: string) {
-    if (challengeIsFinished || isPending) {
+    if (challengeLocked || isPending) {
       return;
     }
 
@@ -141,19 +205,23 @@ export function Game({
     addAttemptAction(optimisticCurrent);
   }
 
+  useEffect(() => {
+    if (!isGuest) {
+      return;
+    }
+
+    startTransition(() => {
+      setAttempts(readGuestAttempts(storageKey, initialAttempts));
+    });
+  }, [initialAttempts, isGuest, storageKey, startTransition]);
+
   return (
     <main className="flex h-full flex-col items-center justify-between gap-4">
-      <Confetti
-        width={width}
-        height={height}
-        run={challengeIsCompleted}
-        recycle={false}
-      />
       <DialogChallengeCompleted
-        key={challengeIsFinished.toString()}
+        key={challengeLocked.toString()}
         challenge={challenge}
         colors={colors}
-        defaultOpen={challengeIsFinished}
+        defaultOpen={challengeLocked}
       />
       <Attempts
         attempts={optimisticAttempts}

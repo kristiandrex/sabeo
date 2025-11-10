@@ -1,10 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { GUEST_COOKIE } from "#/constants";
 import { createClient } from "#/lib/supabase/server";
 import { LoginScreen } from "#/components/login-screen";
-
-const GUEST_COOKIE = "guest-play";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
