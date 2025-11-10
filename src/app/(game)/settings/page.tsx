@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Switch } from "@radix-ui/themes";
 import { ArrowLeftIcon, BellIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { InstallInstructions } from "#/components/install-instructions";
+import { Switch } from "#/components/ui/switch";
 import { createClient } from "#/lib/supabase/client";
 import {
   detectDevice,
@@ -203,8 +203,7 @@ export default function SettingsRoute() {
               checked={status === "subscribed"}
               onCheckedChange={handleToggleChange}
               disabled={!canToggle || status === "processing"}
-              size="3"
-              highContrast
+              className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300"
             />
           </div>
 

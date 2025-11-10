@@ -1,8 +1,8 @@
-import { Button } from "@radix-ui/themes";
 import { useEffect } from "react";
 
 import { cn } from "#/lib/utils";
 import { getColorsByAttempt } from "#/utils/challenge";
+import { Button } from "#/components/ui/button";
 
 function getClassNamesByColor(color: string) {
   return {
@@ -95,10 +95,10 @@ function KeyboardRow({
     <Button
       key={key}
       className={cn(
-        "flex-auto p-2 sm:p-4 py-6 text-center bg-gray-400 hover:bg-gray-500 text-base",
+        "flex-auto rounded-lg border border-transparent bg-gray-400 py-4 text-center text-base font-semibold text-white transition-colors hover:bg-gray-500 sm:p-4 sm:py-5",
         colors[key]
       )}
-      color="gray"
+      variant="ghost"
       onClick={onClick(key)}
     >
       {key === "ENTER" ? "✓" : key === "BACKSPACE" ? "←" : key}

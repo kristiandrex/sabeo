@@ -1,9 +1,9 @@
-import { Button } from "@radix-ui/themes";
 import { revalidatePath } from "next/cache";
 
 import { getDictionary } from "#/app/actions/dictionary";
 import { Game } from "#/components/game";
 import { NotificationGate } from "#/components/notification-gate";
+import { Button } from "#/components/ui/button";
 import { NUMBER_OF_ROWS } from "#/constants";
 import { createClient } from "#/lib/supabase/server";
 import {

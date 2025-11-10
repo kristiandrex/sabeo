@@ -1,5 +1,5 @@
-import { Button } from "@radix-ui/themes";
 import { EllipsisVerticalIcon, ShareIcon, SmartphoneIcon } from "lucide-react";
+import { Button } from "#/components/ui/button";
 
 type InstallInstructionsProps = {
   platform: "ios" | "android";

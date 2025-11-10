@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@radix-ui/themes";
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { BellIcon } from "lucide-react";
 
 import { createClient } from "#/lib/supabase/client";
+import { Button } from "#/components/ui/button";
 import {
   detectDevice,
   getExistingSubscription,

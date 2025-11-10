@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@radix-ui/themes";
 import {
   HelpCircleIcon,
   LogInIcon,
@@ -13,6 +12,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
+import { Button } from "#/components/ui/button";
 import { createClient } from "#/lib/supabase/client";
 import { useLocalStorage } from "#/hooks/useLocalStorage";
 import { signInWithGoogle } from "#/utils/auth";
@@ -82,6 +82,8 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
   }
 
   const AuthIcon = hasSession ? LogOutIcon : LogInIcon;
+  const iconColorClass = "text-green-600";
+  const iconButtonClass = "text-green-600 hover:bg-green-50 hover:text-green-700";
   const authAriaLabel = hasSession ? "Cerrar sesión" : "Iniciar sesión";
   const authHandler = hasSession ? handleSignOut : handleSignIn;
   const authButtonDisabled = !hasSession && isSigningIn;
@@ -102,28 +104,45 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
 
         <div className="flex items-center gap-4">
           {hasSession && (
-            <Button variant="ghost" asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={iconButtonClass}
+              asChild
+            >
               <Link href="/settings" aria-label="Configuración">
-                <SettingsIcon />
+                <SettingsIcon className={iconColorClass} />
               </Link>
             </Button>
           )}
-          <Button variant="ghost" onClick={() => setInstructionsOpen(true)}>
-            <HelpCircleIcon />
+          <Button
+            variant="ghost"
+            size="icon"
+            className={iconButtonClass}
+            onClick={() => setInstructionsOpen(true)}
+          >
+            <HelpCircleIcon className={iconColorClass} />
           </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/ranking">
-              <TrophyIcon />
+          <Button
+            variant="ghost"
+            size="icon"
+            className={iconButtonClass}
+            asChild
+          >
+            <Link href="/ranking" aria-label="Ranking">
+              <TrophyIcon className={iconColorClass} />
             </Link>
           </Button>
           <div className="h-6 w-px bg-gray-300" />
           <Button
             variant="ghost"
+            size="icon"
             onClick={authHandler}
             disabled={authButtonDisabled}
             aria-label={authAriaLabel}
+            className={iconButtonClass}
           >
-            <AuthIcon />
+            <AuthIcon className={iconColorClass} />
           </Button>
         </div>
       </header>

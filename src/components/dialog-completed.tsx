@@ -1,7 +1,13 @@
-import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
 import { toast } from "sonner";
 
 import { Challenge, Color } from "#/types";
+import { Button } from "#/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "#/components/ui/dialog";
 
 type Props = {
   challenge: Challenge;
@@ -63,48 +69,68 @@ export function DialogChallengeCompleted({
   }
 
   return (
-    <Dialog.Root defaultOpen={defaultOpen}>
-      <Dialog.Content maxWidth="450px" aria-describedby={undefined}>
-        <Dialog.Title align={"center"} className="text-2xl mb-2">
-          La palabra es: {challenge.word}
-        </Dialog.Title>
+    <Dialog defaultOpen={defaultOpen}>
+      <DialogContent
+        className="max-w-md sm:max-w-lg"
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="text-center space-y-2">
+          <DialogTitle className="text-2xl">
+            La palabra es: {challenge.word}
+          </DialogTitle>
 
-        {challenge.description && (
-          <Text as="p" className="text-center text-balance">
-            {challenge.description}
-          </Text>
-        )}
+          {challenge.description && (
+            <p className="text-base text-muted-foreground text-balance">
+              {challenge.description}
+            </p>
+          )}
+        </DialogHeader>
 
-        <Flex direction="column" className="my-4">
+        <div className="my-4 space-y-2">
           {colors.map((row, index) => (
             <ColorSquaresRow key={index} colors={row} />
           ))}
-        </Flex>
+        </div>
 
-        <Flex justify={"center"}>
-          <Button className="bg-green-500 hover:bg-green-600" onClick={share}>
+        <div className="flex justify-center">
+          <Button
+            className="bg-green-500 text-base font-semibold hover:bg-green-600"
+            onClick={share}
+          >
             Compartir
           </Button>
-        </Flex>
-      </Dialog.Content>
-    </Dialog.Root>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 function ColorSquaresRow({ colors }: { colors: Color[] }) {
   return (
-    <Flex justify={"center"}>
-      {colors.map((color) => {
+    <div className="flex justify-center text-2xl">
+      {colors.map((color, index) => {
         if (color === "green") {
-          return "🟩";
+          return (
+            <span key={`${index}-green`} aria-hidden="true">
+              🟩
+            </span>
+          );
         }
 
         if (color === "yellow") {
-          return "🟨";
+          return (
+            <span key={`${index}-yellow`} aria-hidden="true">
+              🟨
+            </span>
+          );
         }
 
-        return "⬜";
+        return (
+          <span key={`${index}-gray`} aria-hidden="true">
+            ⬜
+          </span>
+        );
       })}
-    </Flex>
+    </div>
   );
 }

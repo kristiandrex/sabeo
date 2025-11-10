@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
-import { Theme } from "@radix-ui/themes";
 
-import "@radix-ui/themes/styles.css";
+import { ThemeProvider } from "#/components/theme-provider";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,15 +28,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body>
-        <Theme
-          accentColor="green"
-          className="h-svh p-2 sm:p-4 flex flex-col overflow-hidden gap-8 max-w-xl mx-auto"
-        >
-          {children}
-        </Theme>
-        <Toaster position="top-center" closeButton />
+    <html lang="es" suppressHydrationWarning>
+      <body className="bg-background text-foreground">
+        <ThemeProvider>
+          <div className="h-svh max-w-xl mx-auto p-2 sm:p-4 flex flex-col overflow-hidden gap-8">
+            {children}
+          </div>
+          <Toaster position="top-center" closeButton />
+        </ThemeProvider>
       </body>
     </html>
   );

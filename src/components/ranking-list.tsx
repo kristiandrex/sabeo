@@ -1,8 +1,12 @@
-import { Avatar } from "@radix-ui/themes";
 import type { ReactNode } from "react";
 
 import { cn } from "#/lib/utils";
 import { RankingPosition } from "#/types";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "#/components/ui/avatar";
 
 type RankingListProps = {
   positions: RankingPosition[];
@@ -57,13 +61,12 @@ export function RankingList({
                 {index + 1}
               </div>
 
-              <Avatar
-                src={position.picture}
-                fallback={position.name[0] ?? ""}
-                size="2"
-                radius="full"
-                className="h-8 w-8 flex-none sm:h-10 sm:w-10"
-              />
+              <Avatar className="h-8 w-8 flex-none sm:h-10 sm:w-10">
+                <AvatarImage src={position.picture} alt={position.name} />
+                <AvatarFallback>
+                  {position.name[0]?.toUpperCase() ?? ""}
+                </AvatarFallback>
+              </Avatar>
 
               <div className="flex min-w-0 items-center gap-1">
                 <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100 sm:text-base">

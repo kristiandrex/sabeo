@@ -1,10 +1,15 @@
-import { Tabs } from "@radix-ui/themes";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
 import { getDailyRanking, getRanking } from "#/queries/ranking";
 import { createClient } from "#/lib/supabase/server";
 import { RankingList } from "#/components/ranking-list";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "#/components/ui/tabs";
 
 dayjs.extend(duration);
 
@@ -38,40 +43,40 @@ export default async function RankingPage() {
           </h2>
         </header>
 
-        <Tabs.Root defaultValue="general">
-          <Tabs.List className="flex border-b border-zinc-200 text-sm font-medium text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-            <Tabs.Trigger
+        <Tabs defaultValue="general">
+          <TabsList className="flex border-b border-zinc-200 bg-transparent p-0 text-sm font-medium text-zinc-500 dark:border-zinc-700 dark:text-zinc-400 rounded-none">
+            <TabsTrigger
               value="general"
-              className="flex-1 border-b-2 border-transparent px-3 py-2 text-center transition-colors data-[state=active]:border-green-600 data-[state=active]:text-green-700 dark:data-[state=active]:border-green-500 dark:data-[state=active]:text-green-400"
+              className="flex-1 border-b-2 border-transparent px-3 py-2 text-center transition-colors rounded-none data-[state=active]:border-green-600 data-[state=active]:text-green-700 dark:data-[state=active]:border-green-500 dark:data-[state=active]:text-green-400"
             >
               General
-            </Tabs.Trigger>
-            <Tabs.Trigger
+            </TabsTrigger>
+            <TabsTrigger
               value="daily"
-              className="flex-1 border-b-2 border-transparent px-3 py-2 text-center transition-colors data-[state=active]:border-green-600 data-[state=active]:text-green-700 dark:data-[state=active]:border-green-500 dark:data-[state=active]:text-green-400"
+              className="flex-1 border-b-2 border-transparent px-3 py-2 text-center transition-colors rounded-none data-[state=active]:border-green-600 data-[state=active]:text-green-700 dark:data-[state=active]:border-green-500 dark:data-[state=active]:text-green-400"
             >
               Diario
-            </Tabs.Trigger>
-          </Tabs.List>
+            </TabsTrigger>
+          </TabsList>
 
-          <Tabs.Content value="general">
+          <TabsContent value="general">
             <RankingList
               positions={ranking}
               valueLabel="Retos"
               valueFormatter={(position) => position.challenges}
               currentUserId={currentUserId}
             />
-          </Tabs.Content>
+          </TabsContent>
 
-          <Tabs.Content value="daily">
+          <TabsContent value="daily">
             <RankingList
               positions={dailyRanking}
               valueLabel="Tiempo"
               valueFormatter={(position) => formatSeconds(position.seconds)}
               currentUserId={currentUserId}
             />
-          </Tabs.Content>
-        </Tabs.Root>
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );

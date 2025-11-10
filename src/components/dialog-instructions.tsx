@@ -1,6 +1,11 @@
 "use client";
 
-import { Dialog } from "@radix-ui/themes";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "#/components/ui/dialog";
 
 type Props = {
   open: boolean;
@@ -9,11 +14,14 @@ type Props = {
 
 export function DialogInstructions({ open, onOpenChange }: Props) {
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Content maxWidth="450px" aria-describedby={undefined}>
-        <Dialog.Title align={"center"} className="text-2xl mb-4">
-          Instrucciones
-        </Dialog.Title>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-md sm:max-w-lg"
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="text-center">
+          <DialogTitle className="mb-4 text-2xl">Instrucciones</DialogTitle>
+        </DialogHeader>
 
         <p className="mb-2">
           Ahora habrá palabras de <strong>5 o 6 letras</strong> en el reto.
@@ -73,7 +81,7 @@ export function DialogInstructions({ open, onOpenChange }: Props) {
             </span>
           </div>
         </div>
-      </Dialog.Content>
-    </Dialog.Root>
+      </DialogContent>
+    </Dialog>
   );
 }

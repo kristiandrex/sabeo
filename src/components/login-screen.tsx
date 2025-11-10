@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@radix-ui/themes";
 import { TrophyIcon } from "lucide-react";
 
 import { setGuestMode } from "#/app/actions/auth";
+import { Button } from "#/components/ui/button";
 import { signInWithGoogle } from "#/utils/auth";
 
 export function LoginScreen() {

@@ -41,18 +41,18 @@ export function Game({
   const [spell] = useState(() =>
     nspell(
       Buffer.from(dictionary.aff, "base64"),
-      Buffer.from(dictionary.dic, "base64")
-    )
+      Buffer.from(dictionary.dic, "base64"),
+    ),
   );
 
   const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
     attempts,
-    (currentAttempts, newAttempt: string) => currentAttempts.concat(newAttempt)
+    (currentAttempts, newAttempt: string) => currentAttempts.concat(newAttempt),
   );
 
   const [optimisticCurrent, setOptimisticCurrent] = useOptimistic(
     currentAttempt,
-    (currentAttempt, newAttempt: string) => newAttempt
+    (currentAttempt, newAttempt: string) => newAttempt,
   );
 
   const [isPending, startTransition] = useTransition();
