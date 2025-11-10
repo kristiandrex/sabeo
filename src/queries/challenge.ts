@@ -30,7 +30,7 @@ export async function getAttemptsByPlayer(challenge: number) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("User not authenticated");
+      return [];
     }
 
     const query = await supabase

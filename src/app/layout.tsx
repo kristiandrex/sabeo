@@ -5,8 +5,6 @@ import { Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import "./globals.css";
 
-import { OnboardingSteps } from "#/components/onboarding-steps";
-
 export const metadata: Metadata = {
   title: "Sabeo",
   description: "Descubre la palabra en el menor tiempo posible",
@@ -36,7 +34,7 @@ export default function RootLayout({
           accentColor="green"
           className="h-svh p-2 sm:p-4 flex flex-col overflow-hidden gap-8 max-w-xl mx-auto"
         >
-          <OnboardingSteps>{children}</OnboardingSteps>
+          {children}
         </Theme>
         <Toaster position="top-center" closeButton />
       </body>

@@ -3,7 +3,9 @@ import { revalidatePath } from "next/cache";
 
 import { getDictionary } from "#/app/actions/dictionary";
 import { Game } from "#/components/game";
+import { NotificationGate } from "#/components/notification-gate";
 import { NUMBER_OF_ROWS } from "#/constants";
+import { createClient } from "#/lib/supabase/server";
 import {
   getAttemptsByPlayer,
   getLatestChallenge,
@@ -13,6 +15,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function PlayPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const latestChallenge = await getLatestChallenge();
   const dictionary = await getDictionary();
 
@@ -36,12 +42,14 @@ export default async function PlayPage() {
     initialAttempts.length === NUMBER_OF_ROWS || challengeIsCompleted;
 
   return (
-    <Game
-      dictionary={dictionary}
-      challenge={latestChallenge}
-      initialAttempts={initialAttempts}
-      challengeIsFinished={challengeIsFinished}
-      onFinishChallenge={reload}
-    />
+    <NotificationGate isAuthenticated={Boolean(user)}>
+      <Game
+        dictionary={dictionary}
+        challenge={latestChallenge}
+        initialAttempts={initialAttempts}
+        challengeIsFinished={challengeIsFinished}
+        onFinishChallenge={reload}
+      />
+    </NotificationGate>
   );
 }
