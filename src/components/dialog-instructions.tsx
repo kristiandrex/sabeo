@@ -51,8 +51,8 @@ export function DialogInstructions({ open, onOpenChange }: Props) {
           <strong>Ejemplo:</strong>
 
           <p>
-            Si la palabra es <strong>"CASAS"</strong> y escribes{" "}
-            <strong>"SALSA"</strong> verás:
+            Si la palabra es <strong>&quot;CASAS&quot;</strong> y escribes{" "}
+            <strong>&quot;SALSA&quot;</strong> verás:
           </p>
 
           <div className="flex space-x-2 mt-2">
