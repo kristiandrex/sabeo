@@ -8,6 +8,7 @@ import {
   SettingsIcon,
   TrophyIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
@@ -96,9 +97,21 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
       />
 
       <header className="flex justify-between items-center gap-4 sm:gap-16 w-full">
-        <div>
-          <Link href="/play">
-            <h1 className="text-4xl font-bold">Sabeo</h1>
+        <div className="flex items-center">
+          <Link
+            href="/play"
+            aria-label="Ir al tablero principal"
+            className="inline-flex"
+          >
+            <Image
+              src="/icon-512x512.png"
+              alt="Sabeo"
+              width={64}
+              height={64}
+              priority
+              className="h-16 w-16"
+            />
+            <span className="sr-only">Sabeo</span>
           </Link>
         </div>
 

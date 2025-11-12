@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { TrophyIcon } from "lucide-react";
 
@@ -24,10 +25,16 @@ export function LoginScreen() {
       <div className="flex h-full w-full items-center justify-center">
         <div className="flex w-full max-w-sm flex-col items-center gap-10 text-center">
           <div className="flex flex-col items-center gap-4">
-            <h1 className="text-4xl font-semibold tracking-tight">
-              Bienvenido a Sabeo
-            </h1>
-            <p className="text-base text-gray-600 text-pretty">
+            <Image
+              src="/icon-512x512.png"
+              alt="Sabeo"
+              width={128}
+              height={128}
+              priority
+              className="h-32 w-32"
+            />
+            <h1 className="sr-only">Bienvenido a Sabeo</h1>
+            <p className="text-3xl font-semibold tracking-tight text-gray-900 text-balance">
               Descubre la palabra del día
             </p>
           </div>
