@@ -16,7 +16,7 @@ import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { Button } from "#/components/ui/button";
 import { createClient } from "#/lib/supabase/client";
 import { useLocalStorage } from "#/hooks/useLocalStorage";
-import { signInWithGoogle } from "#/utils/auth";
+import { signInWithGoogle } from "#/lib/auth";
 
 import { DialogInstructions } from "./dialog-instructions";
 

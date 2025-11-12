@@ -14,7 +14,7 @@ import {
   subscribePlayerToNotifications,
   watchStandaloneMode,
   type DeviceInfo,
-} from "#/utils/pwa";
+} from "#/lib/pwa";
 
 import { Loading } from "./loading";
 import { InstallInstructions } from "./install-instructions";

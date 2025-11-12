@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 import { cn } from "#/lib/utils";
-import { getColorsByAttempt } from "#/utils/challenge";
+import { getColorsByAttempt } from "#/lib/challenge";
 import { Button } from "#/components/ui/button";
 
 function getClassNamesByColor(color: string) {

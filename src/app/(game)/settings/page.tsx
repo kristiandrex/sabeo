@@ -16,7 +16,7 @@ import {
   unsubscribeFromNotifications,
   watchStandaloneMode,
   type DeviceInfo,
-} from "#/utils/pwa";
+} from "#/lib/pwa";
 
 type Status = "idle" | "subscribed" | "processing" | "unsupported";
 

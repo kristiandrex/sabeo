@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "#/components/ui/dialog";
+import { getAppBaseUrl } from "#/lib/env";
 
 type Props = {
   challenge: Challenge;
@@ -63,7 +64,7 @@ export function DialogChallengeCompleted({
       text += "\n";
     });
 
-    text += "Inténtalo en https://sabeo.vercel.app/";
+    text += `Inténtalo en ${getAppBaseUrl()}`;
 
     return text;
   }

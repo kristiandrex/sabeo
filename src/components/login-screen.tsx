@@ -6,7 +6,7 @@ import { ClockIcon, CloudIcon, TrophyIcon } from "lucide-react";
 
 import { setGuestMode } from "#/app/actions/auth";
 import { Button } from "#/components/ui/button";
-import { signInWithGoogle } from "#/utils/auth";
+import { signInWithGoogle } from "#/lib/auth";
 
 export function LoginScreen() {
   const [isSigningIn, setIsSigningIn] = useState(false);

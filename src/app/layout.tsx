@@ -2,19 +2,23 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "#/components/theme-provider";
+import { getServerAppBaseUrl } from "#/lib/env";
 
 import "./globals.css";
+
+const appBaseUrl = getServerAppBaseUrl();
 
 export const metadata: Metadata = {
   title: "Sabeo",
   description: "Descubre la palabra en el menor tiempo posible",
+  metadataBase: new URL(appBaseUrl),
   openGraph: {
     title: "Sabeo",
     description: "Descubre la palabra en el menor tiempo posible",
-    url: "https://sabeo.vercel.app/",
+    url: appBaseUrl,
     images: [
       {
-        url: "https://sabeo.vercel.app/icon-512x512.png",
+        url: "/icon-512x512.png",
         width: 512,
         height: 512,
       },

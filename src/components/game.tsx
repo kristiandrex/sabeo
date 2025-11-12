@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { addAttempt, completeChallenge } from "#/app/actions/challenge";
 import { NUMBER_OF_ROWS } from "#/constants";
 import { Challenge } from "#/types";
-import { getColorsByAttempt } from "#/utils/challenge";
+import { getColorsByAttempt } from "#/lib/challenge";
 
 import { Attempts } from "./attempts";
 import { DialogChallengeCompleted } from "./dialog-completed";
