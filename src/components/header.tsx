@@ -95,14 +95,14 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
         onOpenChange={setInstructionsOpen}
       />
 
-      <header className="flex justify-between items-center gap-16 w-full">
+      <header className="flex justify-between items-center gap-4 sm:gap-16 w-full">
         <div>
           <Link href="/play">
             <h1 className="text-4xl font-bold">Sabeo</h1>
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {hasSession && (
             <Button
               variant="ghost"
