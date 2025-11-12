@@ -21,7 +21,7 @@ export function LoginScreen() {
   }
 
   return (
-    <div className="fixed top-0 left-0 grid h-svh w-screen place-items-center bg-white p-8">
+    <div className="fixed top-0 left-0 grid h-svh w-screen place-items-center bg-background p-8">
       <div className="flex h-full w-full items-center justify-center">
         <div className="flex w-full max-w-sm flex-col items-center gap-10 text-center">
           <div className="flex flex-col items-center gap-4">
@@ -34,19 +34,21 @@ export function LoginScreen() {
               className="h-32 w-32"
             />
             <h1 className="sr-only">Bienvenido a Sabeo</h1>
-            <p className="text-3xl font-semibold tracking-tight text-gray-900 text-balance">
+            <p className="text-3xl font-semibold tracking-tight text-gray-900 text-balance dark:text-white">
               Descubre la palabra del día
             </p>
           </div>
 
-          <div className="w-full rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_18px_40px_rgba(24,94,32,0.08)]">
+          <div className="w-full rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_18px_40px_rgba(24,94,32,0.08)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-green-600 shadow-inner">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
                 <TrophyIcon className="h-6 w-6" strokeWidth={2.5} />
               </div>
               <div className="flex-1 text-left">
-                <h2 className="text-lg font-semibold">Compite en el ranking</h2>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Compite en el ranking
+                </h2>
+                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
                   Participa en la clasificación diaria y general
                 </p>
               </div>
