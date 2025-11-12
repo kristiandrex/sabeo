@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { TrophyIcon } from "lucide-react";
+import { ClockIcon, CloudIcon, TrophyIcon } from "lucide-react";
 
 import { setGuestMode } from "#/app/actions/auth";
 import { Button } from "#/components/ui/button";
@@ -21,10 +21,10 @@ export function LoginScreen() {
   }
 
   return (
-    <div className="fixed top-0 left-0 grid h-svh w-screen place-items-center bg-background p-8">
+    <div className="fixed top-0 left-0 grid h-svh w-screen place-items-center bg-background p-4 sm:p-8">
       <div className="flex h-full w-full items-center justify-center">
-        <div className="flex w-full max-w-sm flex-col items-center gap-10 text-center">
-          <div className="flex flex-col items-center gap-4">
+        <div className="flex w-full max-w-sm flex-col items-center gap-6 text-center">
+          <div className="flex flex-col items-center gap-3">
             <Image
               src="/icon-512x512.png"
               alt="Sabeo"
@@ -39,25 +39,44 @@ export function LoginScreen() {
             </p>
           </div>
 
-          <div className="w-full rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_18px_40px_rgba(24,94,32,0.08)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
-                <TrophyIcon className="h-6 w-6" strokeWidth={2.5} />
-              </div>
-              <div className="flex-1 text-left">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Compite en el ranking
+          <div className="grid w-full gap-2">
+            <div className="rounded-xl border border-gray-200 bg-white p-3 text-left shadow-[0_8px_18px_rgba(24,94,32,0.05)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
+                  <ClockIcon className="h-4 w-4" strokeWidth={2.5} />
+                </div>
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Reto sorpresa diario
                 </h2>
-                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-                  Participa en la clasificación diaria y general
-                </p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-white p-3 text-left shadow-[0_8px_18px_rgba(24,94,32,0.05)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
+                  <TrophyIcon className="h-4 w-4" strokeWidth={2.5} />
+                </div>
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Sube al ranking
+                </h2>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-white p-3 text-left shadow-[0_8px_18px_rgba(24,94,32,0.05)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
+                  <CloudIcon className="h-4 w-4" strokeWidth={2.5} />
+                </div>
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Inicia sesión y guarda tu progreso
+                </h2>
               </div>
             </div>
           </div>
 
-          <div className="flex w-full flex-col items-center gap-4">
+          <div className="flex w-full flex-col items-center gap-3">
             <Button
-              className="h-12 w-full bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+              className="h-11 w-full bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
               onClick={handleGoogleSignIn}
               disabled={isSigningIn}
             >
@@ -85,7 +104,7 @@ export function LoginScreen() {
             <form action={setGuestMode} className="w-full">
               <Button
                 variant="outline"
-                className="h-12 w-full text-base font-semibold"
+                className="h-11 w-full text-base font-semibold"
                 type="submit"
                 disabled={isSigningIn}
               >
