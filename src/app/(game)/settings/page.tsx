@@ -167,12 +167,12 @@ export default function SettingsRoute() {
   }
 
   return (
-    <div className="flex w-full justify-center px-4 pb-16 pt-10">
-      <div className="flex w-full max-w-3xl flex-col gap-10">
-        <header className="flex w-full items-center justify-between">
+    <div className="flex w-full justify-center bg-background px-4 pb-16 pt-10">
+      <div className="flex w-full max-w-3xl flex-col gap-8">
+        <header className="flex w-full items-center justify-between text-gray-900 dark:text-white">
           <button
             onClick={() => router.back()}
-            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-white/10"
             aria-label="Volver"
           >
             <ArrowLeftIcon className="h-6 w-6" />
@@ -181,40 +181,42 @@ export default function SettingsRoute() {
           <div className="w-10" />
         </header>
 
-        <section className="flex flex-col gap-4">
+        <section className="flex flex-col gap-4 text-gray-900 dark:text-white">
           <h2 className="text-xl font-semibold">Notificaciones</h2>
 
-          <div className="flex flex-col gap-4 rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_10px_30px_rgba(24,94,32,0.06)] sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-            <div className="flex flex-1 items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-green-600 shadow-inner">
-                <BellIcon className="h-6 w-6" />
+          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-[0_12px_24px_rgba(24,94,32,0.05)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_12px_24px_rgba(0,0,0,0.35)]">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+              <div className="flex flex-1 items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
+                  <BellIcon className="h-5 w-5" />
+                </div>
+                <div className="flex flex-col gap-1 text-left">
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">
+                    Alertas de nuevos retos
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Recibe notificaciones cuando haya un nuevo reto disponible
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <p className="text-base font-semibold">
-                  Alertas de nuevos retos
-                </p>
-                <p className="text-sm text-gray-600">
-                  Recibe notificaciones cuando haya un nuevo reto disponible
-                </p>
-              </div>
-            </div>
 
-            <Switch
-              checked={status === "subscribed"}
-              onCheckedChange={handleToggleChange}
-              disabled={!canToggle || status === "processing"}
-              className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300"
-            />
+              <Switch
+                checked={status === "subscribed"}
+                onCheckedChange={handleToggleChange}
+                disabled={!canToggle || status === "processing"}
+                className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 dark:data-[state=unchecked]:bg-gray-600"
+              />
+            </div>
           </div>
 
           {status === "unsupported" && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Las notificaciones no están disponibles en este navegador.
             </p>
           )}
 
           {permission === "denied" && status !== "unsupported" && (
-            <p className="text-sm text-yellow-700">
+            <p className="text-sm text-yellow-700 dark:text-yellow-200">
               Las notificaciones están bloqueadas. Actívalas en la configuración
               de tu navegador.
             </p>

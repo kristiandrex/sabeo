@@ -104,7 +104,7 @@ export function LoginScreen() {
             <form action={setGuestMode} className="w-full">
               <Button
                 variant="outline"
-                className="h-11 w-full text-base font-semibold"
+                className="h-11 w-full border border-gray-200 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
                 type="submit"
                 disabled={isSigningIn}
               >

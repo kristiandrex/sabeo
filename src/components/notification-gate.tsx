@@ -30,7 +30,7 @@ type LayoutProps = {
 
 function OnboardingLayout({ children }: LayoutProps) {
   return (
-    <div className="fixed top-0 left-0 grid h-svh w-screen place-items-center bg-white p-8">
+    <div className="fixed top-0 left-0 grid h-svh w-screen place-items-center bg-background p-4 text-gray-900 dark:bg-slate-950 dark:text-white sm:p-8">
       <div className="flex h-full w-full items-center justify-center">
         {children}
       </div>
@@ -188,14 +188,14 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
       <OnboardingLayout>
         <div className="flex w-full max-w-md flex-col items-center gap-8 text-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-green-100 text-green-600">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-green-100 text-green-600 dark:bg-green-950/30 dark:text-green-300">
               <BellIcon className="h-10 w-10" />
             </div>
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-semibold">
+              <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
                 Activa las notificaciones
               </h1>
-              <p className="text-gray-600 text-pretty">
+              <p className="text-pretty text-gray-600 dark:text-gray-300">
                 Recibe alertas cuando haya un nuevo desafío disponible
               </p>
             </div>
@@ -203,7 +203,7 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
 
           <div className="flex w-full max-w-sm flex-col gap-2">
             <Button
-              className="h-12 bg-green-500 text-base font-semibold hover:bg-green-600"
+              className="h-12 bg-green-500 text-base font-semibold text-white hover:bg-green-600"
               onClick={subscribeToNotifications}
             >
               Activar notificaciones
@@ -211,7 +211,7 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
 
             <Button
               variant="outline"
-              className="h-12 text-base font-semibold"
+              className="h-12 border border-gray-200 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
               onClick={onSkipNotifications}
             >
               Continuar sin notificaciones

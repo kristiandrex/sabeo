@@ -101,7 +101,7 @@ export function InstallInstructions({
 
       <Button
         variant="outline"
-        className="h-12 w-full max-w-sm text-base font-semibold"
+        className="h-12 w-full max-w-sm border border-gray-200 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
         onClick={onSkip}
       >
         {skipLabel}
