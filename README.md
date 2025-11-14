@@ -44,11 +44,11 @@ A word-guessing game inspired by Wordle with random notifications like BeReal. P
 
 ### Prerequisites
 
-- `Node.js` (LTS version recommended; see the [Node.js download page](https://nodejs.org/en/download))
-- `pnpm`
-- `Supabase CLI` (installed via `pnpm` as a dev dependency; run CLI commands with `pnpx supabase` per the [Supabase local development guide](https://supabase.com/docs/guides/local-development))
+- `Bun` ([Bun docs](https://bun.com/docs))
+- `Supabase CLI` (installed as a dev dependency; run CLI commands with `bunx supabase` per the [Supabase local development guide](https://supabase.com/docs/guides/local-development))
 - `Docker Engine` or `Docker Desktop` (required for the Supabase local stack; see [Docker Engine install docs](https://docs.docker.com/engine/install/) and [Docker Desktop install docs, including Linux support](https://docs.docker.com/desktop/))
 - `mkcert` ([FiloSottile/mkcert](https://github.com/FiloSottile/mkcert))
+- `hunspell` ([Hunspell project](https://github.com/hunspell/hunspell))
 
 ### Local HTTPS
 
@@ -78,5 +78,5 @@ sabeo/
 
 Sabeo relies on VAPID for push notification encryption. Use the [web-push CLI](https://github.com/web-push-libs/web-push) to rotate the key pair:
 
-1. Run `pnpm dlx web-push generate-vapid-keys --json` from the project root to create a new public/private key pair.
+1. Run `bunx web-push generate-vapid-keys --json` from the project root to create a new public/private key pair.
 2. Copy the printed `publicKey` and `privateKey` values into `.env` as `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`.
