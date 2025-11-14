@@ -62,7 +62,7 @@ const keyboardRows: KeyboardRowConfig[] = [
   {
     id: "row-1",
     className: "flex w-full justify-center gap-1 px-3 sm:gap-1.5 sm:px-4",
-    keys: ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+    keys: ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ñ"],
   },
   {
     id: "row-2",

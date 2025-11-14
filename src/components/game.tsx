@@ -1,7 +1,12 @@
 "use client";
 
-import nspell from "nspell";
-import { useEffect, useOptimistic, useState, useTransition } from "react";
+import {
+  useEffect,
+  useMemo,
+  useOptimistic,
+  useState,
+  useTransition,
+} from "react";
 import { toast } from "sonner";
 
 import { addAttempt, completeChallenge } from "#/app/actions/challenge";
@@ -49,7 +54,7 @@ function writeGuestAttempts(key: string, attempts: string[]) {
 }
 
 type Props = {
-  dictionary: { aff: string; dic: string };
+  dictionary: string[];
   challenge: Challenge;
   initialAttempts: string[];
   challengeIsFinished: boolean;
@@ -67,12 +72,7 @@ export function Game({
 }: Props) {
   const [attempts, setAttempts] = useState(initialAttempts);
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
-  const [spell] = useState(() =>
-    nspell(
-      Buffer.from(dictionary.aff, "base64"),
-      Buffer.from(dictionary.dic, "base64"),
-    ),
-  );
+  const dictionarySet = useMemo(() => new Set(dictionary), [dictionary]);
 
   const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
     attempts,
@@ -172,7 +172,7 @@ export function Game({
       return;
     }
 
-    const isLetter = /^[A-Z]$/.test(key);
+    const isLetter = /^[A-ZÑ]$/.test(key);
 
     const wordIsCompleted = optimisticCurrent.length === challenge.word.length;
 
@@ -196,7 +196,7 @@ export function Game({
       return;
     }
 
-    if (!spell.correct(optimisticCurrent.toLowerCase())) {
+    if (!dictionarySet.has(optimisticCurrent.toLowerCase())) {
       toast.dismiss();
       toast.error("Esta palabra no está en mi diccionario");
       return;

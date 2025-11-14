@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "extract-dictionary": "node scripts/extract-dictionary.js"
+    "process-dictionary": "bun scripts/process-dictionary.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
@@ -27,7 +27,6 @@
     "lucide-react": "^0.468.0",
     "next": "16.0.1",
     "next-themes": "^0.4.3",
-    "nspell": "^2.1.5",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "sonner": "^1.7.0",
@@ -38,7 +37,6 @@
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/node": "^20.17.8",
-    "@types/nspell": "^2.1.6",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "@types/web-push": "^3.6.4",
