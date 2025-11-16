@@ -39,10 +39,49 @@ export default async function PlayPage() {
     );
   }
 
+  const shouldRegisterChallengeOpen = Boolean(user) && !isGuest;
+
+  if (shouldRegisterChallengeOpen) {
+    try {
+      const { error } = await supabase.rpc("register_challenge_open", {
+        p_player: user!.id,
+        p_challenge: latestChallenge.id,
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error("Error calling register_challenge_open", error);
+    }
+  }
+
   const initialAttempts = await getAttemptsByPlayer(latestChallenge.id);
   const challengeIsCompleted = initialAttempts.includes(latestChallenge.word);
   const challengeIsFinished =
     initialAttempts.length === NUMBER_OF_ROWS || challengeIsCompleted;
+
+  let initialBonusSnapshot: {
+    seasonPoints: number;
+    currentStreak: number;
+    fastBonusAwarded: boolean;
+  } | null = null;
+
+  if (user && !isGuest && challengeIsFinished) {
+    const { data: seasonRow } = await supabase
+      .from("season_scores")
+      .select("season_points, current_streak, fast_bonus_awarded")
+      .eq("player", user.id)
+      .single();
+
+    if (seasonRow) {
+      initialBonusSnapshot = {
+        seasonPoints: seasonRow.season_points,
+        currentStreak: seasonRow.current_streak,
+        fastBonusAwarded: seasonRow.fast_bonus_awarded,
+      };
+    }
+  }
 
   return (
     <NotificationGate isAuthenticated={Boolean(user)}>
@@ -53,6 +92,7 @@ export default async function PlayPage() {
         challengeIsFinished={challengeIsFinished}
         onFinishChallenge={reload}
         isGuest={isGuest}
+        initialBonusSnapshot={initialBonusSnapshot}
       />
     </NotificationGate>
   );

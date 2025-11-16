@@ -44,7 +44,13 @@ export async function addAttempt(attempt: string, challenge: number) {
 }
 
 export async function completeChallenge(): Promise<
-  { success: true } | { success: false; error: string }
+  | {
+      success: true;
+      seasonPoints: number;
+      currentStreak: number;
+      fastBonusAwarded: boolean;
+    }
+  | { success: false; error: string }
 > {
   try {
     const supabase = await createClient();
@@ -82,7 +88,22 @@ export async function completeChallenge(): Promise<
       throw error;
     }
 
-    return { success: true };
+    const { data: seasonRow, error: seasonError } = await supabase
+      .from("season_scores")
+      .select("season_points, current_streak, fast_bonus_awarded")
+      .eq("player", data.user.id)
+      .single();
+
+    if (seasonError) {
+      throw seasonError;
+    }
+
+    return {
+      success: true,
+      seasonPoints: seasonRow.season_points,
+      currentStreak: seasonRow.current_streak,
+      fastBonusAwarded: seasonRow.fast_bonus_awarded,
+    };
   } catch (error) {
     console.error(error);
 

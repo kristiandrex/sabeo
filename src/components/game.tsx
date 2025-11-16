@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 import { addAttempt, completeChallenge } from "#/app/actions/challenge";
 import { NUMBER_OF_ROWS } from "#/constants";
-import { Challenge } from "#/types";
+import { Challenge } from "#/types/challenge";
 import { getColorsByAttempt } from "#/lib/challenge";
 
 import { Attempts } from "./attempts";
@@ -60,6 +60,13 @@ type Props = {
   challengeIsFinished: boolean;
   onFinishChallenge: () => Promise<void>;
   isGuest: boolean;
+  initialBonusSnapshot?: BonusSnapshot | null;
+};
+
+type BonusSnapshot = {
+  seasonPoints: number;
+  currentStreak: number;
+  fastBonusAwarded: boolean;
 };
 
 export function Game({
@@ -69,9 +76,13 @@ export function Game({
   challengeIsFinished,
   onFinishChallenge,
   isGuest,
+  initialBonusSnapshot = null,
 }: Props) {
   const [attempts, setAttempts] = useState(initialAttempts);
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
+  const [bonusSnapshot, setBonusSnapshot] = useState<BonusSnapshot | null>(
+    initialBonusSnapshot,
+  );
   const dictionarySet = useMemo(() => new Set(dictionary), [dictionary]);
 
   const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
@@ -155,6 +166,12 @@ export function Game({
         toast.error(response.error);
         return;
       }
+
+      setBonusSnapshot({
+        seasonPoints: response.seasonPoints,
+        currentStreak: response.currentStreak,
+        fastBonusAwarded: response.fastBonusAwarded,
+      });
     }
 
     startTransition(() => {
@@ -222,6 +239,9 @@ export function Game({
         challenge={challenge}
         colors={colors}
         defaultOpen={challengeLocked}
+        seasonPoints={bonusSnapshot?.seasonPoints}
+        currentStreak={bonusSnapshot?.currentStreak}
+        fastBonusAwarded={bonusSnapshot?.fastBonusAwarded}
       />
       <Attempts
         attempts={optimisticAttempts}

@@ -1,13 +1,3 @@
-export type Challenge = {
-  id: number;
-  word: string;
-  description: string;
-  started_at: Date;
-  created_at: Date;
-};
-
-export type Color = "green" | "yellow" | "gray";
-
 export type ChallengeCompleted = {
   player: string;
   /**
@@ -26,10 +16,25 @@ export type DailyChallengeCompleted = {
   seconds: number;
 };
 
-export type RankingPosition = {
+export type SeasonRankingRow = {
+  player: string;
+  season_points: number;
+  current_streak: number;
+  fast_bonus_awarded: boolean;
+  missed_in_a_row: number;
+};
+
+export type SeasonRankingPosition = {
   id: string;
   name: string;
   picture: string;
-  challenges: number;
+  seasonPoints: number;
+  currentStreak: number;
+};
+
+export type DailyRankingPosition = {
+  id: string;
+  name: string;
+  picture: string;
   seconds: number;
 };

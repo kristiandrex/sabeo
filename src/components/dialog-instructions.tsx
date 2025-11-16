@@ -16,67 +16,80 @@ export function DialogInstructions({ open, onOpenChange }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-md sm:max-w-lg"
+        className="max-w-md space-y-3 p-4 text-sm leading-relaxed sm:max-w-lg sm:p-6"
         aria-describedby={undefined}
       >
         <DialogHeader className="text-center">
-          <DialogTitle className="mb-4 text-2xl">Instrucciones</DialogTitle>
+          <DialogTitle className="text-lg font-semibold sm:text-2xl">
+            Instrucciones
+          </DialogTitle>
         </DialogHeader>
 
-        <p className="mb-2">
-          Ahora habrá palabras de <strong>5 o 6 letras</strong> en el reto.
-        </p>
+        <div className="space-y-1.5 text-left text-muted-foreground sm:text-base">
+          <p>
+            Cada reto usa palabras de <strong>5 letras</strong>.
+          </p>
+          <p>
+            <strong>Recibirás una notificación</strong> sorpresa para iniciar el
+            reto diario.
+          </p>
+          <p>
+            Tendrás <strong>6 intentos</strong> para descubrirla.
+          </p>
+          <p>Después de cada intento verás los siguientes colores:</p>
+        </div>
 
-        <p className="mb-2">
-          <strong>Recibirás una notificación</strong> sorpresa para iniciar el
-          reto diario.
-        </p>
-
-        <p className="mb-2">
-          Tendrás <strong>6 intentos</strong> para descubrir la palabra.
-        </p>
-
-        <p className="mb-2">
-          Después de cada intento verás los siguientes colores:
-        </p>
-
-        <ul className="mb-4 space-y-1">
+        <ul className="space-y-1 text-left text-muted-foreground sm:text-base">
           <li>
-            <span className="font-bold text-green-600">Verde:</span> Si la letra
-            es correcta y está bien ubicada.
+            <span className="font-semibold text-emerald-600">
+              Verde:
+            </span>{" "}
+            La letra es correcta y está bien ubicada.
           </li>
           <li>
-            <span className="font-bold text-yellow-600">Amarillo:</span> Si la
-            letra es correcta pero está en otra posición.
+            <span className="font-semibold text-amber-600">
+              Amarillo:
+            </span>{" "}
+            La letra es correcta pero está en otra posición.
           </li>
           <li>
-            <span className="font-bold text-gray-600">Gris:</span> Si la letra
-            no está en la palabra.
+            <span className="font-semibold text-zinc-600">
+              Gris:
+            </span>{" "}
+            La letra no está en la palabra.
           </li>
         </ul>
 
-        <div>
-          <strong>Ejemplo:</strong>
+        <p className="text-left text-muted-foreground sm:text-base">
+          Completa el reto a diario para sumar puntos extra y evita perder más
+          de tres días seguidos para no restar puntos.
+        </p>
+        <p className="text-left text-muted-foreground sm:text-base">
+          Si terminas un reto en el primer minuto desde que lo comienzas,
+          ganas <strong>+1 punto adicional</strong>.
+        </p>
 
-          <p>
-            Si la palabra es <strong>&quot;CASAS&quot;</strong> y escribes{" "}
-            <strong>&quot;SALSA&quot;</strong> verás:
+        <div className="rounded-2xl border border-border bg-card p-3 text-left text-sm text-muted-foreground sm:text-base">
+          <p className="font-semibold text-foreground">Ejemplo</p>
+          <p className="text-sm sm:text-base">
+            Si la palabra es <strong>“CASAS”</strong> y escribes{" "}
+            <strong>“SALSA”</strong> verás:
           </p>
 
-          <div className="flex space-x-2 mt-2">
-            <span className="w-8 h-8 flex items-center justify-center bg-yellow-500 text-white font-bold rounded">
+          <div className="mt-2 flex justify-center space-x-1 text-[11px] font-bold text-white sm:text-xs">
+            <span className="flex h-7 w-7 items-center justify-center rounded bg-yellow-500">
               S
             </span>
-            <span className="w-8 h-8 flex items-center justify-center bg-green-500 text-white font-bold rounded">
+            <span className="flex h-7 w-7 items-center justify-center rounded bg-green-500">
               A
             </span>
-            <span className="w-8 h-8 flex items-center justify-center bg-gray-500 text-white font-bold rounded">
+            <span className="flex h-7 w-7 items-center justify-center rounded bg-gray-500">
               L
             </span>
-            <span className="w-8 h-8 flex items-center justify-center bg-yellow-500 text-white font-bold rounded">
+            <span className="flex h-7 w-7 items-center justify-center rounded bg-yellow-500">
               S
             </span>
-            <span className="w-8 h-8 flex items-center justify-center bg-yellow-500 text-white font-bold rounded">
+            <span className="flex h-7 w-7 items-center justify-center rounded bg-yellow-500">
               A
             </span>
           </div>

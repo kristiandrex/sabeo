@@ -1,26 +1,36 @@
 import type { ReactNode } from "react";
+import { Flame } from "lucide-react";
 
 import { cn } from "#/lib/utils";
-import { RankingPosition } from "#/types";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "#/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 
-type RankingListProps = {
-  positions: RankingPosition[];
+type BaseRankingPosition = {
+  id: string;
+  name: string;
+  picture: string;
+};
+
+type RankingListProps<T extends BaseRankingPosition> = {
+  positions: T[];
   valueLabel: string;
-  valueFormatter: (position: RankingPosition) => ReactNode;
+  valueFormatter: (position: T) => ReactNode;
   currentUserId: string | null;
 };
 
-export function RankingList({
+function hasCurrentStreak(
+  position: BaseRankingPosition,
+): position is BaseRankingPosition & { currentStreak: number } {
+  return (
+    typeof (position as { currentStreak?: unknown }).currentStreak === "number"
+  );
+}
+
+export function RankingList<T extends BaseRankingPosition>({
   positions,
   valueLabel,
   valueFormatter,
   currentUserId,
-}: RankingListProps) {
+}: RankingListProps<T>) {
   if (positions.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-zinc-200 px-5 py-12 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
@@ -34,12 +44,16 @@ export function RankingList({
       <div className="flex items-center px-2.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-600 sm:px-3 sm:text-xs">
         <span className="w-9 shrink-0 text-center sm:w-10">#</span>
         <span className="flex-1 text-left">Jugador(a)</span>
-        <span className="min-w-[4rem] text-right sm:text-left">{valueLabel}</span>
+        <span className="min-w-[4rem] text-right sm:text-left">
+          {valueLabel}
+        </span>
       </div>
 
       {positions.map((position, index) => {
         const isCurrentPlayer =
           currentUserId !== null && currentUserId === position.id;
+        const shouldShowStreak =
+          hasCurrentStreak(position) && position.currentStreak > 1;
 
         return (
           <article
@@ -68,14 +82,22 @@ export function RankingList({
                 </AvatarFallback>
               </Avatar>
 
-              <div className="flex min-w-0 items-center gap-1">
-                <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100 sm:text-base">
-                  {position.name}
-                </span>
-                {isCurrentPlayer && (
-                  <span className="shrink-0 text-xs font-semibold text-green-600 dark:text-green-300 sm:text-sm">
-                    (Tú)
+              <div className="flex min-w-0 flex-col">
+                <div className="flex min-w-0 items-center gap-1">
+                  <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100 sm:text-base">
+                    {position.name}
                   </span>
+                  {isCurrentPlayer && (
+                    <span className="shrink-0 text-xs font-semibold text-green-600 dark:text-green-300 sm:text-sm">
+                      (Tú)
+                    </span>
+                  )}
+                </div>
+                {shouldShowStreak && (
+                  <div className="mt-0.5 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    <Flame className="h-3 w-3 text-orange-500" aria-hidden />
+                    <span>{position.currentStreak} días de racha</span>
+                  </div>
                 )}
               </div>
             </div>

@@ -1,9 +1,10 @@
 import { createServiceClient } from "#/lib/supabase/server";
 import type {
   DailyChallengeCompleted,
-  RankingPosition,
-  ChallengeCompleted,
-} from "#/types";
+  SeasonRankingRow,
+  SeasonRankingPosition,
+  DailyRankingPosition,
+} from "#/types/ranking";
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export async function getDailyRanking() {
@@ -23,7 +24,7 @@ export async function getDailyRanking() {
       throw dailyChallenges.error;
     }
 
-    const ranking: RankingPosition[] = [];
+    const ranking: DailyRankingPosition[] = [];
 
     for (const challenge of dailyChallenges.data) {
       const player = data.users.find((user) => user.id === challenge.player);
@@ -33,7 +34,6 @@ export async function getDailyRanking() {
           id: player.id,
           name: player.user_metadata.name,
           picture: player.user_metadata.picture,
-          challenges: 1,
           seconds: challenge.seconds,
         });
       }
@@ -56,25 +56,25 @@ export async function getRanking() {
       throw error;
     }
 
-    const challengesCompleted: PostgrestSingleResponse<ChallengeCompleted[]> =
-      await supabase.rpc("get_challenges_completed");
+    const seasonRanking: PostgrestSingleResponse<SeasonRankingRow[]> =
+      await supabase.rpc("get_active_season_ranking");
 
-    if (challengesCompleted.error) {
-      throw challengesCompleted.error;
+    if (seasonRanking.error) {
+      throw seasonRanking.error;
     }
 
-    const ranking: RankingPosition[] = [];
+    const ranking: SeasonRankingPosition[] = [];
 
-    for (const challenge of challengesCompleted.data) {
-      const player = data.users.find((user) => user.id === challenge.player);
+    for (const row of seasonRanking.data) {
+      const player = data.users.find((user) => user.id === row.player);
 
       if (player) {
         ranking.push({
           id: player.id,
           name: player.user_metadata.name,
           picture: player.user_metadata.picture,
-          challenges: challenge.total_challenges,
-          seconds: challenge.total_seconds,
+          seasonPoints: row.season_points,
+          currentStreak: row.current_streak,
         });
       }
     }

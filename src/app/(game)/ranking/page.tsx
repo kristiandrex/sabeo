@@ -62,8 +62,8 @@ export default async function RankingPage() {
           <TabsContent value="general">
             <RankingList
               positions={ranking}
-              valueLabel="Retos"
-              valueFormatter={(position) => position.challenges}
+              valueLabel="Puntos"
+              valueFormatter={(position) => position.seasonPoints}
               currentUserId={currentUserId}
             />
           </TabsContent>
