@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "process-dictionary": "bun scripts/process-dictionary.ts"
+    "process-dictionary": "bun scripts/process-dictionary.ts",
+    "generate-vapid-keys": "bunx web-push generate-vapid-keys --json"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",

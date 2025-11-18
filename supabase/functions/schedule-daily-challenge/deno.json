@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["deno.ns"]
+    "lib": ["deno.ns", "dom"]
   },
   "imports": {
-    "@upstash/qstash": "jsr:@upstash/qstash@2.8.4"
+    "@upstash/qstash": "https://esm.sh/@upstash/qstash@2.8.4"
   }
 }
