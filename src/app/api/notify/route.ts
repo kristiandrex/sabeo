@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse, after } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 
 import { createServiceClient } from "#/lib/supabase/server";
@@ -6,18 +6,16 @@ import { createServiceClient } from "#/lib/supabase/server";
 webpush.setVapidDetails(
   "mailto:cristiandrestorres@gmail.com",
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  process.env.VAPID_PRIVATE_KEY!,
 );
 
 export async function POST(req: NextRequest) {
-  console.log(req);
+  const { SUPABASE_SERVICE_KEY } = process.env;
 
   try {
-    const requestHeaders = new Headers(req.headers);
+    const authorization = req.headers.get("authorization");
 
-    if (
-      requestHeaders.get("api-key") !== process.env.NOTIFICATIONS_PRIVATE_KEY
-    ) {
+    if (authorization !== `Bearer ${SUPABASE_SERVICE_KEY}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -26,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (!title || !description) {
       return NextResponse.json(
         { error: "Title and description are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -45,14 +43,14 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(
         { error: "Error fetching subscriptions" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     if (!subscriptions.length) {
       return NextResponse.json(
         { error: "No subscriptions found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -69,7 +67,7 @@ export async function POST(req: NextRequest) {
             title,
             body: description,
             icon: "/icon-512x512.png",
-          })
+          }),
         )
         .catch((error) => console.error("Notification error:", error));
     });
@@ -83,7 +81,7 @@ export async function POST(req: NextRequest) {
         message: `Sending notifications to ${subscriptions.length} recipients`,
         total: subscriptions.length,
       },
-      { status: 202 }
+      { status: 202 },
     );
   } catch (error) {
     console.error("Error sending notifications:", error);
@@ -92,7 +90,7 @@ export async function POST(req: NextRequest) {
       { error: "An error occurred while sending notifications" },
       {
         status: 500,
-      }
+      },
     );
   }
 }

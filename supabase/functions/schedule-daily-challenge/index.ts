@@ -1,8 +1,7 @@
 import { Client } from "@upstash/qstash";
 
 const {
-  SUPABASE_FUNCTION_SECRET,
-  START_CHALLENGE_INTERNAL_KEY,
+  SUPABASE_SERVICE_KEY,
   START_CHALLENGE_URL,
   QSTASH_TOKEN,
   QSTASH_URL,
@@ -18,15 +17,15 @@ function getRandomBogotaDatetime(date = new Date()): Date {
       date.getUTCMonth(),
       date.getUTCDate(),
       13,
-      randomMinutes
-    )
+      randomMinutes,
+    ),
   );
 }
 
 Deno.serve(async (req) => {
-  const authHeader = req.headers.get("authorization");
+  const authorization = req.headers.get("authorization");
 
-  if (authHeader !== `Bearer ${SUPABASE_FUNCTION_SECRET}`) {
+  if (authorization !== `Bearer ${SUPABASE_SERVICE_KEY}`) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -38,7 +37,7 @@ Deno.serve(async (req) => {
       type: "start_challenge",
     },
     headers: {
-      "x-internal-key": START_CHALLENGE_INTERNAL_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
       "content-type": "application/json",
     },
     notBefore: Math.floor(runAt.getTime() / 1000),
@@ -55,6 +54,6 @@ Deno.serve(async (req) => {
       headers: {
         "content-type": "application/json",
       },
-    }
+    },
   );
 });

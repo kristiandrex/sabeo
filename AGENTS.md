@@ -29,4 +29,4 @@ Stick to functional React components, Next Server Actions, and Tailwind utility 
 Follow conventional commits (`refactor:`, `feat:`, `fix:`) as seen in the existing log. Each commit should focus on one concern and include any schema or Supabase changes under `supabase/migrations`. Pull requests need a concise summary, linked issues when available, screenshots or terminal output for UI/data changes, environmental notes (new env keys like `QSTASH_TOKEN`), and the QA steps you ran. Ensure CI-equivalent commands (`bun run lint`, `bun run build`) were executed locally before requesting review.
 
 ## Security & Configuration Tips
-Secrets live in `.env.local` and mirror Supabase and Vercel settings. Keep VAPID keys, QStash tokens, and `START_CHALLENGE_INTERNAL_KEY` aligned across environments. Never commit generated credentials; instead update `.env.example` if new variables become mandatory.
+Secrets live in `.env.local` and mirror Supabase and Vercel settings. Keep VAPID keys, QStash tokens, and server-only Supabase keys aligned across environments. Never commit generated credentials; instead update `.env.example` if new variables become mandatory.

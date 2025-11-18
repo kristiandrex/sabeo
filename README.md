@@ -64,18 +64,32 @@ Generate VAPID keys with `bunx web-push generate-vapid-keys --json` and copy the
 
 ## Daily cron
 
-Iterate locally with `supabase functions serve schedule-daily-challenge --env-file .env`. Deploy the cron with:
+Iterate locally with `supabase functions serve schedule-daily-challenge --env-file .env`.
+
+### Production schedule via pg\_cron
+
+`supabase/migrations/20251118214523_schedule_daily_challenge_cron.sql` configures `pg_net` + `pg_cron`, posts the Edge Function, and schedules it daily (12:00 UTC / 07:00 Bogotá). Para activarlo:
+
+1. Ejecuta `supabase db push` contra el proyecto.
+2. Crea los secretos de Vault que el script espera:
+   - `project_url`: URL base del proyecto (e.g., `https://...supabase.co`)
+   - `service_role_key`: tu `SUPABASE_SERVICE_KEY` (sólo server-side).
+3. Confirma el cron con `select jobid, jobname, schedule from cron.job;`
+
+Pausa/ajusta el cron con `select cron.unschedule('schedule-daily-challenge');` o editando la migración.
+
+### Edge function deploy
+
+Deploy the Edge Function (needed so pg\_cron has something to invoke) and ensure `SUPABASE_SERVICE_KEY` is available when deploying:
 
 ```bash
 supabase functions deploy schedule-daily-challenge \
   --project-ref <project_ref> \
   --import-map supabase/functions/schedule-daily-challenge/deno.json \
-  --env-file .env.production \
-  --schedule "0 12 * * *"
+  --env-file .env.production
 ```
 
-Keep Supabase, Vercel, and Upstash secrets in sync; pause the cron by removing the schedule from Supabase CLI or Upstash.
-Set `START_CHALLENGE_URL` to your deployed host (e.g., `https://sabeo.vercel.app`) when deploying the edge function so QStash posts to the right API.
+Keep Supabase, Vercel, and Upstash secrets in sync. Set `START_CHALLENGE_URL` to your deployed host (e.g., `https://sabeo.vercel.app`) so QStash posts to the right API.
 
 ## Environment variables
 
@@ -83,13 +97,10 @@ Set `START_CHALLENGE_URL` to your deployed host (e.g., `https://sabeo.vercel.app
 | --- |
 | NEXT_PUBLIC_SUPABASE_URL |
 | NEXT_PUBLIC_SUPABASE_ANON_KEY |
-| SUPABASE_SERVICE_KEY |
-| SUPABASE_FUNCTION_SECRET |
-| START_CHALLENGE_INTERNAL_KEY |
-| START_CHALLENGE_URL |
 | NEXT_PUBLIC_VAPID_PUBLIC_KEY |
+| SUPABASE_SERVICE_KEY |
+| START_CHALLENGE_URL |
 | VAPID_PRIVATE_KEY |
-| NOTIFICATIONS_PRIVATE_KEY |
 | QSTASH_TOKEN |
 | QSTASH_URL |
 | QSTASH_CURRENT_SIGNING_KEY |
