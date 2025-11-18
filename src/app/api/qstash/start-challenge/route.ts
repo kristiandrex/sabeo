@@ -9,22 +9,15 @@ const {
   START_CHALLENGE_INTERNAL_KEY,
 } = process.env;
 
-if (
-  !QSTASH_CURRENT_SIGNING_KEY ||
-  !QSTASH_NEXT_SIGNING_KEY ||
-  !START_CHALLENGE_INTERNAL_KEY
-) {
-  throw new Error("Missing QStash environment variables");
-}
-
 const receiver = new Receiver({
-  currentSigningKey: QSTASH_CURRENT_SIGNING_KEY,
-  nextSigningKey: QSTASH_NEXT_SIGNING_KEY,
+  currentSigningKey: QSTASH_CURRENT_SIGNING_KEY!,
+  nextSigningKey: QSTASH_NEXT_SIGNING_KEY!,
 });
 
 export async function POST(req: NextRequest) {
   try {
     const signature = req.headers.get("upstash-signature");
+
     if (!signature) {
       return new Response("Unauthorized", { status: 401 });
     }
@@ -38,7 +31,7 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    if (req.headers.get("x-internal-key") !== internalKey) {
+    if (req.headers.get("x-internal-key") !== START_CHALLENGE_INTERNAL_KEY) {
       return new Response("Unauthorized", { status: 401 });
     }
 

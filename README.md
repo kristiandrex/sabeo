@@ -1,10 +1,10 @@
 # Sabeo
 
-A word-guessing game inspired by Wordle with random notifications like BeReal. Players attempt to guess a secret word within six tries, with each word consisting of five or six letters. After each guess, players receive color-coded feedback:
+A word-guessing game inspired by Wordle with BeReal-style random notifications. Players get six attempts to guess a five or six-letter word and receive color-coded feedback after every guess.
 
-- 🟩 Green: Correct letter in the right position
-- 🟨 Yellow: Correct letter in the wrong position
-- ⬜ Gray: Letter not in the word
+- 🟩 Green: correct letter, correct slot
+- 🟨 Yellow: correct letter, wrong slot
+- ⬜ Gray: letter not in the word
 
 ## Features
 
@@ -15,91 +15,57 @@ A word-guessing game inspired by Wordle with random notifications like BeReal. P
 - ✅ Mobile-first design
 - ✅ Real-time updates
 - ✅ Push notifications
-- ⬜ Daily streak tracking (coming soon)
+- ✅ Daily streak tracking
 
 ## Architecture
 
-![Architecture diagram](https://github.com/user-attachments/assets/fe168d49-b049-4719-9b85-b15de2b4f0fe)
+```mermaid
+graph TD
+  App[Next.js App Router\nUI + Server Actions] -->|Auth & data queries| Supabase[(Supabase\nAuth · DB · Storage)]
+  App -->|REST + webhooks| API[/Next.js API Routes/]
+  App -->|Push opt-in & caching| PWA[Service Worker · Manifest]
+  API -->|Persist game state & rankings| Supabase
+  PWA -->|Triggers notification prompts| App
+  EdgeFn[Supabase Edge Function\nschedule-daily-challenge] -->|Create daily job| QStash[(Upstash QStash\ncron delivery)]
+  QStash -->|POST /api/qstash/start-challenge| API
+  API -->|Start daily challenge| App
+```
 
-## Tech Stack
-
-### Core
-
-- Next.js
-- TypeScript
-- Supabase
-- Tailwind CSS
-- Radix UI
-- PWA
-
-### Key Dependencies
-
-- React
-- Web Push
-- Sonner
-- Lucide Icons
-- React Confetti
-
-## Development
-
-### Prerequisites
-
-- `Bun` ([Bun docs](https://bun.com/docs))
-- `Supabase CLI` (install via Homebrew following the [official guide for Linux](https://supabase.com/docs/guides/local-development/cli/getting-started); e.g., `brew install supabase/tap/supabase`, then run commands with `supabase ...`)
-- `Docker Engine` or `Docker Desktop` (required for the Supabase local stack; see [Docker Engine install docs](https://docs.docker.com/engine/install/) and [Docker Desktop install docs, including Linux support](https://docs.docker.com/desktop/))
-- `mkcert` ([FiloSottile/mkcert](https://github.com/FiloSottile/mkcert))
-- `hunspell` ([Hunspell project](https://github.com/hunspell/hunspell))
-
-### Local HTTPS
-
-- Run `mkcert -install` once to trust the local certificate authority before using `next dev --experimental-https`.
-
-### Project Structure
+## Structure
 
 ```
 sabeo/
-├── src/
-│   ├── app/         # Next.js app router
-│   ├── components/  # React components
-│   └── lib/         # Utility functions
-├── supabase/        # Backend configuration
-└── public/          # Static assets
+├── src/app              # App Router routes, layouts, API routes, server actions
+├── src/components       # UI modules and primitives under ui/
+├── src/lib              # auth, env, Supabase, QStash, PWA helpers
+├── src/queries          # database reads/writes
+├── src/hooks            # client state (e.g., useLocalStorage)
+├── src/types            # shared data contracts
+├── scripts              # utilities like process-dictionary
+├── supabase             # edge functions, config, migrations
+└── public               # assets, icons, manifest
 ```
 
-### Security
+## Local requirements
 
-- Google OAuth
-- JWT token management
-- Push notification encryption (VAPID)
-- Row Level Security
-- Custom authentication callbacks
+- Bun
+- Supabase CLI + Docker Engine/Desktop
+- mkcert (`mkcert -install` once for local HTTPS)
+- hunspell (needed for `process-dictionary`)
 
-### Generating VAPID Keys
+## Dictionary
 
-Sabeo relies on VAPID for push notification encryption. Use the [web-push CLI](https://github.com/web-push-libs/web-push) to rotate the key pair:
+Edit `data/dictionary-es.txt` and run `bun run process-dictionary` to rebuild the Hunspell-based word list.
 
-1. Run `bunx web-push generate-vapid-keys --json` from the project root to create a new public/private key pair.
-2. Copy the printed `publicKey` and `privateKey` values into `.env` as `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`.
+## Push notifications
 
-### QStash & Cron Environment Variables
+Generate VAPID keys with `bunx web-push generate-vapid-keys --json` and copy the values into your environment before hitting `/api/subscribe` or `/api/notify`.
 
-Configura estas variables en `.env.local`, en los secretos de Supabase Functions y en el entorno de producción (Vercel) antes de habilitar el cron diario:
+## Daily cron
 
-- `QSTASH_TOKEN`: token de API de QStash para crear schedules desde la función `schedule-daily-challenge`.
-- `QSTASH_URL`: endpoint base de la API (por defecto `https://qstash.upstash.io`).
-- `QSTASH_CURRENT_SIGNING_KEY` y `QSTASH_NEXT_SIGNING_KEY`: claves que entrega Upstash para verificar `upstash-signature`.
-- `START_CHALLENGE_INTERNAL_KEY`: llave interna que se enviará en el header `x-internal-key` para autorizar `/api/qstash/start-challenge`.
-- `SUPABASE_FUNCTION_SECRET`: secreto para validar que el cron de Supabase es quien invoca la función edge.
-
-Mantén estos valores sincronizados entre local, Supabase y producción para evitar fallos al crear o ejecutar schedules.
-
-### Despliegue del cron en Supabase
-
-Cuando estés listo para habilitar el cron diario, ejecuta (ajusta `project-ref`, cron y archivo de entorno según tu setup):
+Iterate locally with `supabase functions serve schedule-daily-challenge --env-file .env`. Deploy the cron with:
 
 ```bash
-supabase secrets set --project-ref <project_ref> SUPABASE_FUNCTION_SECRET=... START_CHALLENGE_INTERNAL_KEY=... QSTASH_TOKEN=... QSTASH_URL=... NEXT_PUBLIC_APP_URL=...
-
 supabase functions deploy schedule-daily-challenge \
   --project-ref <project_ref> \
   --import-map supabase/functions/schedule-daily-challenge/deno.json \
@@ -107,5 +73,23 @@ supabase functions deploy schedule-daily-challenge \
   --schedule "0 12 * * *"
 ```
 
-- Usa una hora de cron anterior a las 08:00 BOG (ej. 12:00 UTC ≈ 07:00 BOG) para que la función tenga tiempo de programar el horario aleatorio del día.
-- Si necesitas deshabilitar temporalmente el cron, puedes ejecutar `supabase functions delete schedule-daily-challenge --project-ref <project_ref>` o pausar el schedule desde el dashboard de Upstash.
+Keep Supabase, Vercel, and Upstash secrets in sync; pause the cron by removing the schedule from Supabase CLI or Upstash.
+Set `START_CHALLENGE_URL` to your deployed host (e.g., `https://sabeo.vercel.app`) when deploying the edge function so QStash posts to the right API.
+
+## Environment variables
+
+| Variable |
+| --- |
+| NEXT_PUBLIC_SUPABASE_URL |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY |
+| SUPABASE_SERVICE_KEY |
+| SUPABASE_FUNCTION_SECRET |
+| START_CHALLENGE_INTERNAL_KEY |
+| START_CHALLENGE_URL |
+| NEXT_PUBLIC_VAPID_PUBLIC_KEY |
+| VAPID_PRIVATE_KEY |
+| NOTIFICATIONS_PRIVATE_KEY |
+| QSTASH_TOKEN |
+| QSTASH_URL |
+| QSTASH_CURRENT_SIGNING_KEY |
+| QSTASH_NEXT_SIGNING_KEY |
