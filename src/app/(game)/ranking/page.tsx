@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
-import { getDailyRanking, getRanking } from "#/queries/ranking";
+import { getDailyRanking, getRanking } from "#/domain/ranking/queries";
 import { createClient } from "#/lib/supabase/server";
 import { RankingList } from "#/components/ranking-list";
 import {

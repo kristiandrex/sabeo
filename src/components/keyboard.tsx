@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 import { cn } from "#/lib/utils";
-import { getColorsByAttempt } from "#/lib/challenge";
+import { getColorsByAttempt } from "#/domain/challenge/colors";
 import { Button } from "#/components/ui/button";
 
 function getClassNamesByColor(color: string) {
@@ -147,7 +147,7 @@ function KeyboardRow({
     "min-w-0 rounded-md border border-transparent bg-gray-400",
     "text-center text-base font-semibold text-white md:text-lg",
     "transition-colors hover:bg-gray-500 hover:text-white",
-    "h-auto px-0",
+    "h-auto px-0"
   );
 
   const variantClass = {
@@ -168,7 +168,7 @@ function KeyboardRow({
         className={cn(
           baseKeyClass,
           variantClass[key.variant],
-          colors[key.value],
+          colors[key.value]
         )}
         variant="ghost"
         onClick={onClick(key.value)}

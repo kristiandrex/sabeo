@@ -1,5 +1,5 @@
 import { createClient, createServiceClient } from "#/lib/supabase/server";
-import type { Challenge } from "#/types/challenge";
+import type { Challenge } from "#/domain/challenge/types";
 
 export async function getLatestChallenge(): Promise<Challenge | null> {
   try {

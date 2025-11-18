@@ -4,7 +4,7 @@ import type {
   SeasonRankingRow,
   SeasonRankingPosition,
   DailyRankingPosition,
-} from "#/types/ranking";
+} from "#/domain/ranking/types";
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 export async function getDailyRanking() {

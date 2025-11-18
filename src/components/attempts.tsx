@@ -1,6 +1,6 @@
 import { NUMBER_OF_ROWS } from "#/constants";
 import { cn } from "#/lib/utils";
-import { Color } from "#/types/challenge";
+import { Color } from "#/domain/challenge/types";
 
 export function getClassNamesByColor(color: string) {
   const classNames: Record<string, string> = {

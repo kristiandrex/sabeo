@@ -1,7 +1,34 @@
 "use server";
 
 import { createClient } from "#/lib/supabase/server";
-import { getLatestChallenge } from "#/queries/challenge";
+import { getLatestChallenge } from "#/domain/challenge/queries";
+
+export async function registerChallengeOpen(challenge: number) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false };
+    }
+
+    const { error } = await supabase.rpc("register_challenge_open", {
+      p_player: user.id,
+      p_challenge: challenge,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to register challenge open", error);
+    return { success: false };
+  }
+}
 
 export async function addAttempt(attempt: string, challenge: number) {
   try {

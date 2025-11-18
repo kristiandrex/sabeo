@@ -1,7 +1,7 @@
 import { Receiver } from "@upstash/qstash";
 import { after, type NextRequest } from "next/server";
 
-import { runStartChallenge } from "#/lib/start-challenge";
+import { runStartChallenge } from "#/domain/challenge/start-challenge";
 
 const {
   QSTASH_CURRENT_SIGNING_KEY,

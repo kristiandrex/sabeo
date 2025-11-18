@@ -1,4 +1,4 @@
-import { Color } from "#/types/challenge";
+import { Color } from "#/domain/challenge/types";
 
 export function getColorsByAttempt({
   attempt,

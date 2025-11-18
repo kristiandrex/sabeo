@@ -1,6 +1,6 @@
 import { after, type NextRequest } from "next/server";
 
-import { runStartChallenge } from "#/lib/start-challenge";
+import { runStartChallenge } from "#/domain/challenge/start-challenge";
 
 export async function POST(req: NextRequest) {
   try {

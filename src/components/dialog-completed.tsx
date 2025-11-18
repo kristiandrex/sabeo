@@ -1,7 +1,7 @@
 import { Flame, Zap } from "lucide-react";
 import { toast } from "sonner";
 
-import { Challenge, Color } from "#/types/challenge";
+import { Challenge, Color } from "#/domain/challenge/types";
 import { Button } from "#/components/ui/button";
 import {
   Dialog,

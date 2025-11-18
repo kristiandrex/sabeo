@@ -7,11 +7,12 @@ import { NotificationGate } from "#/components/notification-gate";
 import { Button } from "#/components/ui/button";
 import { GUEST_COOKIE, NUMBER_OF_ROWS } from "#/constants";
 import { createClient } from "#/lib/supabase/server";
-import { getAttemptsByPlayer, getLatestChallenge } from "#/queries/challenge";
+import {
+  getAttemptsByPlayer,
+  getLatestChallenge,
+} from "#/domain/challenge/queries";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default async function PlayPage() {
   const supabase = await createClient();
   const {
@@ -41,21 +42,6 @@ export default async function PlayPage() {
 
   const shouldRegisterChallengeOpen = Boolean(user) && !isGuest;
 
-  if (shouldRegisterChallengeOpen) {
-    try {
-      const { error } = await supabase.rpc("register_challenge_open", {
-        p_player: user!.id,
-        p_challenge: latestChallenge.id,
-      });
-
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
-      console.error("Error calling register_challenge_open", error);
-    }
-  }
-
   const initialAttempts = await getAttemptsByPlayer(latestChallenge.id);
   const challengeIsCompleted = initialAttempts.includes(latestChallenge.word);
   const challengeIsFinished =
@@ -83,16 +69,21 @@ export default async function PlayPage() {
     }
   }
 
+  const initialState = {
+    attempts: initialAttempts,
+    isFinished: challengeIsFinished,
+    bonusSnapshot: initialBonusSnapshot,
+  };
+
   return (
     <NotificationGate isAuthenticated={Boolean(user)}>
       <Game
+        key={`${latestChallenge.id}-${shouldRegisterChallengeOpen}`}
         dictionary={dictionary}
         challenge={latestChallenge}
-        initialAttempts={initialAttempts}
-        challengeIsFinished={challengeIsFinished}
-        onFinishChallenge={reload}
+        initialState={initialState}
         isGuest={isGuest}
-        initialBonusSnapshot={initialBonusSnapshot}
+        shouldRegisterChallengeOpen={shouldRegisterChallengeOpen}
       />
     </NotificationGate>
   );

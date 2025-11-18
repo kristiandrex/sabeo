@@ -37,10 +37,11 @@ graph TD
 sabeo/
 ├── src/app              # App Router routes, layouts, API routes, server actions
 ├── src/components       # UI modules and primitives under ui/
-├── src/lib              # auth, env, Supabase, QStash, PWA helpers
-├── src/queries          # database reads/writes
+├── src/domain           # mecánicas del juego y contratos del dominio
+│   ├── challenge/       # colores, queries del reto, start-challenge
+│   └── ranking/         # tipos + queries del ranking
+├── src/lib              # integraciones (Supabase, auth, env, PWA, QStash)
 ├── src/hooks            # client state (e.g., useLocalStorage)
-├── src/types            # shared data contracts
 ├── scripts              # utilities like process-dictionary
 ├── supabase             # edge functions, config, migrations
 └── public               # assets, icons, manifest

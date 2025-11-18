@@ -9,10 +9,19 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import { addAttempt, completeChallenge } from "#/app/actions/challenge";
+import {
+  addAttempt,
+  completeChallenge,
+  registerChallengeOpen,
+} from "#/app/actions/challenge";
 import { NUMBER_OF_ROWS } from "#/constants";
-import { Challenge } from "#/types/challenge";
-import { getColorsByAttempt } from "#/lib/challenge";
+import { Challenge } from "#/domain/challenge/types";
+import { getColorsByAttempt } from "#/domain/challenge/colors";
+import {
+  readGuestAttempts,
+  writeGuestAttempts,
+} from "#/domain/challenge/guest";
+import { useLocalStorage } from "#/hooks/useLocalStorage";
 
 import { Attempts } from "./attempts";
 import { DialogChallengeCompleted } from "./dialog-completed";
@@ -22,45 +31,12 @@ function getAllAttemptsColors(attempts: string[], challenge: string) {
   return attempts.map((attempt) => getColorsByAttempt({ attempt, challenge }));
 }
 
-function readGuestAttempts(key: string, fallback: string[]) {
-  const rawValue = localStorage.getItem(key);
-
-  if (!rawValue) {
-    return fallback;
-  }
-
-  try {
-    const parsedValue = JSON.parse(rawValue);
-
-    if (!Array.isArray(parsedValue)) {
-      return fallback;
-    }
-
-    return parsedValue.filter(
-      (value): value is string => typeof value === "string",
-    );
-  } catch {
-    return fallback;
-  }
-}
-
-function writeGuestAttempts(key: string, attempts: string[]) {
-  try {
-    localStorage.setItem(key, JSON.stringify(attempts));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 type Props = {
   dictionary: string[];
   challenge: Challenge;
-  initialAttempts: string[];
-  challengeIsFinished: boolean;
-  onFinishChallenge: () => Promise<void>;
+  initialState: ChallengeInitialState;
   isGuest: boolean;
-  initialBonusSnapshot?: BonusSnapshot | null;
+  shouldRegisterChallengeOpen: boolean;
 };
 
 type BonusSnapshot = {
@@ -69,30 +45,44 @@ type BonusSnapshot = {
   fastBonusAwarded: boolean;
 };
 
+type ChallengeInitialState = {
+  attempts: string[];
+  isFinished: boolean;
+  bonusSnapshot: BonusSnapshot | null;
+};
+
 export function Game({
   dictionary,
   challenge,
-  initialAttempts,
-  challengeIsFinished,
-  onFinishChallenge,
+  initialState,
   isGuest,
-  initialBonusSnapshot = null,
+  shouldRegisterChallengeOpen,
 }: Props) {
-  const [attempts, setAttempts] = useState(initialAttempts);
+  const [attempts, setAttempts] = useState(initialState.attempts);
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
   const [bonusSnapshot, setBonusSnapshot] = useState<BonusSnapshot | null>(
-    initialBonusSnapshot,
+    initialState.bonusSnapshot
   );
+  const [isChallengeFinished, setIsChallengeFinished] = useState(
+    initialState.isFinished
+  );
+
+  const [hasRegisteredChallengeOpen, setHasRegisteredChallengeOpen] = useState(
+    !shouldRegisterChallengeOpen
+  );
+
   const dictionarySet = useMemo(() => new Set(dictionary), [dictionary]);
+  const [instructionsOpen] = useLocalStorage<boolean>("instructions-v2", true);
+  const initialAttempts = initialState.attempts;
 
   const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
     attempts,
-    (currentAttempts, newAttempt: string) => currentAttempts.concat(newAttempt),
+    (currentAttempts, newAttempt: string) => currentAttempts.concat(newAttempt)
   );
 
   const [optimisticCurrent, setOptimisticCurrent] = useOptimistic(
     currentAttempt,
-    (currentAttempt, newAttempt: string) => newAttempt,
+    (currentAttempt, newAttempt: string) => newAttempt
   );
 
   const [isPending, startTransition] = useTransition();
@@ -105,11 +95,44 @@ export function Game({
     isGuest &&
     (attempts.includes(challenge.word) || attempts.length === NUMBER_OF_ROWS);
 
-  const challengeLocked = challengeIsFinished || guestHasFinished;
+  const challengeLocked = isChallengeFinished || guestHasFinished;
+
+  const shouldRegisterChallenge =
+    shouldRegisterChallengeOpen &&
+    !instructionsOpen &&
+    !hasRegisteredChallengeOpen;
+
+  useEffect(() => {
+    if (!shouldRegisterChallenge) {
+      return;
+    }
+
+    let cancelled = false;
+
+    registerChallengeOpen(challenge.id)
+      .then((result) => {
+        if (cancelled || !result.success) {
+          return;
+        }
+
+        setHasRegisteredChallengeOpen(true);
+      })
+      .catch((error) => {
+        console.error("Failed to register challenge open", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [challenge.id, shouldRegisterChallenge]);
 
   async function addAttemptAction(attempt: string) {
     toast.dismiss();
     toast.info("Guardando intento...");
+
+    const nextAttemptsCount = attempts.length + 1;
+    const shouldFinishChallenge =
+      attempt === challenge.word || nextAttemptsCount === NUMBER_OF_ROWS;
 
     startTransition(() => {
       addOptimisticAttempt(attempt);
@@ -136,11 +159,8 @@ export function Game({
         setCurrentAttempt("");
       });
 
-      if (
-        attempt === challenge.word ||
-        attempts.length === NUMBER_OF_ROWS - 1
-      ) {
-        await onFinishChallenge();
+      if (shouldFinishChallenge) {
+        setIsChallengeFinished(true);
       }
 
       return;
@@ -179,8 +199,8 @@ export function Game({
       setCurrentAttempt("");
     });
 
-    if (attempt === challenge.word || attempts.length === NUMBER_OF_ROWS - 1) {
-      await onFinishChallenge();
+    if (shouldFinishChallenge) {
+      setIsChallengeFinished(true);
     }
   }
 
