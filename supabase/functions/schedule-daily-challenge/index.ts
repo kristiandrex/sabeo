@@ -11,21 +11,19 @@ const {
 
 const destinationBaseUrl = PUBLIC_APP_URL ?? NEXT_PUBLIC_APP_URL;
 
-if (!functionSecret || !startChallengeInternalKey || !destinationBaseUrl || !qstashToken) {
-  throw new Error("Missing environment variables for schedule-daily-challenge");
-}
-
 const client = new Client({ token: qstashToken, baseUrl: qstashUrl });
 
 function getRandomBogotaDatetime(date = new Date()): Date {
-  const utcYear = date.getUTCFullYear();
-  const utcMonth = date.getUTCMonth();
-  const utcDate = date.getUTCDate();
-
-  const randomMinutes = Math.floor(Math.random() * (8 * 60));
-
-  const windowStartUtc = Date.UTC(utcYear, utcMonth, utcDate, 13, 0, 0);
-  return new Date(windowStartUtc + randomMinutes * 60 * 1000);
+  const randomMinutes = Math.floor(Math.random() * 8 * 60);
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      13,
+      randomMinutes
+    )
+  );
 }
 
 Deno.serve(async (req) => {
