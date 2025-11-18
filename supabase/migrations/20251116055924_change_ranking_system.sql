@@ -157,6 +157,7 @@ language sql
 as $$
   select player, season_points, current_streak, fast_bonus_awarded, missed_in_a_row
   from public.season_scores
+  where season_points > 0
   order by season_points desc, current_streak desc, updated_at asc;
 $$;
 
