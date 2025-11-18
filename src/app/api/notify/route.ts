@@ -10,12 +10,12 @@ webpush.setVapidDetails(
 );
 
 export async function POST(req: NextRequest) {
-  const { SUPABASE_SERVICE_KEY } = process.env;
+  const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
   try {
     const authorization = req.headers.get("authorization");
 
-    if (authorization !== `Bearer ${SUPABASE_SERVICE_KEY}`) {
+    if (authorization !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

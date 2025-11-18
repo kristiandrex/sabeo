@@ -2,13 +2,13 @@ import { after, type NextRequest } from "next/server";
 
 import { runStartChallenge } from "#/domain/challenge/start-challenge";
 
-const { SUPABASE_SERVICE_KEY } = process.env;
+const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
 export async function POST(req: NextRequest) {
   try {
     const authorization = req.headers.get("authorization");
 
-    if (authorization !== `Bearer ${SUPABASE_SERVICE_KEY}`) {
+    if (authorization !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
       return new Response("Unauthorized", { status: 401 });
     }
 

@@ -73,14 +73,14 @@ Iterate locally with `supabase functions serve schedule-daily-challenge --env-fi
 1. Ejecuta `supabase db push` contra el proyecto.
 2. Crea los secretos de Vault que el script espera:
    - `project_url`: URL base del proyecto (e.g., `https://...supabase.co`)
-   - `service_role_key`: tu `SUPABASE_SERVICE_KEY` (sólo server-side).
+   - `service_role_key`: tu `SUPABASE_SERVICE_ROLE_KEY` (sólo server-side).
 3. Confirma el cron con `select jobid, jobname, schedule from cron.job;`
 
 Pausa/ajusta el cron con `select cron.unschedule('schedule-daily-challenge');` o editando la migración.
 
 ### Edge function deploy
 
-Deploy the Edge Function (needed so pg\_cron has something to invoke) and ensure `SUPABASE_SERVICE_KEY` is available when deploying:
+Deploy the Edge Function (needed so pg\_cron has something to invoke) and ensure `SUPABASE_SERVICE_ROLE_KEY` is available when deploying:
 
 ```bash
 supabase functions deploy schedule-daily-challenge \
@@ -98,7 +98,7 @@ Keep Supabase, Vercel, and Upstash secrets in sync. Set `START_CHALLENGE_URL` to
 | NEXT_PUBLIC_SUPABASE_URL |
 | NEXT_PUBLIC_SUPABASE_ANON_KEY |
 | NEXT_PUBLIC_VAPID_PUBLIC_KEY |
-| SUPABASE_SERVICE_KEY |
+| SUPABASE_SERVICE_ROLE_KEY |
 | START_CHALLENGE_URL |
 | VAPID_PRIVATE_KEY |
 | QSTASH_TOKEN |

@@ -6,7 +6,7 @@ import { runStartChallenge } from "#/domain/challenge/start-challenge";
 const {
   QSTASH_CURRENT_SIGNING_KEY,
   QSTASH_NEXT_SIGNING_KEY,
-  SUPABASE_SERVICE_KEY,
+  SUPABASE_SERVICE_ROLE_KEY,
 } = process.env;
 
 const receiver = new Receiver({
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const authorization = req.headers.get("authorization");
 
-    if (authorization !== `Bearer ${SUPABASE_SERVICE_KEY}`) {
+    if (authorization !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
       return new Response("Unauthorized", { status: 401 });
     }
 

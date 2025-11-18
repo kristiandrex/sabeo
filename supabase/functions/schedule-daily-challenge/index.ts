@@ -1,7 +1,7 @@
 import { Client } from "@upstash/qstash";
 
 const {
-  SUPABASE_SERVICE_KEY,
+  SUPABASE_SERVICE_ROLE_KEY,
   START_CHALLENGE_URL,
   QSTASH_TOKEN,
   QSTASH_URL,
@@ -25,7 +25,7 @@ function getRandomBogotaDatetime(date = new Date()): Date {
 Deno.serve(async (req) => {
   const authorization = req.headers.get("authorization");
 
-  if (authorization !== `Bearer ${SUPABASE_SERVICE_KEY}`) {
+  if (authorization !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       type: "start_challenge",
     },
     headers: {
-      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
       "content-type": "application/json",
     },
     notBefore: Math.floor(runAt.getTime() / 1000),
