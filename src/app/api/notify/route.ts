@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
-import { waitUntil } from "@vercel/functions";
+import { NextRequest, NextResponse, after } from "next/server";
 import webpush from "web-push";
 
 import { createServiceClient } from "#/lib/supabase/server";
@@ -75,7 +74,9 @@ export async function POST(req: NextRequest) {
         .catch((error) => console.error("Notification error:", error));
     });
 
-    waitUntil(Promise.allSettled(promises));
+    after(async () => {
+      await Promise.allSettled(promises);
+    });
 
     return NextResponse.json(
       {

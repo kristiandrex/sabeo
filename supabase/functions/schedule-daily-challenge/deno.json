@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "lib": ["deno.ns"]
+  },
+  "imports": {
+    "@upstash/qstash": "jsr:@upstash/qstash@2.8.4"
+  }
+}
