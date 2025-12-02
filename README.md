@@ -21,14 +21,13 @@ A word-guessing game inspired by Wordle with BeReal-style random notifications. 
 
 ```mermaid
 graph TD
-  App[Next.js App Router\nUI + Server Actions] -->|Auth & data queries| Supabase[(Supabase\nAuth · DB · Storage)]
-  App -->|REST + webhooks| API[/Next.js API Routes/]
-  App -->|Push opt-in & caching| PWA[Service Worker · Manifest]
-  API -->|Persist game state & rankings| Supabase
-  PWA -->|Triggers notification prompts| App
-  EdgeFn[Supabase Edge Function\nschedule-daily-challenge] -->|Create daily job| QStash[(Upstash QStash\ncron delivery)]
-  QStash -->|POST /api/qstash/start-challenge| API
-  API -->|Start daily challenge| App
+  App[Next.js] --> Supabase[(Supabase)]
+  App --> API[/Next.js API/]
+  App --> PWA[Service Worker]
+  API --> Supabase
+  PWA --> App
+  Cron[(pg_cron)] --> EdgeFn[Edge Function]
+  EdgeFn --> API
 ```
 
 ## Structure
@@ -40,7 +39,7 @@ sabeo/
 ├── src/domain           # mecánicas del juego y contratos del dominio
 │   ├── challenge/       # colores, queries del reto, start-challenge
 │   └── ranking/         # tipos + queries del ranking
-├── src/lib              # integraciones (Supabase, auth, env, PWA, QStash)
+├── src/lib              # integraciones (Supabase, auth, env, PWA)
 ├── src/hooks            # client state (e.g., useLocalStorage)
 ├── scripts              # utilities like process-dictionary
 ├── supabase             # edge functions, config, migrations
@@ -68,15 +67,12 @@ Iterate locally with `supabase functions serve schedule-daily-challenge --env-fi
 
 ### Production schedule via pg\_cron
 
-`supabase/migrations/20251118214523_schedule_daily_challenge_cron.sql` configures `pg_net` + `pg_cron`, posts the Edge Function, and schedules it daily (12:00 UTC / 07:00 Bogotá). Para activarlo:
+El cron en producción (pg\_cron + pg\_net) llama al Edge Function cada 10 minutos dentro de la ventana 08:00–16:00 (Bogotá). El Edge Function guarda en `jobs.daily_challenge_schedule` el día y la hora aleatoria que le tocó a ese reto y, cuando llega ese timestamp, hace un POST a `/api/start-challenge`. Ese API route aplica penalidades, marca el siguiente reto como iniciado y dispara las notificaciones push. Con esto la arquitectura queda:
 
-1. Ejecuta `supabase db push` contra el proyecto.
-2. Crea los secretos de Vault que el script espera:
-   - `project_url`: URL base del proyecto (e.g., `https://...supabase.co`)
-   - `service_role_key`: tu `SUPABASE_SERVICE_ROLE_KEY` (sólo server-side).
-3. Confirma el cron con `select jobid, jobname, schedule from cron.job;`
-
-Pausa/ajusta el cron con `select cron.unschedule('schedule-daily-challenge');` o editando la migración.
+- **pg\_cron**: temporizador que invoca `jobs.run_schedule_daily_challenge`.
+- **Edge Function**: decide la hora aleatoria diaria, persiste el registro y dispara `/api/start-challenge` cuando corresponde.
+- **Next.js API (`/api/start-challenge`)**: lógica central para activar el reto y enviar notificaciones; también sirve como fallback manual si necesitas iniciar un challenge sin pasar por el cron.
+- **Supabase Vault**: guarda `schedule_daily_challenge_url` (URL completa del Edge Function) y `service_role_key`, claves que la función usa para autenticarse.
 
 ### Edge function deploy
 
@@ -89,7 +85,7 @@ supabase functions deploy schedule-daily-challenge \
   --env-file .env.production
 ```
 
-Keep Supabase, Vercel, and Upstash secrets in sync. Set `START_CHALLENGE_URL` to your deployed host (e.g., `https://sabeo.vercel.app`) so QStash posts to the right API.
+Keep Supabase and Vercel secrets in sync. Set `START_CHALLENGE_URL` to your deployed host (e.g., `https://sabeo.vercel.app`) so the Edge Function can hit the API.
 
 ## Environment variables
 
@@ -101,7 +97,3 @@ Keep Supabase, Vercel, and Upstash secrets in sync. Set `START_CHALLENGE_URL` to
 | SUPABASE_SERVICE_ROLE_KEY |
 | START_CHALLENGE_URL |
 | VAPID_PRIVATE_KEY |
-| QSTASH_TOKEN |
-| QSTASH_URL |
-| QSTASH_CURRENT_SIGNING_KEY |
-| QSTASH_NEXT_SIGNING_KEY |

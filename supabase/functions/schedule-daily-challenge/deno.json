@@ -3,6 +3,6 @@
     "lib": ["deno.ns", "dom"]
   },
   "imports": {
-    "@upstash/qstash": "https://esm.sh/@upstash/qstash@2.8.4"
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.46.1"
   }
 }
