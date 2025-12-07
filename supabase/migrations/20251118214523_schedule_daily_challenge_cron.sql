@@ -1,6 +1,6 @@
 -- Enables HTTP + cron extensions so Postgres can call the edge function on a schedule.
 create extension if not exists "pg_net" with schema "extensions";
-create extension if not exists "pg_cron" with schema "extensions";
+create extension if not exists "pg_cron";
 
 -- Namespace for cron helpers to avoid polluting public schema.
 create schema if not exists "jobs";
@@ -44,12 +44,11 @@ $$;
 comment on function "jobs"."run_schedule_daily_challenge" is
   'Invokes the schedule-daily-challenge Edge Function via pg_net. Requires vault secrets EDGE_FUNCTION_URL & SERVICE_ROLE_KEY.';
 
--- Drop any existing cron job so re-running the migration is idempotent.
 do $$
 begin
   perform cron.unschedule('schedule-daily-challenge');
 exception
-  when undefined_function then
+  when others then
     null;
 end;
 $$;
