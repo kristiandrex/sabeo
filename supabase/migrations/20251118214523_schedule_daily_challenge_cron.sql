@@ -2,17 +2,14 @@
 create extension if not exists "pg_net" with schema "extensions";
 create extension if not exists "pg_cron";
 
--- Namespace for cron helpers to avoid polluting public schema.
-create schema if not exists "jobs";
-
-create table if not exists "jobs"."daily_challenge_schedule" (
+create table if not exists "public"."daily_challenge_schedule" (
   "challenge_day" date primary key,
   "scheduled_run_at" timestamptz not null,
   "triggered_at" timestamptz,
   "challenge_id" bigint references public.challenges(id)
 );
 
-create or replace function "jobs"."run_schedule_daily_challenge"()
+create or replace function "public"."run_schedule_daily_challenge"()
 returns void
 language plpgsql
 security definer
@@ -41,7 +38,7 @@ begin
 end;
 $$;
 
-comment on function "jobs"."run_schedule_daily_challenge" is
+comment on function "public"."run_schedule_daily_challenge" is
   'Invokes the schedule-daily-challenge Edge Function via pg_net. Requires vault secrets EDGE_FUNCTION_URL & SERVICE_ROLE_KEY.';
 
 do $$
@@ -56,5 +53,5 @@ $$;
 select cron.schedule(
   'schedule-daily-challenge',
   '*/10 13-21 * * *',
-  $$ select jobs.run_schedule_daily_challenge(); $$
+  $$ select public.run_schedule_daily_challenge(); $$
 );

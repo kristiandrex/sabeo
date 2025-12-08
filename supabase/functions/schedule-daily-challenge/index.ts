@@ -8,7 +8,6 @@ const {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
-  db: { schema: "jobs" },
 });
 
 const START_HOUR_UTC = 13; // 8:00 a.m. Bogotá
@@ -130,10 +129,10 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({
-      scheduleDay: schedule.challenge_day,
-      scheduledAt: scheduledAt.toISOString(),
+        scheduleDay: schedule.challenge_day,
+        scheduledAt: scheduledAt.toISOString(),
         created,
-      notified: result.ok || result.status === 404,
+        notified: result.ok || result.status === 404,
         status: result.status,
       }),
       { headers: { "content-type": "application/json" } },
