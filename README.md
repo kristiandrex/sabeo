@@ -30,62 +30,38 @@ graph TD
   EdgeFn --> API
 ```
 
-## Structure
-
-```
-sabeo/
-├── src/app              # App Router routes, layouts, API routes, server actions
-├── src/components       # UI modules and primitives under ui/
-├── src/domain           # mecánicas del juego y contratos del dominio
-│   ├── challenge/       # colores, queries del reto, start-challenge
-│   └── ranking/         # tipos + queries del ranking
-├── src/lib              # integraciones (Supabase, auth, env, PWA)
-├── src/hooks            # client state (e.g., useLocalStorage)
-├── scripts              # utilities like process-dictionary
-├── supabase             # edge functions, config, migrations
-└── public               # assets, icons, manifest
-```
-
 ## Local requirements
 
 - Bun
 - Supabase CLI + Docker Engine/Desktop
-- mkcert (`mkcert -install` once for local HTTPS)
-- hunspell (needed for `process-dictionary`)
+- Deno (for Supabase Edge Functions)
+- mkcert (`mkcert -install` once for local HTTPS); on macOS it may not be needed, install only if dev HTTPS fails.
+- hunspell (only needed if you re-run `process-dictionary`)
 
-## Dictionary
+## Development setup
 
-Edit `data/dictionary-es.txt` and run `bun run process-dictionary` to rebuild the Hunspell-based word list.
+- Install dependencies: `bun install`.
+- Run the app: `bun run dev` (HTTPS; reinstall certs with `mkcert -install` if needed).
+- Dictionary: edit `data/dictionary-es.txt` and run `bun run process-dictionary` to regenerate the word list (requires hunspell).
+
+## Supabase setup
+
+- Authenticate and link once: `supabase login` then `supabase link --project-ref <project_ref>`. After linking, omit `--project-ref` in the remaining commands.
+- Start local stack: `supabase start`.
+- Local migrations: after creating files under `supabase/migrations`, apply locally with `supabase db reset` (recreates local state).
+- Remote migrations: `supabase db up` (uses the linked project).
+- Edge Function `schedule-daily-challenge`: serve locally with `supabase functions serve schedule-daily-challenge --env-file .env`; deploy with `supabase functions deploy schedule-daily-challenge --import-map supabase/functions/schedule-daily-challenge/deno.json --env-file .env.production`.
+- Cron definition lives in `supabase/migrations/20251118214523_schedule_daily_challenge_cron.sql` and invokes the Edge Function via pg\_cron/pg\_net.
+
+### Supabase secrets
+
+- Supabase Vault (for pg\_cron): exact names `EDGE_FUNCTION_URL` and `SERVICE_ROLE_KEY` (used by `run_schedule_daily_challenge`), plus VAPID keys if needed by other functions.
+- Edge Function env (for `schedule-daily-challenge`): `START_CHALLENGE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_URL`. Authorization headers use `SUPABASE_SERVICE_ROLE_KEY`, so keep casing/names consistent with Vault.
+- Google auth: set up Google in the Supabase dashboard following https://supabase.com/docs/guides/auth/social-login/auth-google and provide `SUPABASE_AUTH_GOOGLE_CLIENT_ID` / `SUPABASE_AUTH_GOOGLE_SECRET` (Google Cloud Console) in Supabase and your local `.env`.
 
 ## Push notifications
 
 Generate VAPID keys with `bunx web-push generate-vapid-keys --json` and copy the values into your environment before hitting `/api/subscribe` or `/api/notify`.
-
-## Daily cron
-
-Iterate locally with `supabase functions serve schedule-daily-challenge --env-file .env`.
-
-### Production schedule via pg\_cron
-
-El cron en producción (pg\_cron + pg\_net) llama al Edge Function cada 10 minutos dentro de la ventana 08:00–16:00 (Bogotá). El Edge Function guarda en `jobs.daily_challenge_schedule` el día y la hora aleatoria que le tocó a ese reto y, cuando llega ese timestamp, hace un POST a `/api/start-challenge`. Ese API route aplica penalidades, marca el siguiente reto como iniciado y dispara las notificaciones push. Con esto la arquitectura queda:
-
-- **pg\_cron**: temporizador que invoca `jobs.run_schedule_daily_challenge`.
-- **Edge Function**: decide la hora aleatoria diaria, persiste el registro y dispara `/api/start-challenge` cuando corresponde.
-- **Next.js API (`/api/start-challenge`)**: lógica central para activar el reto y enviar notificaciones; también sirve como fallback manual si necesitas iniciar un challenge sin pasar por el cron.
-- **Supabase Vault**: guarda `schedule_daily_challenge_url` (URL completa del Edge Function) y `service_role_key`, claves que la función usa para autenticarse.
-
-### Edge function deploy
-
-Deploy the Edge Function (needed so pg\_cron has something to invoke) and ensure `SUPABASE_SERVICE_ROLE_KEY` is available when deploying:
-
-```bash
-supabase functions deploy schedule-daily-challenge \
-  --project-ref <project_ref> \
-  --import-map supabase/functions/schedule-daily-challenge/deno.json \
-  --env-file .env.production
-```
-
-Keep Supabase and Vercel secrets in sync. Set `START_CHALLENGE_URL` to your deployed host (e.g., `https://sabeo.vercel.app`) so the Edge Function can hit the API.
 
 ## Environment variables
 
@@ -94,6 +70,19 @@ Keep Supabase and Vercel secrets in sync. Set `START_CHALLENGE_URL` to your depl
 | NEXT_PUBLIC_SUPABASE_URL |
 | NEXT_PUBLIC_SUPABASE_ANON_KEY |
 | NEXT_PUBLIC_VAPID_PUBLIC_KEY |
+| SUPABASE_URL |
 | SUPABASE_SERVICE_ROLE_KEY |
 | START_CHALLENGE_URL |
 | VAPID_PRIVATE_KEY |
+| SUPABASE_AUTH_GOOGLE_CLIENT_ID |
+| SUPABASE_AUTH_GOOGLE_SECRET |
+
+## Ranking rules
+
+Ranking behavior is defined in `supabase/migrations/20251116055924_change_ranking_system.sql` and consumed by `src/domain/ranking/queries.ts`.
+
+- Base scoring: each completed daily challenge grants 1 point; `award_season_points_trigger` on `challenges_completed` updates `season_scores`.
+- Fast bonus: +1 if the challenge is finished within 60 seconds of first opening it (tracked in `challenge_sessions` via `register_challenge_open`).
+- Streak bonus: consecutive daily completions increment `current_streak`; when the streak grows and that streak day hasn’t been rewarded yet, +1 is added. Missing a day breaks the streak and restarts it on the next play (no points are subtracted when the streak breaks).
+- Inactivity penalty: `apply_inactivity_penalties` increments `missed_in_a_row` for days without play and, starting on the 4th consecutive miss, subtracts 1 point per check (floored at 0) and clears fast bonus flags.
+- Ranking query: `get_active_season_ranking` orders by `season_points` desc, then `current_streak` desc, then `updated_at` asc. Keep migrations and query logic aligned whenever the formula changes.
