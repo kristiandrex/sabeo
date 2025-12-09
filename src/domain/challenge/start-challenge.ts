@@ -31,7 +31,7 @@ export type StartChallengeResult =
   | StartChallengeNotFound
   | StartChallengeError;
 
-export async function runStartChallenge(): Promise<StartChallengeResult> {
+export async function startChallenge(): Promise<StartChallengeResult> {
   const supabase = await createServiceClient();
 
   const { error: penaltiesError } = await supabase.rpc(

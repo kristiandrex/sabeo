@@ -16,30 +16,31 @@ security definer
 set search_path = extensions, public
 as $$
 declare
-  EDGE_FUNCTION_URL text;
-  SERVICE_ROLE_KEY text;
+  SCHEDULE_DAILY_CHALLENGE_URL text;
+  SUPABASE_SERVICE_ROLE_KEY text;
 begin
   select decrypted_secret
-    into EDGE_FUNCTION_URL
+    into SCHEDULE_DAILY_CHALLENGE_URL
     from vault.decrypted_secrets
-   where name = 'EDGE_FUNCTION_URL';
+   where name = 'SCHEDULE_DAILY_CHALLENGE_URL';
 
   select decrypted_secret
-    into SERVICE_ROLE_KEY
+    into SUPABASE_SERVICE_ROLE_KEY
     from vault.decrypted_secrets
-   where name = 'SERVICE_ROLE_KEY';
+   where name = 'SUPABASE_SERVICE_ROLE_KEY';
 
-  perform net.http_post(
-    url := EDGE_FUNCTION_URL,
-    headers := jsonb_build_object(
-      'Authorization', 'Bearer ' || SERVICE_ROLE_KEY
-    )
-  );
+   perform net.http_post(
+     url := SCHEDULE_DAILY_CHALLENGE_URL,
+     headers := jsonb_build_object(
+       'Authorization', 'Bearer ' || SUPABASE_SERVICE_ROLE_KEY,
+       'Content-Type', 'application/json'
+     )
+   );
 end;
 $$;
 
 comment on function "public"."run_schedule_daily_challenge" is
-  'Invokes the schedule-daily-challenge Edge Function via pg_net. Requires vault secrets EDGE_FUNCTION_URL & SERVICE_ROLE_KEY.';
+  'Invokes the schedule-daily-challenge Next API route via pg_net. Requires vault secrets SCHEDULE_DAILY_CHALLENGE_URL & SUPABASE_SERVICE_ROLE_KEY.';
 
 do $$
 begin

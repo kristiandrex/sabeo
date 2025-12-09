@@ -1,6 +1,6 @@
 import { after, type NextRequest } from "next/server";
 
-import { runStartChallenge } from "#/domain/challenge/start-challenge";
+import { startChallenge } from "#/domain/challenge/start-challenge";
 
 const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const result = await runStartChallenge();
+    const result = await startChallenge();
 
     if (result.status === "error") {
       throw new Error(result.message);

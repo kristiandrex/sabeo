@@ -1,11 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
+import { after, type NextRequest } from "next/server";
 
-const { START_CHALLENGE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL } =
-  Deno.env.toObject();
+import { startChallenge } from "#/domain/challenge/start-challenge";
+import { createServiceClient } from "#/lib/supabase/server";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+type ServiceSupabaseClient = Awaited<ReturnType<typeof createServiceClient>>;
 
 const START_HOUR_UTC = 13; // 8:00 a.m. Bogotá
 const SLOT_MINUTES = 10;
@@ -29,7 +27,7 @@ function getRandomRunAt(nowUtc: Date): Date {
   return new Date(startOfWindow + slot * SLOT_MINUTES * 60_000);
 }
 
-async function findPendingChallengeId(): Promise<number | null> {
+async function findPendingChallengeId(supabase: ServiceSupabaseClient) {
   const { data, error } = await supabase
     .from("challenges")
     .select("id")
@@ -45,7 +43,11 @@ async function findPendingChallengeId(): Promise<number | null> {
   return data?.id ?? null;
 }
 
-async function ensureSchedule(nowUtc: Date, challengeId: number) {
+async function ensureSchedule(
+  supabase: ServiceSupabaseClient,
+  nowUtc: Date,
+  challengeId: number,
+) {
   const challengeDay = getScheduleDay(nowUtc);
 
   const existing = await supabase
@@ -85,10 +87,14 @@ async function ensureSchedule(nowUtc: Date, challengeId: number) {
   return { schedule: inserted.data, created: true };
 }
 
-async function markNotified(challengeDay: string, challengeId?: number) {
+async function markNotified(
+  supabase: ServiceSupabaseClient,
+  challengeDay: string,
+  challengeId?: number,
+) {
   const payload = {
     triggered_at: new Date().toISOString(),
-    ...(challengeId !== undefined ? { challenge_id: challengeId } : {}),
+    challenge_id: challengeId,
   };
 
   const result = await supabase
@@ -101,56 +107,46 @@ async function markNotified(challengeDay: string, challengeId?: number) {
   }
 }
 
-async function triggerStartChallenge() {
-  const response = await fetch(START_CHALLENGE_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-    },
-  });
+export async function POST(req: NextRequest) {
+  const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
-  const body = response.ok ? await response.json() : null;
-
-  return {
-    ok: response.ok,
-    status: response.status,
-    challengeId: body?.challengeId as number | undefined,
-  };
-}
-
-Deno.serve(async (req) => {
-  if (
-    req.headers.get("authorization") !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
-  ) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const nowUtc = new Date();
-  const challengeDay = getScheduleDay(nowUtc);
-
-  const existing = await supabase
-    .from("daily_challenge_schedule")
-    .select("challenge_day,scheduled_run_at,triggered_at,challenge_id")
-    .eq("challenge_day", challengeDay)
-    .maybeSingle();
-
-  if (existing.error) {
-    console.error("schedule-daily-challenge failed", existing.error);
-    return new Response(
-      JSON.stringify({ message: "schedule-daily-challenge failed" }),
-      {
-        status: 500,
-        headers: { "content-type": "application/json" },
-      },
-    );
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    return new Response("Missing configuration", { status: 500 });
   }
 
   try {
+    const authorization = req.headers.get("authorization");
+
+    if (authorization !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
+    const supabase = await createServiceClient();
+    const nowUtc = new Date();
+    const challengeDay = getScheduleDay(nowUtc);
+
+    const existing = await supabase
+      .from("daily_challenge_schedule")
+      .select("challenge_day,scheduled_run_at,triggered_at,challenge_id")
+      .eq("challenge_day", challengeDay)
+      .maybeSingle();
+
+    if (existing.error) {
+      console.error("schedule-daily-challenge failed", existing.error);
+      return new Response(
+        JSON.stringify({ message: "schedule-daily-challenge failed" }),
+        {
+          status: 500,
+          headers: { "content-type": "application/json" },
+        },
+      );
+    }
+
     let schedule = existing.data;
     let created = false;
 
     if (!schedule) {
-      const pendingChallengeId = await findPendingChallengeId();
+      const pendingChallengeId = await findPendingChallengeId(supabase);
 
       if (!pendingChallengeId) {
         const { error: insertError } = await supabase
@@ -177,7 +173,11 @@ Deno.serve(async (req) => {
         );
       }
 
-      const ensured = await ensureSchedule(nowUtc, pendingChallengeId);
+      const ensured = await ensureSchedule(
+        supabase,
+        nowUtc,
+        pendingChallengeId,
+      );
       schedule = ensured.schedule;
       created = ensured.created;
     }
@@ -213,22 +213,33 @@ Deno.serve(async (req) => {
       );
     }
 
-    const result = await triggerStartChallenge();
+    const result = await startChallenge();
 
-    if (result.ok) {
-      await markNotified(schedule.challenge_day, result.challengeId);
+    if (result.status === "success") {
+      await markNotified(supabase, schedule.challenge_day, result.challengeId);
+
+      after(async () => {
+        await result.notifications;
+      });
     }
 
     const state =
-      result.status === 404 ? "no_challenge" : result.ok ? "notified" : "error";
+      result.status === "not_found"
+        ? "no_challenge"
+        : result.status === "success"
+          ? "notified"
+          : "error";
 
     return new Response(
       JSON.stringify({
         scheduleDay: schedule.challenge_day,
         scheduledAt: scheduledAt.toISOString(),
         created,
-        notified: result.ok || result.status === 404,
-        challengeId: result.challengeId ?? schedule.challenge_id ?? null,
+        notified: result.status !== "error",
+        challengeId:
+          result.status === "success"
+            ? result.challengeId
+            : (schedule.challenge_id ?? null),
         state,
       }),
       { headers: { "content-type": "application/json" } },
@@ -244,4 +255,4 @@ Deno.serve(async (req) => {
       },
     );
   }
-});
+}

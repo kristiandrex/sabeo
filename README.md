@@ -26,8 +26,7 @@ graph TD
   App --> PWA[Service Worker]
   API --> Supabase
   PWA --> App
-  Cron[(pg_cron)] --> EdgeFn[Edge Function]
-  EdgeFn --> API
+  Cron[(pg_cron)] --> API
 ```
 
 ## Local requirements
@@ -50,13 +49,12 @@ graph TD
 - Start local stack: `supabase start`.
 - Local migrations: after creating files under `supabase/migrations`, apply locally with `supabase db reset` (recreates local state).
 - Remote migrations: `supabase db up` (uses the linked project).
-- Edge Function `schedule-daily-challenge`: serve locally with `supabase functions serve schedule-daily-challenge --env-file .env`; deploy with `supabase functions deploy schedule-daily-challenge --import-map supabase/functions/schedule-daily-challenge/deno.json --env-file .env.production`.
-- Cron definition lives in `supabase/migrations/20251118214523_schedule_daily_challenge_cron.sql` and invokes the Edge Function via pg\_cron/pg\_net.
+- Daily challenge scheduling is handled by the Next API route `/api/schedule-daily-challenge`.
+- Cron definition lives in `supabase/migrations/20251118214523_schedule_daily_challenge_cron.sql` and invokes the Next API route via pg\_cron/pg\_net.
 
 ### Supabase secrets
 
-- Supabase Vault (for pg\_cron): exact names `EDGE_FUNCTION_URL` and `SERVICE_ROLE_KEY` (used by `run_schedule_daily_challenge`), plus VAPID keys if needed by other functions.
-- Edge Function env (for `schedule-daily-challenge`): `START_CHALLENGE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_URL`. Authorization headers use `SUPABASE_SERVICE_ROLE_KEY`, so keep casing/names consistent with Vault.
+- Supabase Vault (for pg\_cron): exact names `SCHEDULE_DAILY_CHALLENGE_URL` (pointing to the Next API route) and `SUPABASE_SERVICE_ROLE_KEY` (used by `run_schedule_daily_challenge`), plus VAPID keys if needed by other functions.
 - Google auth: set up Google in the Supabase dashboard following https://supabase.com/docs/guides/auth/social-login/auth-google and provide `SUPABASE_AUTH_GOOGLE_CLIENT_ID` / `SUPABASE_AUTH_GOOGLE_SECRET` (Google Cloud Console) in Supabase and your local `.env`.
 
 ## Push notifications
@@ -72,7 +70,6 @@ Generate VAPID keys with `bunx web-push generate-vapid-keys --json` and copy the
 | NEXT_PUBLIC_VAPID_PUBLIC_KEY |
 | SUPABASE_URL |
 | SUPABASE_SERVICE_ROLE_KEY |
-| START_CHALLENGE_URL |
 | VAPID_PRIVATE_KEY |
 | SUPABASE_AUTH_GOOGLE_CLIENT_ID |
 | SUPABASE_AUTH_GOOGLE_SECRET |
