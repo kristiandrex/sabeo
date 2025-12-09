@@ -4,7 +4,7 @@ create extension if not exists "pg_cron";
 
 create table if not exists "public"."daily_challenge_schedule" (
   "challenge_day" date primary key,
-  "scheduled_run_at" timestamptz not null,
+  "scheduled_run_at" timestamptz,
   "triggered_at" timestamptz,
   "challenge_id" bigint references public.challenges(id) on delete cascade
 );
