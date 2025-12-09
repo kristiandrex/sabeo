@@ -14,23 +14,32 @@ export async function POST(req: NextRequest) {
 
     const result = await runStartChallenge();
 
-    if (result.status === "success") {
-      after(async () => {
-        await result.notifications;
-      });
-
-      return new Response(result.message, { status: 200 });
+    if (result.status === "error") {
+      throw new Error(result.message);
     }
 
     if (result.status === "not_found") {
-      return new Response(result.message, { status: 404 });
+      return new Response("Not Found", { status: 404 });
     }
 
-    return new Response(result.message, { status: 500 });
+    after(async () => {
+      await result.notifications;
+    });
+
+    return new Response(
+      JSON.stringify({
+        message: result.message,
+        challengeId: result.challengeId,
+      }),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      },
+    );
   } catch (error) {
     console.error(error);
 
-    return new Response("An error occurred while sending notifications", {
+    return new Response("An error occurred while starting the challenge", {
       status: 500,
     });
   }

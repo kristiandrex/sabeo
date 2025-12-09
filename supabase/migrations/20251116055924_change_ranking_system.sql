@@ -1,5 +1,5 @@
 create table if not exists public.season_scores (
-  player uuid primary key,
+  player uuid primary key references auth.users (id) on delete cascade,
   season_points integer not null default 0,
   current_streak integer not null default 0,
   last_played date,
@@ -12,8 +12,8 @@ create table if not exists public.season_scores (
 comment on table public.season_scores is 'Total points per player for the current ranking season.';
 
 create table if not exists public.challenge_sessions (
-  player uuid not null,
-  challenge_id bigint not null,
+  player uuid not null references auth.users (id) on delete cascade,
+  challenge_id bigint not null references public.challenges (id) on delete cascade,
   opened_at timestamptz not null,
   created_at timestamptz not null default now(),
   constraint challenge_sessions_pkey primary key (player, challenge_id)

@@ -12,6 +12,7 @@ webpush.setVapidDetails(
 type StartChallengeSuccess = {
   status: "success";
   message: string;
+  challengeId: number;
   notifications: Promise<PromiseSettledResult<SendResult>[]>;
 };
 
@@ -113,6 +114,7 @@ export async function runStartChallenge(): Promise<StartChallengeResult> {
   return {
     status: "success",
     message: "Notifications sent",
+    challengeId: challenge.id,
     notifications: notifications,
   };
 }

@@ -6,7 +6,7 @@ create table if not exists "public"."daily_challenge_schedule" (
   "challenge_day" date primary key,
   "scheduled_run_at" timestamptz not null,
   "triggered_at" timestamptz,
-  "challenge_id" bigint references public.challenges(id)
+  "challenge_id" bigint references public.challenges(id) on delete cascade
 );
 
 create or replace function "public"."run_schedule_daily_challenge"()
