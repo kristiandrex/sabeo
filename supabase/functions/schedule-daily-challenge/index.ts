@@ -119,6 +119,8 @@ async function triggerStartChallenge() {
 }
 
 Deno.serve(async (req) => {
+  console.log("Authorization", req.headers.get("authorization"));
+
   if (
     req.headers.get("authorization") !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
   ) {
