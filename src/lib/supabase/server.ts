@@ -16,18 +16,23 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, options),
             );
           } catch (error) {
             console.error(error);
           }
         },
       },
-    }
+    },
   );
 }
 
 export async function createServiceClient() {
+  console.log({
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    NEXT_PUBLIC_SUPABASE_URL_: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  });
+
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -37,6 +42,6 @@ export async function createServiceClient() {
         autoRefreshToken: false,
         detectSessionInUrl: false,
       },
-    }
+    },
   );
 }
