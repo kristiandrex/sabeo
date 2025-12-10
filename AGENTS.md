@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Sabeo is a Next.js App Router workspace. `src/app` hosts route groups and server components, while reusable UI lives under `src/components` and logic under `src/lib`, `src/hooks`, and `src/queries`. Path aliases in `tsconfig.json` expose these modules under `#/...`. Static assets sit in `public/`, and `supabase/` contains edge functions, migrations, and config (see `supabase/functions/schedule-daily-challenge`).
+Sabeo is a Next.js App Router workspace. `src/app` hosts route groups and server components, while reusable UI lives under `src/components` and logic under `src/lib`, `src/hooks`, and `src/queries`. Path aliases in `tsconfig.json` expose these modules under `#/...`. Static assets sit in `public/`, and `supabase/` contains migrations and config.
 
 ## Build, Test, and Development Commands
 - `bun install` — install dependencies; Bun is the canonical package manager here.
@@ -9,7 +9,6 @@ Sabeo is a Next.js App Router workspace. `src/app` hosts route groups and server
 - `bun run build` / `bun run start` — create and serve the production bundle.
 - `bun run lint` — run `eslint.config.mjs` against the whole tree; PRs must pass this.
 - `bun run process-dictionary` — regenerate the Hunspell-based word list before changing dictionary logic.
-- `supabase functions serve schedule-daily-challenge` (from `supabase/`) — iterate on the cron function locally before deploying with `supabase functions deploy`.
 
 ## Coding Style & Naming Conventions
 Code is TypeScript-first with 2-space indentation. Use `PascalCase` for components, `camelCase` for hooks/utilities, and `UPPER_SNAKE_CASE` for constants defined in `src/constants.ts`. Run ESLint before pushing; if needed, use `bun run lint -- --fix` for safe auto-corrections.

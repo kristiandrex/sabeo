@@ -11,15 +11,15 @@ create table if not exists public.season_scores (
 
 comment on table public.season_scores is 'Total points per player for the current ranking season.';
 
-create table if not exists public.challenge_sessions (
+create table if not exists public.challenges_opened (
   player uuid not null references auth.users (id) on delete cascade,
   challenge_id bigint not null references public.challenges (id) on delete cascade,
   opened_at timestamptz not null,
   created_at timestamptz not null default now(),
-  constraint challenge_sessions_pkey primary key (player, challenge_id)
+  constraint challenges_opened_pkey primary key (player, challenge_id)
 );
 
-comment on table public.challenge_sessions is 'Tracks when a player first opened a daily challenge.';
+comment on table public.challenges_opened is 'Tracks when a player first opened a daily challenge.';
 
 -- Poblar season_scores con jugadores existentes (sin season_id)
 insert into public.season_scores (player)
@@ -34,7 +34,7 @@ returns void
 language plpgsql
 as $$
 begin
-  insert into public.challenge_sessions (player, challenge_id, opened_at)
+  insert into public.challenges_opened (player, challenge_id, opened_at)
   values (p_player, p_challenge, now())
   on conflict (player, challenge_id) do nothing;
 end;
@@ -69,7 +69,7 @@ begin
 
   select opened_at
   into v_opened_at
-  from public.challenge_sessions
+  from public.challenges_opened
   where player = new.player
     and challenge_id = new.challenge;
 
