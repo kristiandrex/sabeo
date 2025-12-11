@@ -42,18 +42,30 @@ export default function SettingsRoute() {
   }, []);
 
   useEffect(() => {
-    let active = true;
+    let isMounted = true;
 
     async function initialize() {
-      if (
+      if (!isMounted) return;
+
+      const currentDevice = detectDevice();
+
+      setDevice(currentDevice);
+
+      const requiresStandalone =
+        currentDevice.isIOS && !currentDevice.isStandalone;
+
+      if (requiresStandalone) {
+        return;
+      }
+
+      const missingPushSupport =
         typeof window === "undefined" ||
         !("Notification" in window) ||
         !("serviceWorker" in navigator) ||
-        !("PushManager" in window)
-      ) {
-        if (active) {
-          setStatus("unsupported");
-        }
+        !("PushManager" in window);
+
+      if (missingPushSupport) {
+        setStatus("unsupported");
         return;
       }
 
@@ -61,17 +73,17 @@ export default function SettingsRoute() {
         const subscription = await getExistingSubscription();
         const currentPermission = Notification.permission;
 
-        if (active) {
-          setPermission(currentPermission);
-          setStatus(
-            subscription && currentPermission === "granted"
-              ? "subscribed"
-              : "idle",
-          );
-        }
+        if (!isMounted) return;
+
+        setPermission(currentPermission);
+        setStatus(
+          subscription && currentPermission === "granted"
+            ? "subscribed"
+            : "idle",
+        );
       } catch (error) {
         console.error(error);
-        if (active) {
+        if (isMounted) {
           toast.error("Hubo un problema al cargar la configuración");
         }
       }
@@ -80,7 +92,7 @@ export default function SettingsRoute() {
     initialize();
 
     return () => {
-      active = false;
+      isMounted = false;
     };
   }, []);
 

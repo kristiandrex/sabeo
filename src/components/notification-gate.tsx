@@ -12,6 +12,7 @@ import {
   isMobileDevice,
   isStandaloneMode,
   subscribePlayerToNotifications,
+  unsubscribeFromNotifications,
   watchStandaloneMode,
   type DeviceInfo,
 } from "#/lib/pwa";
@@ -115,6 +116,11 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
     const initialDevice = detectDevice();
     setDevice(initialDevice);
 
+    if (initialDevice.isIOS && !initialDevice.isStandalone) {
+      setShowInstallInstructions(true);
+      setSubscription(null);
+    }
+
     const unsubscribeStandalone = watchStandaloneMode((nextStandalone) => {
       setDevice((prev) =>
         prev
@@ -129,27 +135,46 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
 
     let unsubscribeAuth: (() => void) | undefined;
 
+    async function handleLogin() {
+      if (hasSkippedNotifications) {
+        return;
+      }
+
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        setSubscription(null);
+        return;
+      }
+
+      await registerServiceWorker();
+    }
+
+    async function handleLogout() {
+      try {
+        await unsubscribeFromNotifications();
+        setSubscription(null);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     async function initialize() {
       try {
-        if (
-          !hasSkippedNotifications &&
-          "serviceWorker" in navigator &&
-          "PushManager" in window
-        ) {
-          await registerServiceWorker();
-        }
+        await handleLogin();
 
         const supabase = createClient();
         const {
           data: { subscription: authSubscription },
-        } = supabase.auth.onAuthStateChange((_, _session) => {
-          if (_session) {
-            setSubscription((prev) => prev);
+        } = supabase.auth.onAuthStateChange(async (_, nextSession) => {
+          if (nextSession) {
+            await handleLogin();
+          } else {
+            await handleLogout();
           }
         });
         unsubscribeAuth = () => authSubscription.unsubscribe();
       } catch (error) {
         console.error(error);
+        setSubscription(null);
       }
     }
 
