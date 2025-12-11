@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 
@@ -40,6 +41,7 @@ export default function RootLayout({
           </div>
           <Toaster position="top-center" closeButton visibleToasts={1} />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
