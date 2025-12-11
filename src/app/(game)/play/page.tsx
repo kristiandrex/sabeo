@@ -33,9 +33,14 @@ export default async function PlayPage() {
 
   if (!latestChallenge) {
     return (
-      <div className="flex h-screen items-center justify-center flex-col gap-2">
+      <div className="flex h-screen items-center justify-center flex-col gap-4">
         <h1 className="text-2xl">No hay reto disponible</h1>
-        <Button onClick={reload}>Recargar</Button>
+        <Button
+          onClick={reload}
+          className="h-12 justify-center gap-2 rounded-xl bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+        >
+          Volver a cargar
+        </Button>
       </div>
     );
   }

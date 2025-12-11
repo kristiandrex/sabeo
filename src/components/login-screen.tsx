@@ -77,7 +77,7 @@ export function LoginScreen() {
 
           <div className="flex w-full flex-col items-center gap-3">
             <Button
-              className="h-12 w-full justify-center gap-2 rounded-xl bg-emerald-500 text-base font-semibold text-white hover:bg-emerald-600 disabled:opacity-60"
+              className="h-12 w-full justify-center gap-2 rounded-xl bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
               onClick={handleGoogleSignIn}
               disabled={isSigningIn}
             >
