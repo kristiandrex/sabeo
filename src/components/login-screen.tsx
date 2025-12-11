@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { ClockIcon, CloudIcon, TrophyIcon } from "lucide-react";
+import { BellIcon, TrophyIcon } from "lucide-react";
 
 import { setGuestMode } from "#/app/actions/auth";
 import { Button } from "#/components/ui/button";
@@ -39,48 +39,54 @@ export function LoginScreen() {
             </p>
           </div>
 
-          <div className="grid w-full gap-2">
-            <div className="rounded-xl border border-gray-200 bg-white p-3 text-left shadow-[0_8px_18px_rgba(24,94,32,0.05)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
-                  <ClockIcon className="h-4 w-4" strokeWidth={2.5} />
-                </div>
-                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Reto sorpresa diario
-                </h2>
-              </div>
-            </div>
+          <div className="grid w-full gap-6">
+            <p className="text-center text-sm text-slate-500 dark:text-slate-300">
+              Inicia sesión para mejorar tu experiencia de juego:
+            </p>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-3 text-left shadow-[0_8px_18px_rgba(24,94,32,0.05)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
-                  <TrophyIcon className="h-4 w-4" strokeWidth={2.5} />
+            <div className="space-y-2">
+              <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900/50">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900">
+                  <BellIcon className="h-5 w-5" strokeWidth={2.25} />
                 </div>
-                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Sube al ranking
-                </h2>
+                <div className="space-y-0.5 text-left">
+                  <p className="text-base font-semibold text-slate-900 dark:text-white">
+                    Notificaciones
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-300/80">
+                    Te avisamos cuando salga un nuevo reto
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-3 text-left shadow-[0_8px_18px_rgba(24,94,32,0.05)] dark:border-zinc-800 dark:bg-slate-950/40 dark:shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 text-green-600 shadow-inner dark:bg-green-950/30 dark:text-green-300">
-                  <CloudIcon className="h-4 w-4" strokeWidth={2.5} />
+              <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900/50">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber-500 ring-1 ring-inset ring-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900">
+                  <TrophyIcon className="h-5 w-5" strokeWidth={2.25} />
                 </div>
-                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Inicia sesión y guarda tu progreso
-                </h2>
+                <div className="space-y-0.5 text-left">
+                  <p className="text-base font-semibold text-slate-900 dark:text-white">
+                    Ranking
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-300/80">
+                    Suma puntos según tu racha y velocidad
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="flex w-full flex-col items-center gap-3">
             <Button
-              className="h-11 w-full bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+              className="h-12 w-full justify-center gap-2 rounded-xl bg-emerald-500 text-base font-semibold text-white hover:bg-emerald-600 disabled:opacity-60"
               onClick={handleGoogleSignIn}
               disabled={isSigningIn}
             >
-              <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="none">
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="white"
@@ -104,7 +110,7 @@ export function LoginScreen() {
             <form action={setGuestMode} className="w-full">
               <Button
                 variant="outline"
-                className="h-11 w-full border border-gray-200 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
+                className="h-12 w-full justify-center rounded-xl border border-slate-100 bg-white text-base text-slate-500 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:hover:bg-white/10"
                 type="submit"
                 disabled={isSigningIn}
               >
