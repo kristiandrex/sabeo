@@ -1,6 +1,5 @@
-import { after, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 
-import { startChallenge } from "#/domain/challenge/start-challenge";
 import { createServiceClient } from "#/lib/supabase/server";
 
 type ServiceSupabaseClient = Awaited<ReturnType<typeof createServiceClient>>;
@@ -87,38 +86,24 @@ async function ensureSchedule(
   return { schedule: inserted.data, created: true };
 }
 
-async function markNotified(
-  supabase: ServiceSupabaseClient,
-  challengeDay: string,
-  challengeId?: number,
-) {
-  const payload = {
-    triggered_at: new Date().toISOString(),
-    challenge_id: challengeId,
-  };
-
-  const result = await supabase
-    .from("daily_challenge_schedule")
-    .update(payload)
-    .eq("challenge_day", challengeDay);
-
-  if (result.error) {
-    throw result.error;
-  }
-}
-
 export async function POST(req: NextRequest) {
   const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
   if (!SUPABASE_SERVICE_ROLE_KEY) {
-    return new Response("Missing configuration", { status: 500 });
+    return new Response(
+      JSON.stringify({ message: "Missing configuration" }),
+      { status: 500, headers: { "content-type": "application/json" } },
+    );
   }
 
   try {
     const authorization = req.headers.get("authorization");
 
     if (authorization !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
-      return new Response("Unauthorized", { status: 401 });
+      return new Response(
+        JSON.stringify({ message: "Unauthorized" }),
+        { status: 401, headers: { "content-type": "application/json" } },
+      );
     }
 
     const supabase = await createServiceClient();
@@ -134,16 +119,14 @@ export async function POST(req: NextRequest) {
     if (existing.error) {
       console.error("schedule-daily-challenge failed", existing.error);
       return new Response(
-        JSON.stringify({ message: "schedule-daily-challenge failed" }),
-        {
-          status: 500,
-          headers: { "content-type": "application/json" },
-        },
+        JSON.stringify({
+          message: "An error occurred while scheduling the challenge",
+        }),
+        { status: 500, headers: { "content-type": "application/json" } },
       );
     }
 
     let schedule = existing.data;
-    let created = false;
 
     if (!schedule) {
       const pendingChallengeId = await findPendingChallengeId(supabase);
@@ -162,14 +145,8 @@ export async function POST(req: NextRequest) {
         }
 
         return new Response(
-          JSON.stringify({
-            scheduleDay: challengeDay,
-            created: true,
-            notified: false,
-            state: "no_challenge",
-            challengeId: null,
-          }),
-          { headers: { "content-type": "application/json" } },
+          JSON.stringify({ message: "No challenge available" }),
+          { status: 404, headers: { "content-type": "application/json" } },
         );
       }
 
@@ -179,68 +156,21 @@ export async function POST(req: NextRequest) {
         pendingChallengeId,
       );
       schedule = ensured.schedule;
-      created = ensured.created;
     }
 
-    if (schedule.scheduled_run_at === null) {
+    if (!schedule.scheduled_run_at) {
       return new Response(
-        JSON.stringify({
-          scheduleDay: schedule.challenge_day,
-          created,
-          notified: Boolean(schedule.triggered_at),
-          state: "no_challenge",
-          challengeId: schedule.challenge_id ?? null,
-        }),
-        { headers: { "content-type": "application/json" } },
+        JSON.stringify({ message: "No schedule available" }),
+        { status: 404, headers: { "content-type": "application/json" } },
       );
     }
 
     const scheduledAt = new Date(schedule.scheduled_run_at);
-    const shouldNotify = !schedule.triggered_at && nowUtc >= scheduledAt;
-
-    if (!shouldNotify) {
-      const state = schedule.triggered_at ? "notified" : "pending";
-      return new Response(
-        JSON.stringify({
-          scheduleDay: schedule.challenge_day,
-          scheduledAt: scheduledAt.toISOString(),
-          created,
-          notified: Boolean(schedule.triggered_at),
-          state,
-          challengeId: schedule.challenge_id ?? null,
-        }),
-        { headers: { "content-type": "application/json" } },
-      );
-    }
-
-    const result = await startChallenge();
-
-    if (result.status === "success") {
-      await markNotified(supabase, schedule.challenge_day, result.challengeId);
-
-      after(async () => {
-        await result.notifications;
-      });
-    }
-
-    const state =
-      result.status === "not_found"
-        ? "no_challenge"
-        : result.status === "success"
-          ? "notified"
-          : "error";
 
     return new Response(
       JSON.stringify({
         scheduleDay: schedule.challenge_day,
         scheduledAt: scheduledAt.toISOString(),
-        created,
-        notified: result.status !== "error",
-        challengeId:
-          result.status === "success"
-            ? result.challengeId
-            : (schedule.challenge_id ?? null),
-        state,
       }),
       { headers: { "content-type": "application/json" } },
     );
@@ -248,11 +178,10 @@ export async function POST(req: NextRequest) {
     console.error("schedule-daily-challenge failed", error);
 
     return new Response(
-      JSON.stringify({ message: "schedule-daily-challenge failed" }),
-      {
-        status: 500,
-        headers: { "content-type": "application/json" },
-      },
+      JSON.stringify({
+        message: "An error occurred while scheduling the challenge",
+      }),
+      { status: 500, headers: { "content-type": "application/json" } },
     );
   }
 }
