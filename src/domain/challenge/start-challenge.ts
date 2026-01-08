@@ -34,18 +34,6 @@ export type StartChallengeResult =
 export async function startChallenge(): Promise<StartChallengeResult> {
   const supabase = await createServiceClient();
 
-  const { error: penaltiesError } = await supabase.rpc(
-    "apply_inactivity_penalties",
-  );
-
-  if (penaltiesError) {
-    console.error("Failed to apply inactivity penalties", penaltiesError);
-    return {
-      status: "error",
-      message: "Failed to apply inactivity penalties",
-    };
-  }
-
   const { data: challenge, error: challengeError } = await supabase
     .from("challenges")
     .select("*")
