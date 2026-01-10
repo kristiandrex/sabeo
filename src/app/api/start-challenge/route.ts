@@ -9,7 +9,7 @@ function getScheduleDay(nowUtc: Date): string {
   return nowUtc.toISOString().slice(0, 10);
 }
 
-async function fetchTodaySchedule(
+async function getTodaySchedule(
   supabase: ServiceSupabaseClient,
   challengeDay: string,
 ) {
@@ -29,7 +29,7 @@ async function fetchTodaySchedule(
 async function markTriggered(
   supabase: ServiceSupabaseClient,
   challengeDay: string,
-  challengeId?: number,
+  challengeId: number,
 ) {
   const payload = {
     triggered_at: new Date().toISOString(),
@@ -51,26 +51,26 @@ export async function POST(req: NextRequest) {
   const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
   if (!SUPABASE_SERVICE_ROLE_KEY) {
-    return new Response(
-      JSON.stringify({ message: "Missing configuration" }),
-      { status: 500, headers: { "content-type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ message: "Missing configuration" }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
   }
 
   try {
     const authorization = req.headers.get("authorization");
 
     if (authorization !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
-      return new Response(
-        JSON.stringify({ message: "Unauthorized" }),
-        { status: 401, headers: { "content-type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+        headers: { "content-type": "application/json" },
+      });
     }
 
     const supabase = await createServiceClient();
     const nowUtc = new Date();
     const challengeDay = getScheduleDay(nowUtc);
-    const schedule = await fetchTodaySchedule(supabase, challengeDay);
+    const schedule = await getTodaySchedule(supabase, challengeDay);
 
     if (!schedule || schedule.scheduled_run_at === null) {
       return new Response(

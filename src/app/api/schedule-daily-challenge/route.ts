@@ -26,6 +26,32 @@ function getRandomRunAt(nowUtc: Date): Date {
   return new Date(startOfWindow + slot * SLOT_MINUTES * 60_000);
 }
 
+function buildScheduleResponse(schedule: {
+  challenge_day: string;
+  scheduled_run_at: string | null;
+  challenge_id: number | null;
+  message?: string | null;
+}) {
+  if (!schedule.scheduled_run_at) {
+    return new Response(JSON.stringify({ message: "No schedule available" }), {
+      status: 404,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  const scheduledAt = new Date(schedule.scheduled_run_at);
+
+  return new Response(
+    JSON.stringify({
+      scheduleDay: schedule.challenge_day,
+      scheduledAt: scheduledAt.toISOString(),
+      challengeId: schedule.challenge_id,
+      message: schedule.message,
+    }),
+    { headers: { "content-type": "application/json" } },
+  );
+}
+
 async function findPendingChallengeId(supabase: ServiceSupabaseClient) {
   const { data, error } = await supabase
     .from("challenges")
@@ -46,12 +72,13 @@ async function ensureSchedule(
   supabase: ServiceSupabaseClient,
   nowUtc: Date,
   challengeId: number,
+  message?: string,
 ) {
   const challengeDay = getScheduleDay(nowUtc);
 
   const existing = await supabase
     .from("daily_challenge_schedule")
-    .select("challenge_day,scheduled_run_at,triggered_at,challenge_id")
+    .select("challenge_day,scheduled_run_at,triggered_at,challenge_id,message")
     .eq("challenge_day", challengeDay)
     .maybeSingle();
 
@@ -65,14 +92,17 @@ async function ensureSchedule(
 
   const scheduledAt = getRandomRunAt(nowUtc).toISOString();
 
+  const insertPayload = {
+    challenge_day: challengeDay,
+    scheduled_run_at: scheduledAt,
+    challenge_id: challengeId,
+    message,
+  };
+
   const inserted = await supabase
     .from("daily_challenge_schedule")
-    .upsert({
-      challenge_day: challengeDay,
-      scheduled_run_at: scheduledAt,
-      challenge_id: challengeId,
-    })
-    .select("challenge_day,scheduled_run_at,triggered_at,challenge_id")
+    .upsert(insertPayload)
+    .select("challenge_day,scheduled_run_at,triggered_at,challenge_id,message")
     .maybeSingle();
 
   if (inserted.error) {
@@ -90,34 +120,40 @@ export async function POST(req: NextRequest) {
   const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
   if (!SUPABASE_SERVICE_ROLE_KEY) {
-    return new Response(
-      JSON.stringify({ message: "Missing configuration" }),
-      { status: 500, headers: { "content-type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ message: "Missing configuration" }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
   }
 
   try {
     const authorization = req.headers.get("authorization");
 
     if (authorization !== `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`) {
-      return new Response(
-        JSON.stringify({ message: "Unauthorized" }),
-        { status: 401, headers: { "content-type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+        headers: { "content-type": "application/json" },
+      });
     }
 
     const supabase = await createServiceClient();
+    const body = (await req.json().catch(() => ({}))) ?? {};
+
+    const message = body.message;
     const nowUtc = new Date();
     const challengeDay = getScheduleDay(nowUtc);
 
     const existing = await supabase
       .from("daily_challenge_schedule")
-      .select("challenge_day,scheduled_run_at,triggered_at,challenge_id")
+      .select(
+        "challenge_day,scheduled_run_at,triggered_at,challenge_id,message",
+      )
       .eq("challenge_day", challengeDay)
       .maybeSingle();
 
     if (existing.error) {
       console.error("schedule-daily-challenge failed", existing.error);
+
       return new Response(
         JSON.stringify({
           message: "An error occurred while scheduling the challenge",
@@ -128,52 +164,59 @@ export async function POST(req: NextRequest) {
 
     let schedule = existing.data;
 
-    if (!schedule) {
-      const pendingChallengeId = await findPendingChallengeId(supabase);
+    if (schedule) {
+      const updated = await supabase
+        .from("daily_challenge_schedule")
+        .update({ message })
+        .eq("challenge_day", challengeDay)
+        .select(
+          "challenge_day,scheduled_run_at,triggered_at,challenge_id,message",
+        )
+        .maybeSingle();
 
-      if (!pendingChallengeId) {
-        const { error: insertError } = await supabase
-          .from("daily_challenge_schedule")
-          .insert({
-            challenge_day: challengeDay,
-            scheduled_run_at: null,
-            triggered_at: null,
-          });
-
-        if (insertError) {
-          throw insertError;
-        }
-
-        return new Response(
-          JSON.stringify({ message: "No challenge available" }),
-          { status: 404, headers: { "content-type": "application/json" } },
-        );
+      if (updated.error) {
+        throw updated.error;
       }
 
-      const ensured = await ensureSchedule(
-        supabase,
-        nowUtc,
-        pendingChallengeId,
-      );
-      schedule = ensured.schedule;
+      if (updated.data) {
+        schedule = updated.data;
+      }
+
+      return buildScheduleResponse(schedule);
     }
 
-    if (!schedule.scheduled_run_at) {
+    const pendingChallengeId = await findPendingChallengeId(supabase);
+
+    if (!pendingChallengeId) {
+      const insertPayload = {
+        challenge_day: challengeDay,
+        scheduled_run_at: null,
+        triggered_at: null,
+      };
+
+      const { error: insertError } = await supabase
+        .from("daily_challenge_schedule")
+        .insert(insertPayload);
+
+      if (insertError) {
+        throw insertError;
+      }
+
       return new Response(
-        JSON.stringify({ message: "No schedule available" }),
+        JSON.stringify({ message: "No challenge available" }),
         { status: 404, headers: { "content-type": "application/json" } },
       );
     }
 
-    const scheduledAt = new Date(schedule.scheduled_run_at);
-
-    return new Response(
-      JSON.stringify({
-        scheduleDay: schedule.challenge_day,
-        scheduledAt: scheduledAt.toISOString(),
-      }),
-      { headers: { "content-type": "application/json" } },
+    const ensured = await ensureSchedule(
+      supabase,
+      nowUtc,
+      pendingChallengeId,
+      message,
     );
+    schedule = ensured.schedule;
+
+    return buildScheduleResponse(schedule);
   } catch (error) {
     console.error("schedule-daily-challenge failed", error);
 

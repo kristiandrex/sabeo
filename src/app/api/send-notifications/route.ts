@@ -12,6 +12,13 @@ webpush.setVapidDetails(
 export async function POST(req: NextRequest) {
   const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json(
+      { error: "Missing configuration" },
+      { status: 500 },
+    );
+  }
+
   try {
     const authorization = req.headers.get("authorization");
 

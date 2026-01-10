@@ -31,8 +31,38 @@ export type StartChallengeResult =
   | StartChallengeNotFound
   | StartChallengeError;
 
+function getScheduleDay(nowUtc: Date): string {
+  return nowUtc.toISOString().slice(0, 10);
+}
+
 export async function startChallenge(): Promise<StartChallengeResult> {
   const supabase = await createServiceClient();
+  const nowUtc = new Date();
+  const challengeDay = getScheduleDay(nowUtc);
+
+  const scheduleResult = await supabase
+    .from("daily_challenge_schedule")
+    .select("message")
+    .eq("challenge_day", challengeDay)
+    .maybeSingle();
+
+  if (scheduleResult.error) {
+    console.error("Failed to fetch schedule", scheduleResult.error);
+
+    return {
+      status: "error",
+      message: "An error occurred while fetching the schedule",
+    };
+  }
+
+  if (!scheduleResult.data) {
+    return {
+      status: "error",
+      message: "No schedule available",
+    };
+  }
+
+  const message = scheduleResult.data.message;
 
   const { data: challenge, error: challengeError } = await supabase
     .from("challenges")
@@ -87,8 +117,8 @@ export async function startChallenge(): Promise<StartChallengeResult> {
         .sendNotification(
           sub,
           JSON.stringify({
-            title: "Sabeo",
-            body: "¡Hay un nuevo reto!",
+            title: "¡Hay un nuevo reto!",
+            body: message,
             icon: "/icon-512x512.png",
           }),
         )

@@ -20,23 +20,36 @@ A side project, definitely-not-original and probably overengineered, inspired by
 ## Architecture
 
 ```mermaid
-flowchart TD
-  subgraph "Next.js"
-    Client["Client UI"]
-    API["API Routes (server)"]
-    SW[Service Worker]
+sequenceDiagram
+  actor User
+  participant SW as Service Worker
+  
+  box Next.js App
+    participant UI as Client
+    participant API as API Routes
   end
-
-  subgraph "Supabase"
-    DB["Supabase DB + Auth"]
-    Cron["pg_cron scheduler"]
+  
+  box Supabase
+    participant DB as Database
+    participant Cron as pg_cron
   end
-
-  Client -->|reads/writes gameplay via| API
-  Client -->|push subscription| SW
-  SW -->|push notifications with| API
-  API -->|game state + auth| DB
-  Cron -->|calls daily challenge endpoint| API
+  
+  participant Push as Push Service
+  
+  Note over User,API: Subscription Flow
+  User->>UI: Enable notifications
+  UI->>SW: Request subscription
+  SW-->>API: POST /api/subscribe
+  API->>DB: Store subscription
+  
+  Note over Cron,API: Schedule challenge with random time (8AM-4PM COT)
+  Cron->>API: POST /api/schedule-daily-challenge
+  
+  Note over Push,API: At scheduled time start challenge and send notifications
+  Cron->>API: POST /api/start-challenge
+  API->>Push: Send notifications payload
+  Push->>SW: Deliver push
+  SW->>User: Show notification
 ```
 
 ## Local requirements
@@ -58,13 +71,19 @@ flowchart TD
 - Start local stack: `supabase start`.
 - Local migrations: after creating files under `supabase/migrations`, apply locally with `supabase db reset` (recreates local state).
 - Remote migrations: `supabase db up` (uses the linked project).
-- Daily challenge scheduling is handled by the Next API route `/api/schedule-daily-challenge`.
-- Cron definition lives in `supabase/migrations/20251118214523_schedule_daily_challenge_cron.sql` and invokes the Next API route via pg\_cron/pg\_net.
+- Daily challenge scheduling is handled by the Next API route `/api/schedule-daily-challenge`, and the challenge is started and notifications sent in `/api/start-challenge`.
 
 ### Supabase secrets
 
 - Supabase Vault (for pg\_cron): exact names `SCHEDULE_DAILY_CHALLENGE_URL` (pointing to the Next API route) and `SUPABASE_SERVICE_ROLE_KEY` (used by `run_schedule_daily_challenge`), plus VAPID keys if needed by other functions.
 - Google auth: set up Google in the Supabase dashboard following https://supabase.com/docs/guides/auth/social-login/auth-google and provide `SUPABASE_AUTH_GOOGLE_CLIENT_ID` / `SUPABASE_AUTH_GOOGLE_SECRET` (Google Cloud Console) in Supabase and your local `.env`.
+
+## Daily challenge routes (high-level)
+
+- `/api/schedule-daily-challenge` creates or updates the daily schedule row for the current date and stores the notification `message` that will be sent.
+- The `daily_challenge_schedule` table is the daily control record: it records the day, the scheduled time, whether it was triggered, and which challenge is tied to it.
+- If there is no pending challenge when scheduling runs, the route still creates a row with `scheduled_run_at`, `triggered_at`, and `challenge_id` set to `null`. That row marks the day as “no challenge available,” and the scheduler will respond 404.
+- `/api/start-challenge` only runs when a schedule row exists and has a `scheduled_run_at`; it reads the message from the schedule row and sends the push notification.
 
 ## Push notifications
 
