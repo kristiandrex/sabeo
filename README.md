@@ -78,7 +78,7 @@ sequenceDiagram
 - Supabase Vault (for pg\_cron): exact names `SCHEDULE_DAILY_CHALLENGE_URL` (pointing to the Next API route) and `SUPABASE_SERVICE_ROLE_KEY` (used by `run_schedule_daily_challenge`), plus VAPID keys if needed by other functions.
 - Google auth: set up Google in the Supabase dashboard following https://supabase.com/docs/guides/auth/social-login/auth-google and provide `SUPABASE_AUTH_GOOGLE_CLIENT_ID` / `SUPABASE_AUTH_GOOGLE_SECRET` (Google Cloud Console) in Supabase and your local `.env`.
 
-## Daily challenge routes (high-level)
+## Daily challenge scheduling
 
 - `/api/schedule-daily-challenge` creates or updates the daily schedule row for the current date and stores the notification `message` that will be sent.
 - The `daily_challenge_schedule` table is the daily control record: it records the day, the scheduled time, whether it was triggered, and which challenge is tied to it.
@@ -104,10 +104,7 @@ Generate VAPID keys with `bunx web-push generate-vapid-keys --json` and copy the
 
 ## Ranking rules
 
-Ranking behavior is defined in `supabase/migrations/20251116055924_change_ranking_system.sql` and consumed by `src/domain/ranking/queries.ts`.
-
 - Base scoring: each completed daily challenge grants 1 point; `award_season_points_trigger` on `challenges_completed` updates `season_scores`.
 - Fast bonus: +1 if the challenge is finished within 60 seconds of first opening it (tracked in `challenges_opened` via `register_challenge_open`).
 - Streak bonus: consecutive daily completions increment `current_streak`; when the streak grows and that streak day hasn’t been rewarded yet, +1 is added. Missing a day breaks the streak and restarts it on the next play (no points are subtracted when the streak breaks).
-- Inactivity penalty: `apply_inactivity_penalties` increments `missed_in_a_row` for days without play and, starting on the 4th consecutive miss, subtracts 1 point per check (floored at 0) and clears fast bonus flags.
 - Ranking query: `get_active_season_ranking` orders by `season_points` desc, then `current_streak` desc, then `updated_at` asc. Keep migrations and query logic aligned whenever the formula changes.
