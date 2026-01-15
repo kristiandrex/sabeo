@@ -127,9 +127,6 @@ export function Game({
   }, [challenge.id, shouldRegisterChallenge]);
 
   async function addAttemptAction(attempt: string) {
-    toast.dismiss();
-    toast.info("Guardando intento...");
-
     const nextAttemptsCount = attempts.length + 1;
     const shouldFinishChallenge =
       attempt === challenge.word || nextAttemptsCount === NUMBER_OF_ROWS;
@@ -143,15 +140,8 @@ export function Game({
       const updatedAttempts = attempts.concat(attempt);
 
       if (!writeGuestAttempts(storageKey, updatedAttempts)) {
-        toast.dismiss();
         toast.error("No se pudo guardar tu intento");
         return;
-      }
-
-      toast.dismiss();
-
-      if (attempt !== challenge.word) {
-        toast.success("Intento guardado");
       }
 
       startTransition(() => {
@@ -169,20 +159,14 @@ export function Game({
     const { success } = await addAttempt(attempt, challenge.id);
 
     if (!success) {
-      toast.dismiss();
       toast.error("No se pudo guardar tu intento");
       return;
     }
 
-    toast.dismiss();
-
-    if (attempt !== challenge.word) {
-      toast.success("Intento guardado");
-    } else {
+    if (attempt === challenge.word) {
       const response = await completeChallenge();
 
       if (!response.success) {
-        toast.dismiss();
         toast.error(response.error);
         return;
       }
