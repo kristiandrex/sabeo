@@ -1,6 +1,7 @@
 import { type NextRequest } from "next/server";
 
 import { createServiceClient } from "#/lib/supabase/server";
+import { sendTelegramMessage } from "#/lib/telegram";
 
 type ServiceSupabaseClient = Awaited<ReturnType<typeof createServiceClient>>;
 
@@ -24,6 +25,21 @@ function getRandomRunAt(nowUtc: Date): Date {
 
   const slot = Math.floor(Math.random() * SLOT_COUNT);
   return new Date(startOfWindow + slot * SLOT_MINUTES * 60_000);
+}
+
+function getTomorrowDay(nowUtc: Date): string {
+  const tomorrowUtc = new Date(
+    Date.UTC(
+      nowUtc.getUTCFullYear(),
+      nowUtc.getUTCMonth(),
+      nowUtc.getUTCDate() + 1,
+      0,
+      0,
+      0,
+    ),
+  );
+
+  return getScheduleDay(tomorrowUtc);
 }
 
 function buildScheduleResponse(schedule: {
@@ -66,6 +82,54 @@ async function findPendingChallengeId(supabase: ServiceSupabaseClient) {
   }
 
   return data?.id ?? null;
+}
+
+async function findNextPendingChallengeId(
+  supabase: ServiceSupabaseClient,
+  excludeId?: number | null,
+) {
+  let query = supabase
+    .from("challenges")
+    .select("id")
+    .is("started_at", null)
+    .order("created_at", { ascending: true })
+    .limit(1);
+
+  if (excludeId) {
+    query = query.neq("id", excludeId);
+  }
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.id ?? null;
+}
+
+async function notifyIfNoChallengeForTomorrow(
+  supabase: ServiceSupabaseClient,
+  nowUtc: Date,
+  todayChallengeId: number | null,
+) {
+  const nextPendingChallengeId = await findNextPendingChallengeId(
+    supabase,
+    todayChallengeId,
+  );
+
+  if (nextPendingChallengeId) {
+    return;
+  }
+
+  const tomorrowDay = getTomorrowDay(nowUtc);
+  const result = await sendTelegramMessage(
+    `Sabeo: No hay reto disponible para mañana (${tomorrowDay}).`,
+  );
+
+  if (!result.ok) {
+    console.error("Failed to send Telegram notification", result.error);
+  }
 }
 
 async function ensureSchedule(
@@ -182,6 +246,12 @@ export async function POST(req: NextRequest) {
         schedule = updated.data;
       }
 
+      await notifyIfNoChallengeForTomorrow(
+        supabase,
+        nowUtc,
+        schedule?.challenge_id ?? null,
+      );
+
       return buildScheduleResponse(schedule);
     }
 
@@ -202,6 +272,8 @@ export async function POST(req: NextRequest) {
         throw insertError;
       }
 
+      await notifyIfNoChallengeForTomorrow(supabase, nowUtc, null);
+
       return new Response(
         JSON.stringify({ message: "No challenge available" }),
         { status: 404, headers: { "content-type": "application/json" } },
@@ -215,6 +287,12 @@ export async function POST(req: NextRequest) {
       message,
     );
     schedule = ensured.schedule;
+
+    await notifyIfNoChallengeForTomorrow(
+      supabase,
+      nowUtc,
+      schedule?.challenge_id ?? null,
+    );
 
     return buildScheduleResponse(schedule);
   } catch (error) {

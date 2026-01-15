@@ -35,6 +35,7 @@ sequenceDiagram
   end
   
   participant Push as Push Service
+  participant Telegram as Telegram Bot API
   
   Note over User,API: Subscription Flow
   User->>UI: Enable notifications
@@ -44,6 +45,7 @@ sequenceDiagram
   
   Note over Cron,API: Schedule challenge with random time (8AM-4PM COT)
   Cron->>API: POST /api/schedule-daily-challenge
+  API->>Telegram: Send message if no challenge for tomorrow
   
   Note over Push,API: At scheduled time start challenge and send notifications
   Cron->>API: POST /api/start-challenge
@@ -84,6 +86,7 @@ sequenceDiagram
 - The `daily_challenge_schedule` table is the daily control record: it records the day, the scheduled time, whether it was triggered, and which challenge is tied to it.
 - If there is no pending challenge when scheduling runs, the route still creates a row with `scheduled_run_at`, `triggered_at`, and `challenge_id` set to `null`. That row marks the day as “no challenge available,” and the scheduler will respond 404.
 - `/api/start-challenge` only runs when a schedule row exists and has a `scheduled_run_at`; it reads the message from the schedule row and sends the push notification.
+- When scheduling runs, the API checks for the next pending challenge (by `started_at`); if none exists, it sends a Telegram alert.
 
 ## Push notifications
 
@@ -101,6 +104,8 @@ Generate VAPID keys with `bunx web-push generate-vapid-keys --json` and copy the
 | VAPID_PRIVATE_KEY |
 | SUPABASE_AUTH_GOOGLE_CLIENT_ID |
 | SUPABASE_AUTH_GOOGLE_SECRET |
+| TELEGRAM_BOT_TOKEN |
+| TELEGRAM_CHAT_ID |
 
 ## Ranking rules
 
