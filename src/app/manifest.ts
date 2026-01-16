@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Sabeo",
     short_name: "Sabeo",
-    description: "Descubre la palabra en el menor tiempo posible",
+    description: "Descubre la palabra del día",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

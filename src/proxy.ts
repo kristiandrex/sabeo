@@ -10,7 +10,9 @@ const EXCLUDED_PATHS = [
   "/sw.js",
   "/api/auth/callback",
   "/opengraph-image",
+  "/twitter-image",
   "/ranking/opengraph-image",
+  "/ranking/twitter-image",
   "/api/start-challenge",
   "/api/schedule-daily-challenge",
 ];

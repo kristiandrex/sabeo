@@ -64,7 +64,7 @@ export function isMobileDevice(device: DeviceInfo): boolean {
 
 export function watchStandaloneMode(onChange: (isStandalone: boolean) => void): () => void {
   if (typeof window === "undefined") {
-    return () => { };
+    return () => {};
   }
 
   const mediaQuery = window.matchMedia(STANDALONE_MEDIA_QUERY);
