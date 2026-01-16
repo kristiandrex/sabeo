@@ -1,131 +1,311 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import { ImageResponse } from "next/og";
+
 import { getRanking } from "#/domain/ranking/queries";
-import fs from "fs";
-import path from "path";
+import type { SeasonRankingPosition } from "#/domain/ranking/types";
 
 export const runtime = "nodejs";
 
-function truncateName(name: string, maxLength: number = 20): string {
+const colors = {
+  background: "#fafafa",
+  foreground: "#232b33",
+  muted: "#5b6b7a",
+  border: "#d4d9df",
+  card: "#ffffff",
+  rankBg: "#f4f4f5",
+  rankText: "#52525b",
+};
+
+function truncateName(name: string, maxLength: number = 18): string {
   if (name.length <= maxLength) return name;
   return name.slice(0, maxLength - 3) + "...";
+}
+
+function RankingRow({
+  position,
+  player,
+}: {
+  position: number;
+  player: SeasonRankingPosition;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "12px 16px",
+        borderRadius: 20,
+        border: `1px solid ${colors.border}`,
+        background: colors.card,
+        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.06)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 36,
+            height: 36,
+            borderRadius: 999,
+            background: colors.rankBg,
+            color: colors.rankText,
+            fontWeight: 600,
+            fontSize: 16,
+          }}
+        >
+          {position}
+        </div>
+        <img
+          src={
+            player.picture ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=f1f5f9&color=1f2937&size=48`
+          }
+          width={40}
+          height={40}
+          alt={player.name}
+          style={{ borderRadius: "50%" }}
+        />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minWidth: 0,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              fontSize: 22,
+              fontWeight: 600,
+              color: colors.foreground,
+            }}
+          >
+            {truncateName(player.name)}
+          </div>
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 20,
+            fontWeight: 600,
+            color: colors.foreground,
+          }}
+        >
+          {player.seasonPoints}
+        </div>
+        <div style={{ display: "flex", fontSize: 18, color: colors.muted }}>
+          pts
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export async function GET() {
   try {
     const ranking = await getRanking();
     const topPlayers = ranking.slice(0, 3);
+    const [firstPlayer, secondPlayer, thirdPlayer] = topPlayers;
 
     const iconPath = path.join(process.cwd(), "public", "icon-512x512.png");
     const iconBuffer = fs.readFileSync(iconPath);
     const iconBase64 = `data:image/png;base64,${iconBuffer.toString("base64")}`;
 
-    const medals = ["🥇", "🥈", "🥉"];
-
     if (topPlayers.length === 0) {
       return new ImageResponse(
-        (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              background: "linear-gradient(to bottom, rgb(22, 163, 74), rgb(21, 128, 61))",
-              color: "white",
-              fontFamily: "system-ui, -apple-system, sans-serif",
-              textAlign: "center",
-              padding: "80px",
-            }}
-          >
-            <img src={iconBase64} width={180} height={180} alt="Sabeo" />
-            <div style={{ fontSize: 64, fontWeight: "bold", marginTop: 40, display: "flex", alignItems: "center" }}>
-              🏆 Mejores Jugadores
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            height: "100%",
+            background: colors.background,
+            color: colors.foreground,
+            fontFamily: "system-ui, -apple-system, sans-serif",
+            padding: "64px 80px",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            <div
+              style={{
+                display: "flex",
+                fontSize: 64,
+                fontWeight: 700,
+                color: colors.foreground,
+              }}
+            >
+              Sabeo
             </div>
-            <div style={{ fontSize: 42, marginTop: 60 }}>
+            <div
+              style={{
+                display: "flex",
+                fontSize: 30,
+                color: colors.muted,
+                marginTop: 12,
+              }}
+            >
+              Top de jugadores
+            </div>
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                height: 1,
+                background: colors.border,
+                marginTop: 32,
+                marginBottom: 32,
+              }}
+            />
+            <div style={{ display: "flex", fontSize: 24, color: colors.muted }}>
               Sin jugadores todavía
             </div>
-            <div style={{ fontSize: 28, marginTop: 40, opacity: 0.8 }}>
+            <div
+              style={{
+                display: "flex",
+                fontSize: 18,
+                color: colors.muted,
+                marginTop: 12,
+              }}
+            >
               Compite en el ranking
             </div>
           </div>
-        ),
-        { width: 1200, height: 630 }
+          <img
+            src={iconBase64}
+            width={200}
+            height={200}
+            alt="Sabeo"
+            style={{ marginLeft: 60, borderRadius: 24 }}
+          />
+        </div>,
+        { width: 1200, height: 630 },
       );
     }
 
     return new ImageResponse(
-      (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
-            height: "100%",
-            background: "linear-gradient(to bottom, rgb(22, 163, 74), rgb(21, 128, 61))",
-            color: "white",
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            padding: "60px 80px",
-          }}
-        >
-          <img src={iconBase64} width={100} height={100} alt="Sabeo" />
-          <div style={{ fontSize: 64, fontWeight: "bold", marginTop: 40 }}>
-            🏆 Mejores Jugadores
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          height: "100%",
+          background: colors.background,
+          color: colors.foreground,
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          padding: "64px 80px",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 64,
+              fontWeight: 700,
+              color: colors.foreground,
+            }}
+          >
+            Sabeo
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 30, marginTop: 50 }}>
-            {topPlayers.map((player, index) => (
-              <div key={player.id} style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 36 }}>
-                <span style={{ fontSize: 48 }}>{medals[index]}</span>
-                <img 
-                  src={player.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=10b981&color=fff&size=60`}
-                  width={60} 
-                  height={60} 
-                  alt={player.name}
-                  style={{ borderRadius: "50%" }}
-                />
-                <span style={{ flex: 1 }}>{truncateName(player.name)}</span>
-                <span style={{ fontWeight: "bold" }}>• {player.seasonPoints} pts</span>
-              </div>
-            ))}
+          <div
+            style={{
+              display: "flex",
+              fontSize: 30,
+              color: colors.muted,
+              marginTop: 12,
+            }}
+          >
+            Top de jugadores
           </div>
-          <div style={{ fontSize: 28, marginTop: "auto", opacity: 0.8 }}>
-            Compite en el ranking
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              height: 1,
+              background: colors.border,
+              marginTop: 32,
+              marginBottom: 24,
+            }}
+          />
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {firstPlayer && <RankingRow position={1} player={firstPlayer} />}
+            {secondPlayer && <RankingRow position={2} player={secondPlayer} />}
+            {thirdPlayer && <RankingRow position={3} player={thirdPlayer} />}
           </div>
         </div>
-      ),
-      { width: 1200, height: 630 }
+        <img
+          src={iconBase64}
+          width={200}
+          height={200}
+          alt="Sabeo"
+          style={{ marginLeft: 60, borderRadius: 24 }}
+        />
+      </div>,
+      { width: 1200, height: 630 },
     );
   } catch (error) {
     console.error("Error generating ranking OG image:", error);
-    
+
     const iconPath = path.join(process.cwd(), "public", "icon-512x512.png");
     const iconBuffer = fs.readFileSync(iconPath);
     const iconBase64 = `data:image/png;base64,${iconBuffer.toString("base64")}`;
-    
+
     return new ImageResponse(
-      (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            height: "100%",
-            background: "linear-gradient(to bottom, rgb(22, 163, 74), rgb(21, 128, 61))",
-            color: "white",
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            textAlign: "center",
-          }}
-        >
-          <img src={iconBase64} width={120} height={120} alt="Sabeo" />
-          <div style={{ fontSize: 48, fontWeight: "bold", marginTop: 40 }}>
-            Sabeo Ranking
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          height: "100%",
+          background: colors.background,
+          color: colors.foreground,
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          padding: "64px 80px",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 64,
+              fontWeight: 700,
+              color: colors.foreground,
+            }}
+          >
+            Sabeo
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 30,
+              color: colors.muted,
+              marginTop: 12,
+            }}
+          >
+            Top de jugadores
           </div>
         </div>
-      ),
-      { width: 1200, height: 630 }
+        <img
+          src={iconBase64}
+          width={200}
+          height={200}
+          alt="Sabeo"
+          style={{ marginLeft: 60, borderRadius: 24 }}
+        />
+      </div>,
+      { width: 1200, height: 630 },
     );
   }
 }
