@@ -70,16 +70,13 @@ export async function GET() {
           }}
         >
           <img src={iconBase64} width={100} height={100} alt="Sabeo" />
-          
-          <div style={{ fontSize: 64, fontWeight: "bold", marginTop: 40, display: "flex", alignItems: "center" }}>
+          <div style={{ fontSize: 64, fontWeight: "bold", marginTop: 40 }}>
             🏆 Mejores Jugadores
           </div>
-          
           <div style={{ display: "flex", flexDirection: "column", gap: 30, marginTop: 50 }}>
             {topPlayers.map((player, index) => (
               <div key={player.id} style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 36 }}>
                 <span style={{ fontSize: 48 }}>{medals[index]}</span>
-                
                 <img 
                   src={player.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=10b981&color=fff&size=60`}
                   width={60} 
@@ -87,14 +84,11 @@ export async function GET() {
                   alt={player.name}
                   style={{ borderRadius: "50%" }}
                 />
-                
                 <span style={{ flex: 1 }}>{truncateName(player.name)}</span>
-                
                 <span style={{ fontWeight: "bold" }}>• {player.seasonPoints} pts</span>
               </div>
             ))}
           </div>
-          
           <div style={{ fontSize: 28, marginTop: "auto", opacity: 0.8 }}>
             Compite en el ranking
           </div>

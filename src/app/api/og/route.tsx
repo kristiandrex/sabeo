@@ -78,23 +78,18 @@ export async function GET() {
           }}
         >
           <img src={iconBase64} width={180} height={180} alt="Sabeo" />
-          
           <div style={{ fontSize: 72, fontWeight: "bold", marginTop: 40 }}>
             Sabeo
           </div>
-          
           <div style={{ fontSize: 42, marginTop: 40 }}>
             Reto #{challengeCount} publicado
           </div>
-          
-          <div style={{ fontSize: 36, marginTop: 40, display: "flex", alignItems: "center" }}>
+          <div style={{ fontSize: 36, marginTop: 40 }}>
             🕐 Reto de hoy
           </div>
-          
           <div style={{ fontSize: 32, marginTop: 10 }}>
             {formattedDate} (COT)
           </div>
-          
           <div style={{ fontSize: 28, marginTop: 40, opacity: 0.8 }}>
             Descubre la palabra del día
           </div>
