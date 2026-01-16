@@ -11,19 +11,17 @@ const appBaseUrl = getServerAppBaseUrl();
 
 export const metadata: Metadata = {
   title: "Sabeo",
-  description: "Descubre la palabra en el menor tiempo posible",
+  description: "Descubre la palabra del día",
   metadataBase: new URL(appBaseUrl),
   openGraph: {
     title: "Sabeo",
-    description: "Descubre la palabra en el menor tiempo posible",
+    description: "Descubre la palabra del día",
     url: appBaseUrl,
-    images: [
-      {
-        url: "/icon-512x512.png",
-        width: 512,
-        height: 512,
-      },
-    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sabeo",
+    description: "Descubre la palabra del día",
   },
 };
 
