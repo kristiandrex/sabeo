@@ -1,4 +1,6 @@
-const vercelURL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
+const vercelURL = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : undefined;
 
 const SERVER_APP_BASE_URL = vercelURL ?? "http://localhost:3000";
 
