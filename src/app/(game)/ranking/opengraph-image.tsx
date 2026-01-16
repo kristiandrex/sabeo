@@ -9,6 +9,13 @@ import { getRanking } from "#/domain/ranking/queries";
 import type { SeasonRankingPosition } from "#/domain/ranking/types";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const alt = "Sabeo - Top de jugadores";
+export const size = {
+  width: 1200,
+  height: 630,
+};
+export const contentType = "image/png";
 
 const colors = {
   background: "#fafafa",
@@ -25,7 +32,13 @@ function truncateName(name: string, maxLength: number = 18): string {
   return name.slice(0, maxLength - 3) + "...";
 }
 
-function RankingRow({ position, player }: { position: number; player: SeasonRankingPosition }) {
+function RankingRow({
+  position,
+  player,
+}: {
+  position: number;
+  player: SeasonRankingPosition;
+}) {
   const initial = player.name[0]?.toUpperCase() ?? "";
 
   return (
@@ -114,13 +127,15 @@ function RankingRow({ position, player }: { position: number; player: SeasonRank
         >
           {player.seasonPoints}
         </div>
-        <div style={{ display: "flex", fontSize: 18, color: colors.muted }}>pts</div>
+        <div style={{ display: "flex", fontSize: 18, color: colors.muted }}>
+          pts
+        </div>
       </div>
     </div>
   );
 }
 
-export async function GET() {
+export default async function Image() {
   try {
     const topPlayers = await getRanking(3);
 
@@ -197,7 +212,7 @@ export async function GET() {
             style={{ marginLeft: 60, borderRadius: 24 }}
           />
         </div>,
-        { width: 1200, height: 630 },
+        size,
       );
     }
 
@@ -249,7 +264,11 @@ export async function GET() {
           />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {topPlayers.map((player, index) => (
-              <RankingRow key={player.id} position={index + 1} player={player} />
+              <RankingRow
+                key={player.id}
+                position={index + 1}
+                player={player}
+              />
             ))}
           </div>
         </div>
@@ -261,7 +280,7 @@ export async function GET() {
           style={{ marginLeft: 60, borderRadius: 24 }}
         />
       </div>,
-      { width: 1200, height: 630 },
+      size,
     );
   } catch (error) {
     console.error("Error generating ranking OG image:", error);
@@ -315,7 +334,7 @@ export async function GET() {
           style={{ marginLeft: 60, borderRadius: 24 }}
         />
       </div>,
-      { width: 1200, height: 630 },
+      size,
     );
   }
 }

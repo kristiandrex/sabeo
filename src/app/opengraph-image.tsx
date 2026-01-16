@@ -8,12 +8,22 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { ImageResponse } from "next/og";
 
-import { getChallengeCount, getLatestChallenge } from "#/domain/challenge/queries";
+import {
+  getChallengeCount,
+  getLatestChallenge,
+} from "#/domain/challenge/queries";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const alt = "Sabeo - Descubre la palabra del día";
+export const size = {
+  width: 1200,
+  height: 630,
+};
+export const contentType = "image/png";
 
 const colors = {
   background: "#fafafa",
@@ -63,7 +73,7 @@ function ClockIcon({ color }: { color: string }) {
   );
 }
 
-export async function GET() {
+export default async function Image() {
   try {
     const [challenge, challengeCount] = await Promise.all([
       getLatestChallenge(),
@@ -133,7 +143,7 @@ export async function GET() {
             style={{ marginLeft: 60, borderRadius: 24 }}
           />
         </div>,
-        { width: 1200, height: 630 },
+        size,
       );
     }
 
@@ -222,7 +232,9 @@ export async function GET() {
                 >
                   {challengeCount}
                 </div>
-                <div style={{ display: "flex", fontSize: 15, color: colors.muted }}>
+                <div
+                  style={{ display: "flex", fontSize: 15, color: colors.muted }}
+                >
                   Retos publicados
                 </div>
               </div>
@@ -261,7 +273,9 @@ export async function GET() {
                 >
                   {formattedDate}
                 </div>
-                <div style={{ display: "flex", fontSize: 15, color: colors.muted }}>
+                <div
+                  style={{ display: "flex", fontSize: 15, color: colors.muted }}
+                >
                   Reto de hoy (COT)
                 </div>
               </div>
@@ -276,7 +290,7 @@ export async function GET() {
           style={{ marginLeft: 60, borderRadius: 24 }}
         />
       </div>,
-      { width: 1200, height: 630 },
+      size,
     );
   } catch (error) {
     console.error("Error generating OG image:", error);
@@ -330,7 +344,7 @@ export async function GET() {
           style={{ marginLeft: 60, borderRadius: 24 }}
         />
       </div>,
-      { width: 1200, height: 630 },
+      size,
     );
   }
 }

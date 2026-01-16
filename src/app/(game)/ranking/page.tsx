@@ -1,19 +1,11 @@
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import type { Metadata } from "next";
-
 import { getDailyRanking, getRanking } from "#/domain/ranking/queries";
 import { createClient } from "#/lib/supabase/server";
 import { RankingList } from "#/components/ranking-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 
 dayjs.extend(duration);
-
-export const metadata: Metadata = {
-  openGraph: {
-    images: [{ url: "/api/og/ranking", width: 1200, height: 630 }],
-  },
-};
 
 function formatSeconds(seconds: number) {
   return dayjs.duration(seconds, "seconds").format("HH:mm:ss");

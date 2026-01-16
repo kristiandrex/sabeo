@@ -1,7 +1,5 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import type { Metadata } from "next";
-
 import { getDictionary } from "#/app/actions/dictionary";
 import { Game } from "#/components/game";
 import { NotificationGate } from "#/components/notification-gate";
@@ -12,11 +10,6 @@ import { getAttemptsByPlayer, getLatestChallenge } from "#/domain/challenge/quer
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  openGraph: {
-    images: [{ url: "/api/og", width: 1200, height: 630 }],
-  },
-};
 export default async function PlayPage() {
   const supabase = await createClient();
   const {
