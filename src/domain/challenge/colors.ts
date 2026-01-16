@@ -1,13 +1,7 @@
 import { Color } from "#/domain/challenge/types";
 
-export function getColorsByAttempt({
-  attempt,
-  challenge,
-}: {
-  attempt: string;
-  challenge: string;
-}) {
-  const colors: Color[] = new Array(attempt.length).fill("gray");
+export function getColorsByAttempt({ attempt, challenge }: { attempt: string; challenge: string }) {
+  const colors: Color[] = Array.from<Color>({ length: attempt.length }).fill("gray");
   const availableLetters = new Map<string, number>();
 
   for (const letter of challenge) {

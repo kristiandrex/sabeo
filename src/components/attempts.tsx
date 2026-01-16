@@ -40,24 +40,21 @@ export function Attempts({
           key={j}
           className={cn(
             "box-content flex aspect-square h-7 items-center justify-center border-2  p-2 text-xl uppercase sm:p-4",
-            getClassNamesByColor(color)
+            getClassNamesByColor(color),
           )}
         >
           {attempt ? attempt[j] : ""}
-        </div>
+        </div>,
       );
     }
 
     rows.push(
       <div
         key={i}
-        className={cn(
-          "grid gap-2",
-          challenge.length === 5 ? "grid-cols-5" : "grid-cols-6"
-        )}
+        className={cn("grid gap-2", challenge.length === 5 ? "grid-cols-5" : "grid-cols-6")}
       >
         {columns}
-      </div>
+      </div>,
     );
   }
 

@@ -5,12 +5,7 @@ import type { Metadata } from "next";
 import { getDailyRanking, getRanking } from "#/domain/ranking/queries";
 import { createClient } from "#/lib/supabase/server";
 import { RankingList } from "#/components/ranking-list";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "#/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 
 dayjs.extend(duration);
 
@@ -37,17 +32,17 @@ export default async function RankingPage() {
   const currentUserId = user?.id ?? null;
 
   return (
-    <main className="grow overflow-y-auto px-1 pb-8 pt-2 sm:px-0
+    <main
+      className="grow overflow-y-auto px-1 pb-8 pt-2 sm:px-0
         [&::-webkit-scrollbar]:w-2
       [&::-webkit-scrollbar-track]:bg-green-200/[.35]
       [&::-webkit-scrollbar-thumb]:bg-green-700/[.75]
       dark:[&::-webkit-scrollbar-track]:bg-green-800/[.45]
-      dark:[&::-webkit-scrollbar-thumb]:bg-green-700/[.8]">
+      dark:[&::-webkit-scrollbar-thumb]:bg-green-700/[.8]"
+    >
       <div className="mx-auto flex w-full max-w-xl flex-col gap-5 sm:gap-6">
         <header>
-          <h2 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-            Ranking
-          </h2>
+          <h2 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">Ranking</h2>
         </header>
 
         <Tabs defaultValue="general">

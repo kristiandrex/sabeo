@@ -32,9 +32,7 @@ type LayoutProps = {
 function OnboardingLayout({ children }: LayoutProps) {
   return (
     <div className="fixed top-0 left-0 grid h-svh w-screen place-items-center bg-background p-4 text-gray-900 dark:bg-slate-950 dark:text-white sm:p-8">
-      <div className="flex h-full w-full items-center justify-center">
-        {children}
-      </div>
+      <div className="flex h-full w-full items-center justify-center">{children}</div>
     </div>
   );
 }
@@ -45,9 +43,9 @@ type UseDevice = DeviceInfo | null;
 const NOTIFICATIONS_SKIP_KEY = "notifications-skip";
 
 export function NotificationGate({ children, isAuthenticated }: Props) {
-  const [subscription, setSubscription] = useState<
-    PushSubscription | "loading" | "skipped" | null
-  >("loading");
+  const [subscription, setSubscription] = useState<PushSubscription | "loading" | "skipped" | null>(
+    "loading",
+  );
   const [device, setDevice] = useState<UseDevice>(null);
   const [showInstallInstructions, setShowInstallInstructions] = useState(false);
 
@@ -69,9 +67,7 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
       const standalone = isStandaloneMode();
 
       if (standalone) {
-        setDevice((prev) =>
-          prev ? { ...prev, isStandalone: true } : detectDevice(),
-        );
+        setDevice((prev) => (prev ? { ...prev, isStandalone: true } : detectDevice()));
       }
 
       if (device && isMobile && !standalone) {
@@ -106,8 +102,7 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
       return;
     }
 
-    const hasSkippedNotifications =
-      localStorage.getItem(NOTIFICATIONS_SKIP_KEY) === "true";
+    const hasSkippedNotifications = localStorage.getItem(NOTIFICATIONS_SKIP_KEY) === "true";
 
     if (hasSkippedNotifications) {
       setSubscription("skipped");
@@ -178,7 +173,7 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
       }
     }
 
-    initialize();
+    void initialize();
 
     return () => {
       unsubscribeStandalone();
@@ -229,7 +224,7 @@ export function NotificationGate({ children, isAuthenticated }: Props) {
           <div className="flex w-full max-w-sm flex-col gap-2">
             <Button
               className="h-12 bg-green-500 text-base font-semibold text-white hover:bg-green-600"
-              onClick={subscribeToNotifications}
+              onClick={() => void subscribeToNotifications()}
             >
               Activar notificaciones
             </Button>

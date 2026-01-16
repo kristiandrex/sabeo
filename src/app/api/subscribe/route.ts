@@ -6,7 +6,7 @@ import { createClient } from "#/lib/supabase/server";
 webpush.setVapidDetails(
   "mailto:cristiandrestorres@gmail.com",
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  process.env.VAPID_PRIVATE_KEY!,
 );
 
 export async function POST(req: NextRequest) {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         title: "Sabeo",
         body: "Recibirás una notificación cuando haya un nuevo reto",
         icon: "/icon-512x512.png",
-      })
+      }),
     );
 
     return new Response("Subscription created", { status: 201 });

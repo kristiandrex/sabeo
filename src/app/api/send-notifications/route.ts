@@ -13,10 +13,7 @@ export async function POST(req: NextRequest) {
   const { SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
   if (!SUPABASE_SERVICE_ROLE_KEY) {
-    return NextResponse.json(
-      { error: "Missing configuration" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Missing configuration" }, { status: 500 });
   }
 
   try {
@@ -29,10 +26,7 @@ export async function POST(req: NextRequest) {
     const { title, description, playerId } = await req.json();
 
     if (!title || !description) {
-      return NextResponse.json(
-        { error: "Title and description are required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Title and description are required" }, { status: 400 });
     }
 
     const supabase = await createServiceClient();
@@ -48,17 +42,11 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error("Error fetching subscriptions:", error);
 
-      return NextResponse.json(
-        { error: "Error fetching subscriptions" },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "Error fetching subscriptions" }, { status: 500 });
     }
 
     if (!subscriptions.length) {
-      return NextResponse.json(
-        { error: "No subscriptions found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "No subscriptions found" }, { status: 404 });
     }
 
     const promises = subscriptions.map((subscription) => {

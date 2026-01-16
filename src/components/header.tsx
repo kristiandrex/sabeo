@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  HelpCircleIcon,
-  LogInIcon,
-  LogOutIcon,
-  SettingsIcon,
-  TrophyIcon,
-} from "lucide-react";
+import { HelpCircleIcon, LogInIcon, LogOutIcon, SettingsIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -19,6 +13,7 @@ import { useLocalStorage } from "#/hooks/useLocalStorage";
 import { signInWithGoogle } from "#/lib/auth";
 
 import { DialogInstructions } from "./dialog-instructions";
+import { toast } from "sonner";
 
 type HeaderProps = {
   initialIsAuthenticated: boolean;
@@ -30,10 +25,7 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
 
   const [hasSession, setHasSession] = useState(initialIsAuthenticated);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [instructionsOpen, setInstructionsOpen] = useLocalStorage<boolean>(
-    "instructions-v2",
-    true,
-  );
+  const [instructionsOpen, setInstructionsOpen] = useLocalStorage<boolean>("instructions-v2", true);
 
   useEffect(() => {
     const supabase = createClient();
@@ -82,27 +74,33 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
     }
   }
 
+  async function toggleSession() {
+    try {
+      if (hasSession) {
+        await handleSignOut();
+      } else {
+        await handleSignIn();
+      }
+    } catch (error) {
+      console.error(error);
+
+      toast.error(hasSession ? "No se pudo cerrar sesión" : "No se pudo iniciar sesión con Google");
+    }
+  }
+
   const AuthIcon = hasSession ? LogOutIcon : LogInIcon;
   const iconColorClass = "text-green-600";
   const iconButtonClass = "text-green-600 hover:bg-green-50 hover:text-green-700";
   const authAriaLabel = hasSession ? "Cerrar sesión" : "Iniciar sesión";
-  const authHandler = hasSession ? handleSignOut : handleSignIn;
-  const authButtonDisabled = !hasSession && isSigningIn;
+  const isSessionButtonDisabled = !hasSession && isSigningIn;
 
   return (
     <>
-      <DialogInstructions
-        open={instructionsOpen}
-        onOpenChange={setInstructionsOpen}
-      />
+      <DialogInstructions open={instructionsOpen} onOpenChange={setInstructionsOpen} />
 
       <header className="flex justify-between items-center gap-4 sm:gap-16 w-full">
         <div className="flex items-center">
-          <Link
-            href="/play"
-            aria-label="Ir al tablero principal"
-            className="inline-flex"
-          >
+          <Link href="/play" aria-label="Ir al tablero principal" className="inline-flex">
             <Image
               src="/icon-512x512.png"
               alt="Sabeo"
@@ -117,12 +115,7 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
 
         <div className="flex items-center gap-2 sm:gap-4">
           {hasSession && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className={iconButtonClass}
-              asChild
-            >
+            <Button variant="ghost" size="icon" className={iconButtonClass} asChild>
               <Link href="/settings" aria-label="Configuración">
                 <SettingsIcon className={iconColorClass} />
               </Link>
@@ -136,12 +129,7 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
           >
             <HelpCircleIcon className={iconColorClass} />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={iconButtonClass}
-            asChild
-          >
+          <Button variant="ghost" size="icon" className={iconButtonClass} asChild>
             <Link href="/ranking" aria-label="Ranking">
               <TrophyIcon className={iconColorClass} />
             </Link>
@@ -150,8 +138,8 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={authHandler}
-            disabled={authButtonDisabled}
+            onClick={() => void toggleSession()}
+            disabled={isSessionButtonDisabled}
             aria-label={authAriaLabel}
             className={iconButtonClass}
           >

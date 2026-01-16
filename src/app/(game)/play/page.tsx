@@ -8,10 +8,7 @@ import { NotificationGate } from "#/components/notification-gate";
 import { Button } from "#/components/ui/button";
 import { GUEST_COOKIE, NUMBER_OF_ROWS } from "#/constants";
 import { createClient } from "#/lib/supabase/server";
-import {
-  getAttemptsByPlayer,
-  getLatestChallenge,
-} from "#/domain/challenge/queries";
+import { getAttemptsByPlayer, getLatestChallenge } from "#/domain/challenge/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +40,7 @@ export default async function PlayPage() {
       <div className="flex h-screen items-center justify-center flex-col gap-4">
         <h1 className="text-2xl">No hay reto disponible</h1>
         <Button
-          onClick={reload}
+          onClick={() => void reload()}
           className="h-12 justify-center gap-2 rounded-xl bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
         >
           Volver a cargar
@@ -56,8 +53,7 @@ export default async function PlayPage() {
 
   const initialAttempts = await getAttemptsByPlayer(latestChallenge.id);
   const challengeIsCompleted = initialAttempts.includes(latestChallenge.word);
-  const challengeIsFinished =
-    initialAttempts.length === NUMBER_OF_ROWS || challengeIsCompleted;
+  const challengeIsFinished = initialAttempts.length === NUMBER_OF_ROWS || challengeIsCompleted;
 
   let initialBonusSnapshot: {
     seasonPoints: number;

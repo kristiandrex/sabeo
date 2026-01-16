@@ -24,8 +24,7 @@ export default function SettingsRoute() {
   const router = useRouter();
   const [device, setDevice] = useState<DeviceInfo>(() => detectDevice());
   const [status, setStatus] = useState<Status>("idle");
-  const [permission, setPermission] =
-    useState<NotificationPermission>("default");
+  const [permission, setPermission] = useState<NotificationPermission>("default");
   const [showInstallInstructions, setShowInstallInstructions] = useState(false);
 
   const canToggle = status !== "unsupported" && permission !== "denied";
@@ -51,8 +50,7 @@ export default function SettingsRoute() {
 
       setDevice(currentDevice);
 
-      const requiresStandalone =
-        currentDevice.isIOS && !currentDevice.isStandalone;
+      const requiresStandalone = currentDevice.isIOS && !currentDevice.isStandalone;
 
       if (requiresStandalone) {
         return;
@@ -69,27 +67,22 @@ export default function SettingsRoute() {
         return;
       }
 
-      try {
-        const subscription = await getExistingSubscription();
-        const currentPermission = Notification.permission;
+      const subscription = await getExistingSubscription();
+      const currentPermission = Notification.permission;
 
-        if (!isMounted) return;
+      if (!isMounted) return;
 
-        setPermission(currentPermission);
-        setStatus(
-          subscription && currentPermission === "granted"
-            ? "subscribed"
-            : "idle",
-        );
-      } catch (error) {
-        console.error(error);
-        if (isMounted) {
-          toast.error("Hubo un problema al cargar la configuración");
-        }
-      }
+      setPermission(currentPermission);
+      setStatus(subscription && currentPermission === "granted" ? "subscribed" : "idle");
     }
 
-    initialize();
+    initialize().catch((error) => {
+      console.error(error);
+
+      if (isMounted) {
+        toast.error("Hubo un problema al cargar la configuración");
+      }
+    });
 
     return () => {
       isMounted = false;
@@ -106,9 +99,7 @@ export default function SettingsRoute() {
 
     try {
       const permissionResult =
-        permission === "granted"
-          ? "granted"
-          : await Notification.requestPermission();
+        permission === "granted" ? "granted" : await Notification.requestPermission();
 
       setPermission(permissionResult);
 
@@ -152,7 +143,7 @@ export default function SettingsRoute() {
     }
   }
 
-  async function handleToggleChange(checked: boolean) {
+  async function toggleNotifications(checked: boolean) {
     if (!canToggle || status === "processing") {
       return;
     }
@@ -214,7 +205,7 @@ export default function SettingsRoute() {
 
               <Switch
                 checked={status === "subscribed"}
-                onCheckedChange={handleToggleChange}
+                onCheckedChange={(value) => void toggleNotifications(value)}
                 disabled={!canToggle || status === "processing"}
                 className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300 dark:data-[state=unchecked]:bg-gray-600"
               />
@@ -229,8 +220,7 @@ export default function SettingsRoute() {
 
           {permission === "denied" && status !== "unsupported" && (
             <p className="text-sm text-yellow-700 dark:text-yellow-200">
-              Las notificaciones están bloqueadas. Actívalas en la configuración
-              de tu navegador.
+              Las notificaciones están bloqueadas. Actívalas en la configuración de tu navegador.
             </p>
           )}
         </section>

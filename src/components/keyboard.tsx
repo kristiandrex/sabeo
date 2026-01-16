@@ -12,13 +12,7 @@ function getClassNamesByColor(color: string) {
   }[color];
 }
 
-function getKeyboardColors({
-  attempts,
-  challenge,
-}: {
-  attempts: string[];
-  challenge: string;
-}) {
+function getKeyboardColors({ attempts, challenge }: { attempts: string[]; challenge: string }) {
   const map: Record<string, string> = {};
 
   attempts.forEach((attempt) => {
@@ -147,12 +141,11 @@ function KeyboardRow({
     "min-w-0 rounded-md border border-transparent bg-gray-400",
     "text-center text-base font-semibold text-white md:text-lg",
     "transition-colors hover:bg-gray-500 hover:text-white",
-    "h-auto px-0"
+    "h-auto px-0",
   );
 
   const variantClass = {
-    letter:
-      "flex-1 basis-0 px-1.5 py-2 sm:px-2.5 sm:py-3 md:px-3 md:py-3.5 md:text-base",
+    letter: "flex-1 basis-0 px-1.5 py-2 sm:px-2.5 sm:py-3 md:px-3 md:py-3.5 md:text-base",
     confirm:
       "flex-none basis-[2.75rem] px-2 py-2 text-sm sm:basis-[3.25rem] sm:py-3 sm:text-base md:basis-[3.5rem] md:py-3 md:text-base",
     backspace:
@@ -165,11 +158,7 @@ function KeyboardRow({
     return (
       <Button
         key={key.value}
-        className={cn(
-          baseKeyClass,
-          variantClass[key.variant],
-          colors[key.value]
-        )}
+        className={cn(baseKeyClass, variantClass[key.variant], colors[key.value])}
         variant="ghost"
         onClick={onClick(key.value)}
       >

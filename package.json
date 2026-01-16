@@ -7,7 +7,11 @@
     "dev": "next dev --experimental-https",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "oxlint --type-aware",
+    "lint:fix": "oxlint --fix --type-aware",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "typecheck": "tsgo --noEmit",
     "process-dictionary": "bun scripts/process-dictionary.ts",
     "generate-vapid-keys": "bunx web-push generate-vapid-keys --json"
   },
@@ -35,20 +39,18 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
     "@types/node": "^20.17.8",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "@types/web-push": "^3.6.4",
-    "eslint": "^9.16.0",
-    "eslint-config-next": "16.0.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
-    "eslint-plugin-react-hooks": "^5.1.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260116.1",
     "globals": "^15.13.0",
+    "oxfmt": "^0.24.0",
+    "oxlint": "^1.39.0",
+    "oxlint-tsgolint": "^0.11.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5",
-    "typescript-eslint": "^8.18.1"
+    "typescript": "^5"
   },
   "overrides": {
     "@types/react": "19.2.2",

@@ -48,10 +48,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const supabase = await createClient();
 
-  const {
-    event,
-    session,
-  }: { event: AuthChangeEvent; session: Session | null } = await request.json();
+  const { event, session }: { event: AuthChangeEvent; session: Session | null } =
+    await request.json();
 
   if (event === "SIGNED_OUT") {
     await supabase.auth.signOut();

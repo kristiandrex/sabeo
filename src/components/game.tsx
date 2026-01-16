@@ -1,26 +1,13 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useOptimistic,
-  useState,
-  useTransition,
-} from "react";
+import { useEffect, useMemo, useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import {
-  addAttempt,
-  completeChallenge,
-  registerChallengeOpen,
-} from "#/app/actions/challenge";
+import { addAttempt, completeChallenge, registerChallengeOpen } from "#/app/actions/challenge";
 import { NUMBER_OF_ROWS } from "#/constants";
 import { Challenge } from "#/domain/challenge/types";
 import { getColorsByAttempt } from "#/domain/challenge/colors";
-import {
-  readGuestAttempts,
-  writeGuestAttempts,
-} from "#/domain/challenge/guest";
+import { readGuestAttempts, writeGuestAttempts } from "#/domain/challenge/guest";
 import { useLocalStorage } from "#/hooks/useLocalStorage";
 
 import { Attempts } from "./attempts";
@@ -61,14 +48,12 @@ export function Game({
   const [attempts, setAttempts] = useState(initialState.attempts);
   const [currentAttempt, setCurrentAttempt] = useState<string>("");
   const [bonusSnapshot, setBonusSnapshot] = useState<BonusSnapshot | null>(
-    initialState.bonusSnapshot
+    initialState.bonusSnapshot,
   );
-  const [isChallengeFinished, setIsChallengeFinished] = useState(
-    initialState.isFinished
-  );
+  const [isChallengeFinished, setIsChallengeFinished] = useState(initialState.isFinished);
 
   const [hasRegisteredChallengeOpen, setHasRegisteredChallengeOpen] = useState(
-    !shouldRegisterChallengeOpen
+    !shouldRegisterChallengeOpen,
   );
 
   const dictionarySet = useMemo(() => new Set(dictionary), [dictionary]);
@@ -77,12 +62,12 @@ export function Game({
 
   const [optimisticAttempts, addOptimisticAttempt] = useOptimistic(
     attempts,
-    (currentAttempts, newAttempt: string) => currentAttempts.concat(newAttempt)
+    (currentAttempts, newAttempt: string) => currentAttempts.concat(newAttempt),
   );
 
   const [optimisticCurrent, setOptimisticCurrent] = useOptimistic(
     currentAttempt,
-    (currentAttempt, newAttempt: string) => newAttempt
+    (currentAttempt, newAttempt: string) => newAttempt,
   );
 
   const [isPending, startTransition] = useTransition();
@@ -92,15 +77,12 @@ export function Game({
   const storageKey = `guest-attempts-${challenge.id}`;
 
   const guestHasFinished =
-    isGuest &&
-    (attempts.includes(challenge.word) || attempts.length === NUMBER_OF_ROWS);
+    isGuest && (attempts.includes(challenge.word) || attempts.length === NUMBER_OF_ROWS);
 
   const challengeLocked = isChallengeFinished || guestHasFinished;
 
   const shouldRegisterChallenge =
-    shouldRegisterChallengeOpen &&
-    !instructionsOpen &&
-    !hasRegisteredChallengeOpen;
+    shouldRegisterChallengeOpen && !instructionsOpen && !hasRegisteredChallengeOpen;
 
   useEffect(() => {
     if (!shouldRegisterChallenge) {
@@ -223,7 +205,10 @@ export function Game({
       return;
     }
 
-    addAttemptAction(optimisticCurrent);
+    addAttemptAction(optimisticCurrent).catch((error) => {
+      console.error("Failed to add attempt", error);
+      toast.error("No se pudo guardar tu intento");
+    });
   }
 
   useEffect(() => {
@@ -254,11 +239,7 @@ export function Game({
         challenge={challenge.word}
       />
 
-      <Keyboard
-        challenge={challenge.word}
-        attempts={optimisticAttempts}
-        onKeyDown={onKeyDown}
-      />
+      <Keyboard challenge={challenge.word} attempts={optimisticAttempts} onKeyDown={onKeyDown} />
     </main>
   );
 }

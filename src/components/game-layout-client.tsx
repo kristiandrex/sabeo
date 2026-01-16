@@ -15,9 +15,7 @@ export function GameLayoutClient({ children, initialIsAuthenticated }: Props) {
 
   return (
     <>
-      {!isSettingsPage && (
-        <Header initialIsAuthenticated={initialIsAuthenticated} />
-      )}
+      {!isSettingsPage && <Header initialIsAuthenticated={initialIsAuthenticated} />}
       {children}
     </>
   );

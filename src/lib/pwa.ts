@@ -6,13 +6,14 @@ export type DeviceInfo = {
   isStandalone: boolean;
 };
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const decoded = window.atob(base64);
 
-  const outputArray = new Uint8Array(decoded.length);
+  const buffer = new ArrayBuffer(decoded.length);
+  const outputArray = new Uint8Array(buffer);
 
   for (let i = 0; i < decoded.length; i++) {
     outputArray[i] = decoded.charCodeAt(i);
@@ -32,9 +33,7 @@ export function isStandaloneMode(): boolean {
     return true;
   }
 
-  const navigatorStandalone = (
-    window.navigator as Navigator & { standalone?: boolean }
-  ).standalone;
+  const navigatorStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone;
 
   return navigatorStandalone === true;
 }
@@ -63,11 +62,9 @@ export function isMobileDevice(device: DeviceInfo): boolean {
   return device.isIOS || device.isAndroid;
 }
 
-export function watchStandaloneMode(
-  onChange: (isStandalone: boolean) => void,
-): () => void {
+export function watchStandaloneMode(onChange: (isStandalone: boolean) => void): () => void {
   if (typeof window === "undefined") {
-    return () => {};
+    return () => { };
   }
 
   const mediaQuery = window.matchMedia(STANDALONE_MEDIA_QUERY);
@@ -110,9 +107,7 @@ export async function getExistingSubscription(): Promise<PushSubscription | null
   return registration.pushManager.getSubscription();
 }
 
-export async function subscribePlayerToNotifications(
-  playerId: string,
-): Promise<PushSubscription> {
+export async function subscribePlayerToNotifications(playerId: string): Promise<PushSubscription> {
   const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
   if (!vapidKey) {

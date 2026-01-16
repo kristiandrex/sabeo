@@ -1,3 +1,5 @@
+// oxlint-disable nextjs/no-img-element
+
 import fs from "node:fs";
 import path from "node:path";
 
@@ -6,10 +8,7 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { ImageResponse } from "next/og";
 
-import {
-  getChallengeCount,
-  getLatestChallenge,
-} from "#/domain/challenge/queries";
+import { getChallengeCount, getLatestChallenge } from "#/domain/challenge/queries";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -223,9 +222,7 @@ export async function GET() {
                 >
                   {challengeCount}
                 </div>
-                <div
-                  style={{ display: "flex", fontSize: 15, color: colors.muted }}
-                >
+                <div style={{ display: "flex", fontSize: 15, color: colors.muted }}>
                   Retos publicados
                 </div>
               </div>
@@ -264,9 +261,7 @@ export async function GET() {
                 >
                   {formattedDate}
                 </div>
-                <div
-                  style={{ display: "flex", fontSize: 15, color: colors.muted }}
-                >
+                <div style={{ display: "flex", fontSize: 15, color: colors.muted }}>
                   Reto de hoy (COT)
                 </div>
               </div>

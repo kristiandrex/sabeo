@@ -9,7 +9,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html>
+    <html lang="es">
       <body>
         <h2>¡Hubo un error!</h2>
         <Button

@@ -1,3 +1,4 @@
 {
-  "eslint.useFlatConfig": true
+  "oxc.enable": true,
+  "oxc.fmt.experimental": true
 }

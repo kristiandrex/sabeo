@@ -29,19 +29,15 @@ type SetStateCallback<T> = (value: T) => T;
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const getSnapshot = () => getLocalStorageItem(key);
 
-  const store = React.useSyncExternalStore(
-    subscribeLocalStorage,
-    getSnapshot,
-    () => JSON.stringify(initialValue)
+  const store = React.useSyncExternalStore(subscribeLocalStorage, getSnapshot, () =>
+    JSON.stringify(initialValue),
   );
 
   const setState = React.useCallback(
     (v: T | SetStateCallback<T>) => {
       try {
         const nextState =
-          typeof v === "function" && store
-            ? (v as SetStateCallback<T>)(JSON.parse(store))
-            : v;
+          typeof v === "function" && store ? (v as SetStateCallback<T>)(JSON.parse(store)) : v;
 
         if (nextState === undefined || nextState === null) {
           removeLocalStorageItem(key);
@@ -52,20 +48,14 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         console.warn(e);
       }
     },
-    [key, store]
+    [key, store],
   );
 
   React.useEffect(() => {
-    if (
-      getLocalStorageItem(key) === null &&
-      typeof initialValue !== "undefined"
-    ) {
+    if (getLocalStorageItem(key) === null && typeof initialValue !== "undefined") {
       setLocalStorageItem(key, initialValue);
     }
   }, [key, initialValue]);
 
-  return [store ? JSON.parse(store) : initialValue, setState] as [
-    T,
-    typeof setState
-  ];
+  return [store ? JSON.parse(store) : initialValue, setState] as [T, typeof setState];
 }

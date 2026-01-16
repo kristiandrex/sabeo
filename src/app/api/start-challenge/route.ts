@@ -9,10 +9,7 @@ function getScheduleDay(nowUtc: Date): string {
   return nowUtc.toISOString().slice(0, 10);
 }
 
-async function getTodaySchedule(
-  supabase: ServiceSupabaseClient,
-  challengeDay: string,
-) {
+async function getTodaySchedule(supabase: ServiceSupabaseClient, challengeDay: string) {
   const result = await supabase
     .from("daily_challenge_schedule")
     .select("challenge_day,scheduled_run_at,triggered_at,challenge_id")
@@ -73,26 +70,26 @@ export async function POST(req: NextRequest) {
     const schedule = await getTodaySchedule(supabase, challengeDay);
 
     if (!schedule || schedule.scheduled_run_at === null) {
-      return new Response(
-        JSON.stringify({ message: "No schedule available" }),
-        { status: 404, headers: { "content-type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ message: "No schedule available" }), {
+        status: 404,
+        headers: { "content-type": "application/json" },
+      });
     }
 
     if (schedule.triggered_at) {
-      return new Response(
-        JSON.stringify({ message: "Challenge already started" }),
-        { status: 409, headers: { "content-type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ message: "Challenge already started" }), {
+        status: 409,
+        headers: { "content-type": "application/json" },
+      });
     }
 
     const scheduledAt = new Date(schedule.scheduled_run_at);
 
     if (nowUtc < scheduledAt) {
-      return new Response(
-        JSON.stringify({ message: "Scheduled time not reached" }),
-        { status: 409, headers: { "content-type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ message: "Scheduled time not reached" }), {
+        status: 409,
+        headers: { "content-type": "application/json" },
+      });
     }
 
     const result = await startChallenge();
@@ -102,10 +99,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (result.status === "not_found") {
-      return new Response(
-        JSON.stringify({ message: "No challenge available" }),
-        { status: 404, headers: { "content-type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ message: "No challenge available" }), {
+        status: 404,
+        headers: { "content-type": "application/json" },
+      });
     }
 
     await markTriggered(supabase, schedule.challenge_day, result.challengeId);

@@ -1,10 +1,6 @@
-type TelegramMessageResult =
-  | { ok: true }
-  | { ok: false; error: string };
+type TelegramMessageResult = { ok: true } | { ok: false; error: string };
 
-export async function sendTelegramMessage(
-  text: string,
-): Promise<TelegramMessageResult> {
+export async function sendTelegramMessage(text: string): Promise<TelegramMessageResult> {
   const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
@@ -12,14 +8,11 @@ export async function sendTelegramMessage(
   }
 
   try {
-    const response = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text }),
-      },
-    );
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text }),
+    });
 
     if (!response.ok) {
       const body = await response.text().catch(() => "");

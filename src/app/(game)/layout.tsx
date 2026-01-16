@@ -13,9 +13,5 @@ export default async function GameLayout({ children }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return (
-    <GameLayoutClient initialIsAuthenticated={Boolean(user)}>
-      {children}
-    </GameLayoutClient>
-  );
+  return <GameLayoutClient initialIsAuthenticated={Boolean(user)}>{children}</GameLayoutClient>;
 }

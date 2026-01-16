@@ -23,30 +23,30 @@ A side project, definitely-not-original and probably overengineered, inspired by
 sequenceDiagram
   actor User
   participant SW as Service Worker
-  
+
   box Next.js App
     participant UI as Client
     participant API as API Routes
   end
-  
+
   box Supabase
     participant DB as Database
     participant Cron as pg_cron
   end
-  
+
   participant Push as Push Service
   participant Telegram as Telegram Bot API
-  
+
   Note over User,API: Subscription Flow
   User->>UI: Enable notifications
   UI->>SW: Request subscription
   SW-->>API: POST /api/subscribe
   API->>DB: Store subscription
-  
+
   Note over Cron,API: Schedule challenge with random time (8AM-4PM COT)
   Cron->>API: POST /api/schedule-daily-challenge
   API->>Telegram: Send message if no challenge for tomorrow
-  
+
   Note over Push,API: At scheduled time start challenge and send notifications
   Cron->>API: POST /api/start-challenge
   API->>Push: Send notifications payload
@@ -65,6 +65,9 @@ sequenceDiagram
 
 - Install dependencies: `bun install`.
 - Run the app: `bun run dev` (HTTPS; reinstall certs with `mkcert -install` if needed).
+- Lint: `bun run lint` (Oxlint + tsgolint), auto-fix via `bun run lint:fix`.
+- Format: `bun run fmt` or check with `bun run fmt:check`.
+- Typecheck: `bun run typecheck` (tsgo).
 - Dictionary: edit `data/dictionary-es.txt` and run `bun run process-dictionary` to regenerate the word list (requires hunspell).
 
 ## Supabase setup
@@ -77,7 +80,7 @@ sequenceDiagram
 
 ### Supabase secrets
 
-- Supabase Vault (for pg\_cron): exact names `SCHEDULE_DAILY_CHALLENGE_URL` (pointing to the Next API route) and `SUPABASE_SERVICE_ROLE_KEY` (used by `run_schedule_daily_challenge`), plus VAPID keys if needed by other functions.
+- Supabase Vault (for pg_cron): exact names `SCHEDULE_DAILY_CHALLENGE_URL` (pointing to the Next API route) and `SUPABASE_SERVICE_ROLE_KEY` (used by `run_schedule_daily_challenge`), plus VAPID keys if needed by other functions.
 - Google auth: set up Google in the Supabase dashboard following https://supabase.com/docs/guides/auth/social-login/auth-google and provide `SUPABASE_AUTH_GOOGLE_CLIENT_ID` / `SUPABASE_AUTH_GOOGLE_SECRET` (Google Cloud Console) in Supabase and your local `.env`.
 
 ## Daily challenge scheduling
@@ -94,18 +97,18 @@ Generate VAPID keys with `bunx web-push generate-vapid-keys --json` and copy the
 
 ## Environment variables
 
-| Variable |
-| --- |
-| NEXT_PUBLIC_SUPABASE_URL |
-| NEXT_PUBLIC_SUPABASE_ANON_KEY |
-| NEXT_PUBLIC_VAPID_PUBLIC_KEY |
-| SUPABASE_URL |
-| SUPABASE_SERVICE_ROLE_KEY |
-| VAPID_PRIVATE_KEY |
+| Variable                       |
+| ------------------------------ |
+| NEXT_PUBLIC_SUPABASE_URL       |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY  |
+| NEXT_PUBLIC_VAPID_PUBLIC_KEY   |
+| SUPABASE_URL                   |
+| SUPABASE_SERVICE_ROLE_KEY      |
+| VAPID_PRIVATE_KEY              |
 | SUPABASE_AUTH_GOOGLE_CLIENT_ID |
-| SUPABASE_AUTH_GOOGLE_SECRET |
-| TELEGRAM_BOT_TOKEN |
-| TELEGRAM_CHAT_ID |
+| SUPABASE_AUTH_GOOGLE_SECRET    |
+| TELEGRAM_BOT_TOKEN             |
+| TELEGRAM_CHAT_ID               |
 
 ## Ranking rules
 

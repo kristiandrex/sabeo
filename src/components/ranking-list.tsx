@@ -20,9 +20,7 @@ type RankingListProps<T extends BaseRankingPosition> = {
 function hasCurrentStreak(
   position: BaseRankingPosition,
 ): position is BaseRankingPosition & { currentStreak: number } {
-  return (
-    typeof (position as { currentStreak?: unknown }).currentStreak === "number"
-  );
+  return typeof (position as { currentStreak?: unknown }).currentStreak === "number";
 }
 
 export function RankingList<T extends BaseRankingPosition>({
@@ -44,16 +42,12 @@ export function RankingList<T extends BaseRankingPosition>({
       <div className="flex items-center px-2.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400 dark:text-zinc-600 sm:px-3 sm:text-xs">
         <span className="w-9 shrink-0 text-center sm:w-10">#</span>
         <span className="flex-1 text-left">Jugador(a)</span>
-        <span className="min-w-[4rem] text-right sm:text-left">
-          {valueLabel}
-        </span>
+        <span className="min-w-[4rem] text-right sm:text-left">{valueLabel}</span>
       </div>
 
       {positions.map((position, index) => {
-        const isCurrentPlayer =
-          currentUserId !== null && currentUserId === position.id;
-        const shouldShowStreak =
-          hasCurrentStreak(position) && position.currentStreak > 1;
+        const isCurrentPlayer = currentUserId !== null && currentUserId === position.id;
+        const shouldShowStreak = hasCurrentStreak(position) && position.currentStreak > 1;
 
         return (
           <article
@@ -77,9 +71,7 @@ export function RankingList<T extends BaseRankingPosition>({
 
               <Avatar className="h-8 w-8 flex-none sm:h-10 sm:w-10">
                 <AvatarImage src={position.picture} alt={position.name} />
-                <AvatarFallback>
-                  {position.name[0]?.toUpperCase() ?? ""}
-                </AvatarFallback>
+                <AvatarFallback>{position.name[0]?.toUpperCase() ?? ""}</AvatarFallback>
               </Avatar>
 
               <div className="flex min-w-0 flex-col">

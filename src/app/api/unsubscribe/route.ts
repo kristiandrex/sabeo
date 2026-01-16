@@ -11,10 +11,7 @@ export async function POST(req: NextRequest) {
       return new Response("Missing subscription endpoint", { status: 400 });
     }
 
-    const { error } = await supabase
-      .from("subscriptions")
-      .delete()
-      .eq("endpoint", endpoint);
+    const { error } = await supabase.from("subscriptions").delete().eq("endpoint", endpoint);
 
     if (error) {
       console.error(error);

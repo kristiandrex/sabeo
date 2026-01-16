@@ -12,9 +12,7 @@ export function readGuestAttempts(key: string, fallback: string[]) {
       return fallback;
     }
 
-    return parsedValue.filter(
-      (value): value is string => typeof value === "string",
-    );
+    return parsedValue.filter((value): value is string => typeof value === "string");
   } catch {
     return fallback;
   }

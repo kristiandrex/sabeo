@@ -3,12 +3,7 @@ import { toast } from "sonner";
 
 import { Challenge, Color } from "#/domain/challenge/types";
 import { Button } from "#/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "#/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "#/components/ui/dialog";
 import { getAppBaseUrl } from "#/lib/env";
 
 type Props = {
@@ -46,7 +41,7 @@ export function DialogChallengeCompleted({
   async function share() {
     try {
       if (typeof navigator.share !== "function") {
-        copyToClipboard();
+        await copyToClipboard();
         return;
       }
 
@@ -56,7 +51,7 @@ export function DialogChallengeCompleted({
       });
     } catch (error) {
       console.error(error);
-      copyToClipboard();
+      await copyToClipboard();
     }
   }
 
@@ -109,9 +104,7 @@ export function DialogChallengeCompleted({
               <p className="text-[11px] font-semibold uppercase text-muted-foreground sm:text-xs">
                 Tus puntos totales
               </p>
-              <p className="text-3xl font-black text-foreground sm:text-4xl">
-                {seasonPoints}
-              </p>
+              <p className="text-3xl font-black text-foreground sm:text-4xl">{seasonPoints}</p>
 
               <div className="my-3 h-px w-full bg-border sm:my-4" />
 
@@ -120,10 +113,7 @@ export function DialogChallengeCompleted({
                   {(currentStreak ?? 0) > 1 && (
                     <li className="flex items-center gap-2 rounded-2xl bg-emerald-500/10 px-3 py-2 text-emerald-700 dark:text-emerald-200">
                       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-emerald-600 shadow-inner dark:bg-emerald-950 sm:h-8 sm:w-8">
-                        <Flame
-                          className="h-3.5 w-3.5 sm:h-4 sm:w-4"
-                          aria-hidden
-                        />
+                        <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
                       </span>
                       <span>Bonus de racha (+1)</span>
                     </li>
@@ -131,10 +121,7 @@ export function DialogChallengeCompleted({
                   {fastBonusAwarded && (
                     <li className="flex items-center gap-2 rounded-2xl bg-amber-500/10 px-3 py-2 text-amber-700 dark:text-amber-200">
                       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-amber-600 shadow-inner dark:bg-amber-950 sm:h-8 sm:w-8">
-                        <Zap
-                          className="h-3.5 w-3.5 sm:h-4 sm:w-4"
-                          aria-hidden
-                        />
+                        <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
                       </span>
                       <span>Bonus por primer minuto (+1)</span>
                     </li>
@@ -150,7 +137,7 @@ export function DialogChallengeCompleted({
 
           <Button
             className="h-11 w-full text-sm font-semibold sm:h-12 sm:text-base"
-            onClick={share}
+            onClick={() => void share()}
           >
             Compartir
           </Button>

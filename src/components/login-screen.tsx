@@ -1,8 +1,9 @@
 "use client";
 
+import { BellIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { BellIcon, TrophyIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import { setGuestMode } from "#/app/actions/auth";
 import { Button } from "#/components/ui/button";
@@ -15,6 +16,9 @@ export function LoginScreen() {
     try {
       setIsSigningIn(true);
       await signInWithGoogle("/play");
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo iniciar sesión con Google");
     } finally {
       setIsSigningIn(false);
     }
@@ -64,9 +68,7 @@ export function LoginScreen() {
                   <TrophyIcon className="h-5 w-5" strokeWidth={2.25} />
                 </div>
                 <div className="space-y-0.5 text-left">
-                  <p className="text-base font-semibold text-slate-900 dark:text-white">
-                    Ranking
-                  </p>
+                  <p className="text-base font-semibold text-slate-900 dark:text-white">Ranking</p>
                   <p className="text-sm text-slate-500 dark:text-slate-300/80">
                     Suma puntos según tu racha y velocidad
                   </p>
@@ -78,15 +80,10 @@ export function LoginScreen() {
           <div className="flex w-full flex-col items-center gap-3">
             <Button
               className="h-12 w-full justify-center gap-2 rounded-xl bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
-              onClick={handleGoogleSignIn}
+              onClick={() => void handleGoogleSignIn()}
               disabled={isSigningIn}
             >
-              <svg
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                focusable="false"
-              >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="white"

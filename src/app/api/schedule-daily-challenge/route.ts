@@ -29,14 +29,7 @@ function getRandomRunAt(nowUtc: Date): Date {
 
 function getTomorrowDay(nowUtc: Date): string {
   const tomorrowUtc = new Date(
-    Date.UTC(
-      nowUtc.getUTCFullYear(),
-      nowUtc.getUTCMonth(),
-      nowUtc.getUTCDate() + 1,
-      0,
-      0,
-      0,
-    ),
+    Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth(), nowUtc.getUTCDate() + 1, 0, 0, 0),
   );
 
   return getScheduleDay(tomorrowUtc);
@@ -113,10 +106,7 @@ async function notifyIfNoChallengeForTomorrow(
   nowUtc: Date,
   todayChallengeId: number | null,
 ) {
-  const nextPendingChallengeId = await findNextPendingChallengeId(
-    supabase,
-    todayChallengeId,
-  );
+  const nextPendingChallengeId = await findNextPendingChallengeId(supabase, todayChallengeId);
 
   if (nextPendingChallengeId) {
     return;
@@ -209,9 +199,7 @@ export async function POST(req: NextRequest) {
 
     const existing = await supabase
       .from("daily_challenge_schedule")
-      .select(
-        "challenge_day,scheduled_run_at,triggered_at,challenge_id,message",
-      )
+      .select("challenge_day,scheduled_run_at,triggered_at,challenge_id,message")
       .eq("challenge_day", challengeDay)
       .maybeSingle();
 
@@ -233,9 +221,7 @@ export async function POST(req: NextRequest) {
         .from("daily_challenge_schedule")
         .update({ message })
         .eq("challenge_day", challengeDay)
-        .select(
-          "challenge_day,scheduled_run_at,triggered_at,challenge_id,message",
-        )
+        .select("challenge_day,scheduled_run_at,triggered_at,challenge_id,message")
         .maybeSingle();
 
       if (updated.error) {
@@ -246,11 +232,7 @@ export async function POST(req: NextRequest) {
         schedule = updated.data;
       }
 
-      await notifyIfNoChallengeForTomorrow(
-        supabase,
-        nowUtc,
-        schedule?.challenge_id ?? null,
-      );
+      await notifyIfNoChallengeForTomorrow(supabase, nowUtc, schedule?.challenge_id ?? null);
 
       return buildScheduleResponse(schedule);
     }
@@ -274,25 +256,16 @@ export async function POST(req: NextRequest) {
 
       await notifyIfNoChallengeForTomorrow(supabase, nowUtc, null);
 
-      return new Response(
-        JSON.stringify({ message: "No challenge available" }),
-        { status: 404, headers: { "content-type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ message: "No challenge available" }), {
+        status: 404,
+        headers: { "content-type": "application/json" },
+      });
     }
 
-    const ensured = await ensureSchedule(
-      supabase,
-      nowUtc,
-      pendingChallengeId,
-      message,
-    );
+    const ensured = await ensureSchedule(supabase, nowUtc, pendingChallengeId, message);
     schedule = ensured.schedule;
 
-    await notifyIfNoChallengeForTomorrow(
-      supabase,
-      nowUtc,
-      schedule?.challenge_id ?? null,
-    );
+    await notifyIfNoChallengeForTomorrow(supabase, nowUtc, schedule?.challenge_id ?? null);
 
     return buildScheduleResponse(schedule);
   } catch (error) {

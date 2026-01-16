@@ -100,8 +100,9 @@ export async function startChallenge(): Promise<StartChallengeResult> {
     };
   }
 
-  const { data, error }: PostgrestSingleResponse<PushSubscription[]> =
-    await supabase.from("subscriptions").select("*");
+  const { data, error }: PostgrestSingleResponse<PushSubscription[]> = await supabase
+    .from("subscriptions")
+    .select("*");
 
   if (error) {
     console.error("Failed to fetch subscriptions", error);

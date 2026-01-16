@@ -1,3 +1,5 @@
+// oxlint-disable nextjs/no-img-element
+
 import fs from "node:fs";
 import path from "node:path";
 
@@ -23,13 +25,7 @@ function truncateName(name: string, maxLength: number = 18): string {
   return name.slice(0, maxLength - 3) + "...";
 }
 
-function RankingRow({
-  position,
-  player,
-}: {
-  position: number;
-  player: SeasonRankingPosition;
-}) {
+function RankingRow({ position, player }: { position: number; player: SeasonRankingPosition }) {
   const initial = player.name[0]?.toUpperCase() ?? "";
 
   return (
@@ -118,9 +114,7 @@ function RankingRow({
         >
           {player.seasonPoints}
         </div>
-        <div style={{ display: "flex", fontSize: 18, color: colors.muted }}>
-          pts
-        </div>
+        <div style={{ display: "flex", fontSize: 18, color: colors.muted }}>pts</div>
       </div>
     </div>
   );
@@ -255,11 +249,7 @@ export async function GET() {
           />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {topPlayers.map((player, index) => (
-              <RankingRow
-                key={player.id}
-                position={index + 1}
-                player={player}
-              />
+              <RankingRow key={player.id} position={index + 1} player={player} />
             ))}
           </div>
         </div>
