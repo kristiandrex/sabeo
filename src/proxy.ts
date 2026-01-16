@@ -9,6 +9,8 @@ const EXCLUDED_PATHS = [
   "/manifest.webmanifest",
   "/sw.js",
   "/api/auth/callback",
+  "/api/og",
+  "/api/og/ranking",
   "/api/start-challenge",
   "/api/schedule-daily-challenge",
 ];
