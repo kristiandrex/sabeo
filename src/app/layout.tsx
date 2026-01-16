@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     title: "Sabeo",
     description: "Descubre la palabra del día",
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default function RootLayout({
