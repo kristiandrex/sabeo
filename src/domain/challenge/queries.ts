@@ -21,6 +21,26 @@ export async function getLatestChallenge(): Promise<Challenge | null> {
   }
 }
 
+export async function getChallengeCount(): Promise<number> {
+  try {
+    const supabase = await createServiceClient();
+
+    const { count, error } = await supabase
+      .from("challenges")
+      .select("*", { count: "exact", head: true })
+      .not("started_at", "is", null);
+
+    if (error) {
+      throw error;
+    }
+
+    return count ?? 0;
+  } catch (error) {
+    console.error(error);
+    return 0;
+  }
+}
+
 export async function getAttemptsByPlayer(challenge: number) {
   try {
     const supabase = await createClient();
