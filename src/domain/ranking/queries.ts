@@ -46,7 +46,7 @@ export async function getDailyRanking() {
   }
 }
 
-export async function getRanking() {
+export async function getRanking(limit?: number) {
   try {
     const supabase = await createServiceClient();
 
@@ -57,7 +57,9 @@ export async function getRanking() {
     }
 
     const seasonRanking: PostgrestSingleResponse<SeasonRankingRow[]> =
-      await supabase.rpc("get_active_season_ranking");
+      typeof limit === "number"
+        ? await supabase.rpc("get_active_season_ranking").limit(limit)
+        : await supabase.rpc("get_active_season_ranking");
 
     if (seasonRanking.error) {
       throw seasonRanking.error;

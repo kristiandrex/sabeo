@@ -30,6 +30,8 @@ function RankingRow({
   position: number;
   player: SeasonRankingPosition;
 }) {
+  const initial = player.name[0]?.toUpperCase() ?? "";
+
   return (
     <div
       style={{
@@ -60,16 +62,32 @@ function RankingRow({
         >
           {position}
         </div>
-        <img
-          src={
-            player.picture ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=f1f5f9&color=1f2937&size=48`
-          }
-          width={40}
-          height={40}
-          alt={player.name}
-          style={{ borderRadius: "50%" }}
-        />
+        {player.picture ? (
+          <img
+            src={player.picture}
+            width={40}
+            height={40}
+            alt={player.name}
+            style={{ borderRadius: "50%" }}
+          />
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 40,
+              height: 40,
+              borderRadius: 999,
+              background: colors.rankBg,
+              color: colors.rankText,
+              fontWeight: 600,
+              fontSize: 16,
+            }}
+          >
+            {initial}
+          </div>
+        )}
         <div
           style={{
             display: "flex",
@@ -110,9 +128,7 @@ function RankingRow({
 
 export async function GET() {
   try {
-    const ranking = await getRanking();
-    const topPlayers = ranking.slice(0, 3);
-    const [firstPlayer, secondPlayer, thirdPlayer] = topPlayers;
+    const topPlayers = await getRanking(3);
 
     const iconPath = path.join(process.cwd(), "public", "icon-512x512.png");
     const iconBuffer = fs.readFileSync(iconPath);
@@ -238,9 +254,13 @@ export async function GET() {
             }}
           />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {firstPlayer && <RankingRow position={1} player={firstPlayer} />}
-            {secondPlayer && <RankingRow position={2} player={secondPlayer} />}
-            {thirdPlayer && <RankingRow position={3} player={thirdPlayer} />}
+            {topPlayers.map((player, index) => (
+              <RankingRow
+                key={player.id}
+                position={index + 1}
+                player={player}
+              />
+            ))}
           </div>
         </div>
         <img
