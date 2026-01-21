@@ -10,27 +10,21 @@ function normalizeRedirectPath(path?: string) {
   return path;
 }
 
+function getRedirectBaseUrl() {
+  // Copied from https://supabase.com/docs/guides/auth/redirect-urls#vercel-preview-urls
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL ??
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ??
+    "https://localhost:3000/";
+
+  url = url.startsWith("http") ? url : `https://${url}`;
+  url = url.endsWith("/") ? url : `${url}/`;
+
+  return url;
+}
+
 export async function signInWithGoogle(nextPath?: string) {
   const supabase = createClient();
-
-  function getRedirectBaseUrl() {
-    const env = process.env.NEXT_PUBLIC_VERCEL_ENV;
-
-    if (env === "production") {
-      return `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`;
-    }
-
-    if (env === "preview" && process.env.NEXT_PUBLIC_VERCEL_URL) {
-      return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-    }
-
-    if (typeof window !== "undefined") {
-      return window.location.origin;
-    }
-
-    return process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  }
-
   const redirectBaseUrl = getRedirectBaseUrl();
   const redirectUrl = new URL("/api/auth/callback", redirectBaseUrl);
   redirectUrl.searchParams.set("next", normalizeRedirectPath(nextPath));
