@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { type NextRequest, NextResponse } from "next/server";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 import { GUEST_COOKIE } from "#/constants";
@@ -8,13 +9,18 @@ function sanitizePath(path?: string) {
   return path && path.startsWith("/") ? path : "/";
 }
 
-function buildRedirect(url: string) {
+type CookiePayload = { name: string; value: string; options?: Record<string, unknown> };
+
+function buildRedirect(url: string, cookiesToSet: CookiePayload[]) {
   const response = NextResponse.redirect(url);
+  cookiesToSet.forEach(({ name, value, options }) =>
+    response.cookies.set(name, value, options as never),
+  );
   response.cookies.delete(GUEST_COOKIE);
   return response;
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = sanitizePath(searchParams.get("next") ?? "/");
@@ -23,7 +29,23 @@ export async function GET(request: Request) {
     return NextResponse.redirect(origin);
   }
 
-  const supabase = await createClient();
+  let cookiesToSet: CookiePayload[] = [];
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(newCookies) {
+          cookiesToSet = newCookies;
+          newCookies.forEach(({ name, value }) => request.cookies.set(name, value));
+        },
+      },
+    },
+  );
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
@@ -35,14 +57,14 @@ export async function GET(request: Request) {
 
   if (isLocalEnv) {
     const nextUrl = new URL(next, origin);
-    return buildRedirect(nextUrl.toString());
+    return buildRedirect(nextUrl.toString(), cookiesToSet);
   }
 
   if (forwardedHost) {
-    return buildRedirect(`https://${forwardedHost}${next}`);
+    return buildRedirect(`https://${forwardedHost}${next}`, cookiesToSet);
   }
 
-  return buildRedirect(`${origin}${next}`);
+  return buildRedirect(`${origin}${next}`, cookiesToSet);
 }
 
 export async function POST(request: Request) {

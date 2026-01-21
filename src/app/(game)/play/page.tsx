@@ -32,12 +32,14 @@ export default async function PlayPage() {
     return (
       <div className="flex h-screen items-center justify-center flex-col gap-4">
         <h1 className="text-2xl">No hay reto disponible</h1>
-        <Button
-          onClick={() => void reload()}
-          className="h-12 justify-center gap-2 rounded-xl bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
-        >
-          Volver a cargar
-        </Button>
+        <form action={reload}>
+          <Button
+            type="submit"
+            className="h-12 justify-center gap-2 rounded-xl bg-green-600 text-base font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+          >
+            Volver a cargar
+          </Button>
+        </form>
       </div>
     );
   }
