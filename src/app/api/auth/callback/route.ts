@@ -9,7 +9,11 @@ function sanitizePath(path?: string) {
   return path && path.startsWith("/") ? path : "/";
 }
 
-type CookiePayload = { name: string; value: string; options?: Record<string, unknown> };
+type CookiePayload = {
+  name: string;
+  value: string;
+  options?: Record<string, unknown>;
+};
 
 function buildRedirect(url: string, cookiesToSet: CookiePayload[]) {
   const response = NextResponse.redirect(url);

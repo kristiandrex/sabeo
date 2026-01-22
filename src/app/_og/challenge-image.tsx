@@ -9,10 +9,7 @@ import utc from "dayjs/plugin/utc";
 import { ImageResponse } from "next/og";
 
 import { imageSize } from "#/app/_og/config";
-import {
-  getChallengeCount,
-  getLatestChallenge,
-} from "#/domain/challenge/queries";
+import { getChallengeCount, getLatestChallenge } from "#/domain/challenge/queries";
 
 export const alt = "Sabeo - Descubre la palabra del día";
 
@@ -226,9 +223,7 @@ export async function createChallengeImage() {
                 >
                   {challengeCount}
                 </div>
-                <div
-                  style={{ display: "flex", fontSize: 15, color: colors.muted }}
-                >
+                <div style={{ display: "flex", fontSize: 15, color: colors.muted }}>
                   Retos publicados
                 </div>
               </div>
@@ -267,9 +262,7 @@ export async function createChallengeImage() {
                 >
                   {formattedDate}
                 </div>
-                <div
-                  style={{ display: "flex", fontSize: 15, color: colors.muted }}
-                >
+                <div style={{ display: "flex", fontSize: 15, color: colors.muted }}>
                   Reto de hoy (COT)
                 </div>
               </div>
