@@ -11,10 +11,9 @@ function normalizeRedirectPath(path?: string) {
 }
 
 function getRedirectBaseUrl() {
-  // Copied from https://supabase.com/docs/guides/auth/redirect-urls#vercel-preview-urls
+  // Read https://vercel.com/docs/environment-variables/framework-environment-variables#NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
   let url =
-    process?.env?.NEXT_PUBLIC_SITE_URL ??
-    process?.env?.NEXT_PUBLIC_VERCEL_URL ??
+    process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ??
     "https://localhost:3000/";
 
   url = url.startsWith("http") ? url : `https://${url}`;
