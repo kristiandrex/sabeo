@@ -30,6 +30,10 @@ export async function signInWithGoogle(nextPath?: string) {
   redirectUrl.searchParams.set("next", normalizeRedirectPath(nextPath));
   const redirectTo = redirectUrl.toString();
 
+  console.log({
+    redirectTo,
+  });
+
   await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
