@@ -11,11 +11,7 @@ function normalizeRedirectPath(path?: string) {
 }
 
 function getRedirectBaseUrl() {
-  let url =
-    (process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-      ? process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
-      : process.env.NEXT_PUBLIC_VERCEL_URL) ?? "https://localhost:3000/";
-
+  let url = window.location.origin;
   url = url.startsWith("http") ? url : `https://${url}`;
   url = url.endsWith("/") ? url : `${url}/`;
 
