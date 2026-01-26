@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HelpCircleIcon, LogInIcon, LogOutIcon, SettingsIcon, TrophyIcon } from "lucide-react";
+import {
+  HelpCircleIcon,
+  HistoryIcon,
+  LogInIcon,
+  LogOutIcon,
+  SettingsIcon,
+  TrophyIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -114,13 +121,6 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          {hasSession && (
-            <Button variant="ghost" size="icon" className={iconButtonClass} asChild>
-              <Link href="/settings" aria-label="Configuración">
-                <SettingsIcon className={iconColorClass} />
-              </Link>
-            </Button>
-          )}
           <Button
             variant="ghost"
             size="icon"
@@ -129,11 +129,30 @@ export function Header({ initialIsAuthenticated }: HeaderProps) {
           >
             <HelpCircleIcon className={iconColorClass} />
           </Button>
-          <Button variant="ghost" size="icon" className={iconButtonClass} asChild>
-            <Link href="/ranking" aria-label="Ranking">
-              <TrophyIcon className={iconColorClass} />
-            </Link>
-          </Button>
+          <div className="h-6 w-px bg-gray-300" />
+          <div className="flex items-center gap-2 sm:gap-4">
+            {hasSession && (
+              <Button variant="ghost" size="icon" className={iconButtonClass} asChild>
+                <Link href="/settings" aria-label="Configuración">
+                  <SettingsIcon className={iconColorClass} />
+                </Link>
+              </Button>
+            )}
+
+            {hasSession && (
+              <Button variant="ghost" size="icon" className={iconButtonClass} asChild>
+                <Link href="/history" aria-label="Historial">
+                  <HistoryIcon className={iconColorClass} />
+                </Link>
+              </Button>
+            )}
+
+            <Button variant="ghost" size="icon" className={iconButtonClass} asChild>
+              <Link href="/ranking" aria-label="Ranking">
+                <TrophyIcon className={iconColorClass} />
+              </Link>
+            </Button>
+          </div>
           <div className="h-6 w-px bg-gray-300" />
           <Button
             variant="ghost"

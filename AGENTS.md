@@ -34,7 +34,7 @@ Stick to functional React components, Next Server Actions, and Tailwind utility 
 
 ## Commit & Pull Request Guidelines
 
-Follow conventional commits (`refactor:`, `feat:`, `fix:`) as seen in the existing log. Each commit should focus on one concern and include any schema or Supabase changes under `supabase/migrations`. Pull requests need a concise summary, linked issues when available, screenshots or terminal output for UI/data changes, environmental notes (new env keys like `QSTASH_TOKEN`), and the QA steps you ran. Ensure CI-equivalent commands (`bun run lint`, `bun run build`) were executed locally before requesting review.
+Follow conventional commits (`refactor:`, `feat:`, `fix:`) as seen in the existing log. Each commit should focus on one concern and include any schema or Supabase changes under `supabase/migrations`. Always use the Supabase CLI to create and manage migrations (for example, `supabase migration new`, `supabase db diff`, and `supabase db push`) rather than editing migration history by hand. Pull requests need a concise summary, linked issues when available, screenshots or terminal output for UI/data changes, environmental notes (new env keys like `QSTASH_TOKEN`), and the QA steps you ran. Ensure CI-equivalent commands (`bun run lint`, `bun run build`) were executed locally before requesting review.
 
 ## Security & Configuration Tips
 

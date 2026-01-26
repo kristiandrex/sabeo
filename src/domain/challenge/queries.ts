@@ -1,5 +1,5 @@
 import { createClient, createServiceClient } from "#/lib/supabase/server";
-import type { Challenge } from "#/domain/challenge/types";
+import type { Challenge, ChallengeHistoryEntry, ChallengeStatus } from "#/domain/challenge/types";
 
 export async function getLatestChallenge(): Promise<Challenge | null> {
   try {
@@ -72,5 +72,59 @@ export async function getAttemptsByPlayer(challenge: number) {
   } catch (error) {
     console.error(error);
     return [];
+  }
+}
+
+type ChallengeHistoryRow = {
+  challenge_id: number;
+  started_at: string;
+  status: ChallengeStatus;
+  challenge_number: number;
+  total_count: number;
+};
+
+export async function getUserChallengeHistory(
+  page = 1,
+  perPage = 20,
+): Promise<{
+  entries: ChallengeHistoryEntry[];
+  totalCount: number;
+}> {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { entries: [], totalCount: 0 };
+    }
+
+    const offset = Math.max(0, (page - 1) * perPage);
+
+    const { data, error } = await supabase.rpc("get_user_challenge_history", {
+      p_player: user.id,
+      p_offset: offset,
+      p_limit: perPage,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    const rows = (data ?? []) as ChallengeHistoryRow[];
+    const totalCount = rows[0]?.total_count ?? 0;
+    const entries = rows.map((row) => ({
+      challengeId: row.challenge_id,
+      challengeNumber: row.challenge_number,
+      challengeDate: new Date(row.started_at),
+      status: row.status,
+    }));
+
+    return { entries, totalCount };
+  } catch (error) {
+    console.error(error);
+    return { entries: [], totalCount: 0 };
   }
 }

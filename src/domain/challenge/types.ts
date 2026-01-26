@@ -7,3 +7,12 @@ export type Challenge = {
 };
 
 export type Color = "green" | "yellow" | "gray";
+
+export type ChallengeStatus = "completed" | "played";
+
+export type ChallengeHistoryEntry = {
+  challengeId: number;
+  challengeNumber: number;
+  challengeDate: Date;
+  status: ChallengeStatus;
+};
