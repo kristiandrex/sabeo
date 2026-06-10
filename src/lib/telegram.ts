@@ -1,10 +1,13 @@
-type TelegramMessageResult = { ok: true } | { ok: false; error: string };
+type TelegramMessageResult =
+  | { status: "sent" }
+  | { status: "disabled" }
+  | { status: "failed"; error: string };
 
 export async function sendTelegramMessage(text: string): Promise<TelegramMessageResult> {
   const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    return { ok: false, error: "Missing Telegram configuration" };
+    return { status: "disabled" };
   }
 
   try {
@@ -17,15 +20,15 @@ export async function sendTelegramMessage(text: string): Promise<TelegramMessage
     if (!response.ok) {
       const body = await response.text().catch(() => "");
       return {
-        ok: false,
+        status: "failed",
         error: `Telegram API error: ${response.status} ${body}`.trim(),
       };
     }
 
-    return { ok: true };
+    return { status: "sent" };
   } catch (error) {
     return {
-      ok: false,
+      status: "failed",
       error: error instanceof Error ? error.message : "Unknown Telegram error",
     };
   }

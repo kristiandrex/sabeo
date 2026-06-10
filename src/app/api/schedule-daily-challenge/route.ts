@@ -117,7 +117,7 @@ async function notifyIfNoChallengeForTomorrow(
     `Sabeo: No hay reto disponible para mañana (${tomorrowDay}).`,
   );
 
-  if (!result.ok) {
+  if (result.status === "failed") {
     console.error("Failed to send Telegram notification", result.error);
   }
 }
